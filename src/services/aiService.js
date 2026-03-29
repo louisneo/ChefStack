@@ -2,7 +2,7 @@ const getGeminiConfig = () => {
   const key = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   return {
     key,
-    url: `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`
+    url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`
   };
 };
 
@@ -55,12 +55,14 @@ export const searchRecipes = async (query) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`
       },
       body: JSON.stringify({
-        model: "gemini-1.5-flash", 
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" }
+        contents: [{
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          response_mime_type: "application/json",
+        }
       }),
     });
 
@@ -72,17 +74,14 @@ export const searchRecipes = async (query) => {
       throw new Error(data.error.message || 'Error calling Gemini API');
     }
 
-    if (!data.choices || data.choices.length === 0) {
-      console.error('Gemini returned no choices:', data);
+    if (!data.candidates || data.candidates.length === 0) {
+      console.error('Gemini returned no candidates:', data);
       throw new Error('AI returned no results. Try being more specific.');
     }
 
-    const jsonText = data.choices[0].message.content;
+    const jsonText = data.candidates[0].content.parts[0].text;
     console.log('Gemini parsed text:', jsonText);
-    
-    // The OpenAI response might contain markdown blocks, let's clean it just in case
-    const cleanedJson = jsonText.replace(/```json|```/g, '').trim();
-    const recipes = JSON.parse(cleanedJson);
+    const recipes = JSON.parse(jsonText);
     
     // If the AI returned an object with a recipes array, or just the array
     const finalArray = Array.isArray(recipes) ? recipes : (recipes.recipes || []);
