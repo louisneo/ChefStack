@@ -1,9 +1,8 @@
-// Get the API key from environment variables
 const getGeminiConfig = () => {
   const key = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   return {
     key,
-    url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`
+    url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`
   };
 };
 
