@@ -118,16 +118,24 @@ export default function DashboardScreen({ navigation, route }) {
       
       // 2. Background Sync
       const { error } = await supabase.from('recipes').update(recipeData).eq('id', optimisticUpdated.id);
-      if (error) Alert.alert('Error', error.message);
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        Alert.alert('Success', 'Recipe updated successfully!');
+      }
     } else {
-      // 1. Optimistic Insert (Instant Sync)
+      // 1. Optimistic Insert (Instant UI)
       const tempId = Date.now(); 
       const optimisticRecipe = { ...recipeData, id: tempId, user_id: user.id, is_favorite: false, created_at: new Date().toISOString() };
       setRecipes(prev => [optimisticRecipe, ...prev]);
       
       // 2. Background Sync
       const { error } = await supabase.from('recipes').insert([{ ...recipeData, user_id: user.id }]);
-      if (error) Alert.alert('Error', error.message);
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        Alert.alert('Success', 'New recipe added to your Kitchen Stack!');
+      }
     }
   };
 
@@ -138,7 +146,11 @@ export default function DashboardScreen({ navigation, route }) {
 
     // 2. Background Sync
     const { error } = await supabase.from('recipes').delete().eq('id', id);
-    if (error) Alert.alert('Error', error.message);
+    if (error) {
+      Alert.alert('Error', error.message);
+    } else {
+      Alert.alert('Deleted', 'Recipe has been removed.');
+    }
   };
 
   const handleToggleFavorite = async (id) => {

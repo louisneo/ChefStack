@@ -62,7 +62,11 @@ export default function AISearchScreen({ navigation }) {
 
       if (error) throw error;
       
-      Alert.alert('Success!', `${recipe.title} has been added to your Dashboard.`);
+      Alert.alert(
+        'Success!', 
+        `${recipe.title} has been added to your Kitchen Stack.`,
+        [{ text: 'Great!', onPress: () => navigation.navigate('Dashboard') }]
+      );
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {
