@@ -1,0 +1,72 @@
+const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+/**
+ * Searches for food recipes using Gemini AI
+ * @param {string} query The user's search query
+ * @returns {Promise<Array>} List of structured recipe objects
+ */
+export const searchRecipes = async (query) => {
+  if (!GEMINI_API_KEY) {
+    throw new Error('Gemini API Key is missing. Please check your .env file.');
+  }
+
+  const prompt = `
+    You are a ChefStack AI Assistant. Your task is to find and return exactly 3 highly relevant food recipes for the query: "${query}".
+    
+    RULES:
+    1. ONLY return food recipes. If the query is not about food, return an empty array.
+    2. Format the response as a VALID JSON array of objects.
+    3. DO NOT include any text outside the JSON array.
+    4. Each recipe object must have these exact keys:
+       - "title": string (Recipe name)
+       - "type": string (always "food")
+       - "category": string (e.g., "Main Course (Ulam)", "Dessert", "Appetizer", "Breakfast")
+       - "time": number (minutes to cook, e.g., 45)
+       - "ingredients": array of strings (list of items with amounts)
+       - "steps": array of strings (step-by-step instructions)
+    
+    JSON format example:
+    [
+      {
+        "title": "Adobo",
+        "type": "food",
+        "category": "Main Course (Ulam)",
+        "time": 60,
+        "ingredients": ["500g Pork", "1/2 cup Soy Sauce"],
+        "steps": ["Marinate pork", "Cook until tender"]
+      }
+    ]
+  `;
+
+  try {
+    const response = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          response_mime_type: "application/json",
+        }
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (data.error) {
+      throw new Error(data.error.message || 'Error calling Gemini API');
+    }
+
+    const jsonText = data.candidates[0].content.parts[0].text;
+    const recipes = JSON.parse(jsonText);
+    
+    return Array.isArray(recipes) ? recipes : [];
+  } catch (error) {
+    console.error('AI Service Error:', error);
+    throw error;
+  }
+};

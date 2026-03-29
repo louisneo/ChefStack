@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Platform } from 'react
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function Header({ onMenuClick, onAddClick }) {
+export default function Header({ onMenuClick, onAddClick, onAISearch }) {
   return (
     <View style={styles.container}>
       <TouchableOpacity 
@@ -21,13 +21,25 @@ export default function Header({ onMenuClick, onAddClick }) {
         <Text style={styles.logoText}>ChefStack</Text>
       </View>
 
-      <TouchableOpacity 
-        style={styles.addButton} 
-        onPress={onAddClick}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="add" size={24} color={colors.surface} />
-      </TouchableOpacity>
+      <View style={styles.rightButtons}>
+        {onAISearch && (
+          <TouchableOpacity 
+            style={styles.aiButton} 
+            onPress={onAISearch}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="sparkles" size={24} color={colors.primary} />
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity 
+          style={styles.addButton} 
+          onPress={onAddClick}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="add" size={24} color={colors.surface} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -75,6 +87,19 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: colors.text,
+  },
+  rightButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  aiButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.05)',
   },
   addButton: {
     width: 44,

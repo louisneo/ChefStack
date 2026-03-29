@@ -78,6 +78,17 @@ export default function SideDrawerContent(props) {
           </TouchableOpacity>
 
           <TouchableOpacity 
+            style={[styles.menuItem, activeRoute === 'AISearch' && styles.menuItemActive]} 
+            onPress={() => {
+              props.navigation.navigate('AISearch');
+              props.navigation.closeDrawer();
+            }}
+          >
+            <Ionicons name="sparkles" size={24} color={activeRoute === 'AISearch' ? colors.primary : colors.textSecondary} />
+            <Text style={activeRoute === 'AISearch' ? styles.menuItemTextActive : styles.menuItemText}>AI Recipe Finder</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
             style={styles.menuItem}
             onPress={() => {
               props.navigation.navigate('Profile');

@@ -14,6 +14,7 @@ import NotificationsScreen from '../screens/NotificationsScreen';
 import PrivacyScreen from '../screens/PrivacyScreen';
 import HelpScreen from '../screens/HelpScreen';
 import AboutScreen from '../screens/AboutScreen';
+import AISearchScreen from '../screens/AISearchScreen';
 import SideDrawerContent from '../components/SideDrawer';
 
 const Stack = createNativeStackNavigator();
@@ -58,6 +59,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Privacy" component={PrivacyScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="About" component={AboutScreen} />
+            <Stack.Screen name="AISearch" component={AISearchScreen} />
           </>
         ) : (
           // Auth Screens
