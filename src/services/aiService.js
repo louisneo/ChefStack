@@ -8,8 +8,11 @@ const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemi
  */
 export const searchRecipes = async (query) => {
   if (!GEMINI_API_KEY) {
-    throw new Error('Gemini API Key is missing. Please check your .env file.');
+    console.error('CRITICAL: Gemini API Key is UNDEFINED. Check your Vercel/Expo environment variables.');
+    throw new Error('Gemini API Key is missing. If you are on Vercel, make sure to add EXPO_PUBLIC_GEMINI_API_KEY to your project settings.');
   }
+
+  console.log('Gemini Search Query:', query);
 
   const prompt = `
     You are a ChefStack AI Assistant. Your task is to find and return exactly 3 highly relevant food recipes for the query: "${query}".
@@ -56,12 +59,20 @@ export const searchRecipes = async (query) => {
     });
 
     const data = await response.json();
+    console.log('Gemini raw response status:', response.status);
     
     if (data.error) {
+      console.error('Gemini API Error details:', data.error);
       throw new Error(data.error.message || 'Error calling Gemini API');
     }
 
+    if (!data.candidates || data.candidates.length === 0) {
+      console.error('Gemini returned no candidates:', data);
+      throw new Error('AI returned no results. Try being more specific.');
+    }
+
     const jsonText = data.candidates[0].content.parts[0].text;
+    console.log('Gemini parsed text:', jsonText);
     const recipes = JSON.parse(jsonText);
     
     return Array.isArray(recipes) ? recipes : [];

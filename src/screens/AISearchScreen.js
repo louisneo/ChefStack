@@ -35,7 +35,8 @@ export default function AISearchScreen({ navigation }) {
       }
       setResults(recipes);
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch recipes from AI. Check your connection or API key.');
+      console.error('Search Screen Error:', error);
+      Alert.alert('AI Search Failed', error.message || 'Something went wrong while talking to the AI.');
     } finally {
       setLoading(false);
     }
