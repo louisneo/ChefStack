@@ -16,6 +16,7 @@ import { searchRecipes } from '../services/aiService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
+import Toast from '../components/Toast';
 
 export default function AISearchScreen({ navigation }) {
   const [query, setQuery] = useState('');
@@ -23,6 +24,8 @@ export default function AISearchScreen({ navigation }) {
   const [results, setResults] = useState([]);
   const [importing, setImporting] = useState(null);
   const { user } = useAuth();
+  
+  const toastRef = React.useRef(null);
 
   const handleSearch = async () => {
     console.log('Find Recipe button clicked! Query:', query);
@@ -62,17 +65,14 @@ export default function AISearchScreen({ navigation }) {
 
       if (error) throw error;
       
-      Alert.alert(
-        'Success!', 
-        `${recipe.title} has been added to your Kitchen Stack!`,
-        [{ 
-          text: 'Great!', 
-          onPress: () => navigation.navigate('Dashboard', { refresh: true }) 
-        }]
-      );
-      console.log('Successfully imported recipe:', recipe.title);
+      toastRef.current?.show(`${recipe.title} imported successfully!`);
+      
+      // Navigate back after a short delay so they see the success
+      setTimeout(() => {
+        navigation.navigate('Dashboard', { refresh: true });
+      }, 1000);
     } catch (error) {
-      Alert.alert('Error', error.message);
+      toastRef.current?.show(error.message, 'error');
     } finally {
       setImporting(null);
     }
@@ -177,6 +177,8 @@ export default function AISearchScreen({ navigation }) {
           </Animated.View>
         ))}
       </ScrollView>
+
+      <Toast ref={toastRef} />
     </View>
   );
 }

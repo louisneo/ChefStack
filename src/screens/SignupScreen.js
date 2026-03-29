@@ -9,7 +9,8 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
-  ScrollView
+  ScrollView,
+  Image
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
@@ -98,9 +99,11 @@ export default function SignupScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
-          <View style={styles.iconContainer}>
-            <FontAwesome5 name="utensils" size={24} color={colors.surface} />
-          </View>
+          <Image 
+            source={require('../../assets/chefstack_logo.png')} 
+            style={styles.logo} 
+            resizeMode="contain"
+          />
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join ChefStack community</Text>
         </Animated.View>
@@ -245,16 +248,12 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 24,
   },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    backgroundColor: colors.primary,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 8,
   },
   title: {
     fontSize: 32,

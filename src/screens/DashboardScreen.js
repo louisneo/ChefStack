@@ -23,6 +23,7 @@ import RecipeCard from '../components/RecipeCard';
 import RecipeDetail from '../components/RecipeDetail';
 import AddRecipeModal from '../components/AddRecipeModal';
 import DeleteConfirmation from '../components/DeleteConfirmation';
+import Toast from '../components/Toast';
 
 export default function DashboardScreen({ navigation, route }) {
   const isFavoritesView = route?.params?.filterFavorites || false;
@@ -41,6 +42,8 @@ export default function DashboardScreen({ navigation, route }) {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [deletingRecipe, setDeletingRecipe] = useState(null);
+  
+  const toastRef = React.useRef(null);
 
   // Re-fetch on focus to ensure data is fresh (and handle navigation params)
   useFocusEffect(
@@ -133,9 +136,9 @@ export default function DashboardScreen({ navigation, route }) {
       // 2. Background Sync
       const { error } = await supabase.from('recipes').update(recipeData).eq('id', optimisticUpdated.id);
       if (error) {
-        Alert.alert('Error', error.message);
+        toastRef.current?.show(error.message, 'error');
       } else {
-        Alert.alert('Success', 'Recipe updated successfully!');
+        toastRef.current?.show('Recipe updated successfully!');
       }
     } else {
       // 1. Optimistic Insert (Instant UI)
@@ -146,9 +149,9 @@ export default function DashboardScreen({ navigation, route }) {
       // 2. Background Sync
       const { error } = await supabase.from('recipes').insert([{ ...recipeData, user_id: user.id }]);
       if (error) {
-        Alert.alert('Error', error.message);
+        toastRef.current?.show(error.message, 'error');
       } else {
-        Alert.alert('Success', 'New recipe added to your Kitchen Stack!');
+        toastRef.current?.show('New recipe added to your Kitchen Stack!');
       }
     }
   };
@@ -161,9 +164,9 @@ export default function DashboardScreen({ navigation, route }) {
     // 2. Background Sync
     const { error } = await supabase.from('recipes').delete().eq('id', id);
     if (error) {
-      Alert.alert('Error', error.message);
+      toastRef.current?.show(error.message, 'error');
     } else {
-      Alert.alert('Deleted', 'Recipe has been removed.');
+      toastRef.current?.show('Recipe has been removed.');
     }
   };
 
@@ -304,6 +307,9 @@ export default function DashboardScreen({ navigation, route }) {
         onClose={() => setDeletingRecipe(null)}
         onConfirm={handleDeleteRecipe}
       />
+
+      <Toast ref={toastRef} />
+
 
       {/* Sort Dropdown Modal */}
       {sortDropdownVisible && (
