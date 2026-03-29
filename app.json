@@ -4,7 +4,7 @@
     "slug": "ChefStackMobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/chefs.png",
     "scheme": "chefstackmobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -23,7 +23,7 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/favicon.png",
+      "favicon": "./assets/chefs.png",
       "shortName": "ChefStack",
       "name": "ChefStack Application",
       "description": "Your ultimate culinary companion.",

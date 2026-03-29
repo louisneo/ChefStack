@@ -108,53 +108,48 @@ export default function DashboardScreen({ navigation, route }) {
   });
 
   const handleSaveRecipe = async (recipeData) => {
-    if (editingRecipe) {
-      const { data, error } = await supabase.from('recipes').update(recipeData).eq('id', editingRecipe.id).select().single();
-      if (!error && data) {
-        setRecipes(prev => prev.map(r => r.id === data.id ? data : r));
-      } else {
-        Alert.alert('Error', error?.message || 'Failed to update');
-      }
-    } else {
-      const { data, error } = await supabase.from('recipes').insert([{ ...recipeData, user_id: user.id }]).select().single();
-      if (!error && data) {
-        // Fix the closure bug by using the strictly current 'prev' state
-        setRecipes(prev => {
-          if (prev.find(r => r.id === data.id)) return prev;
-          return [data, ...prev];
-        });
-      } else {
-        Alert.alert('Error', error?.message || 'Failed to insert');
-      }
-    }
     setAddModalVisible(false);
-    setEditingRecipe(null);
+    
+    if (editingRecipe) {
+      // 1. Optimistic Update (Instant UI)
+      const optimisticUpdated = { ...editingRecipe, ...recipeData };
+      setRecipes(prev => prev.map(r => r.id === optimisticUpdated.id ? optimisticUpdated : r));
+      setEditingRecipe(null);
+      
+      // 2. Background Sync
+      const { error } = await supabase.from('recipes').update(recipeData).eq('id', optimisticUpdated.id);
+      if (error) Alert.alert('Error', error.message);
+    } else {
+      // 1. Optimistic Insert (Instant Sync)
+      const tempId = Date.now(); 
+      const optimisticRecipe = { ...recipeData, id: tempId, user_id: user.id, is_favorite: false, created_at: new Date().toISOString() };
+      setRecipes(prev => [optimisticRecipe, ...prev]);
+      
+      // 2. Background Sync
+      const { error } = await supabase.from('recipes').insert([{ ...recipeData, user_id: user.id }]);
+      if (error) Alert.alert('Error', error.message);
+    }
   };
 
   const handleDeleteRecipe = async (id) => {
-    const { error } = await supabase.from('recipes').delete().eq('id', id);
-    if (!error) {
-      setRecipes(prev => prev.filter(r => r.id !== id));
-    } else {
-      Alert.alert('Error', error.message);
-    }
+    // 1. Optimistic Delete (Instant UI)
+    setRecipes(prev => prev.filter(r => r.id !== id));
     setDeletingRecipe(null);
+
+    // 2. Background Sync
+    const { error } = await supabase.from('recipes').delete().eq('id', id);
+    if (error) Alert.alert('Error', error.message);
   };
 
   const handleToggleFavorite = async (id) => {
     const recipe = recipes.find(r => r.id === id);
     if (!recipe) return;
 
-    const { data, error } = await supabase
-      .from('recipes')
-      .update({ is_favorite: !recipe.is_favorite })
-      .eq('id', id)
-      .select()
-      .single();
+    // 1. Optimistic Toggle (Instant UI)
+    setRecipes(prev => prev.map(r => r.id === id ? { ...r, is_favorite: !r.is_favorite } : r));
 
-    if (!error && data) {
-      setRecipes(prev => prev.map(r => r.id === id ? data : r));
-    }
+    // 2. Background Sync
+    await supabase.from('recipes').update({ is_favorite: !recipe.is_favorite }).eq('id', id);
   };
 
   return (

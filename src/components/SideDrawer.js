@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
-    paddingTop: 60,
+    paddingTop: Platform.OS === 'web' ? 20 : 60,
   },
   headerTop: {
     flexDirection: 'row',
