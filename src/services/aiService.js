@@ -2,7 +2,7 @@ const getGeminiConfig = () => {
   const key = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   return {
     key,
-    url: `https://generativelanguage.googleapis.com/v1beta/openai/v1/chat/completions`
+    url: `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`
   };
 };
 
@@ -58,7 +58,7 @@ export const searchRecipes = async (query) => {
         'Authorization': `Bearer ${key}`
       },
       body: JSON.stringify({
-        model: "gemini-1.5-flash",
+        model: "gemini-1.5-flash", 
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" }
       }),
