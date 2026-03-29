@@ -1,5 +1,11 @@
-const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+// Get the API key from environment variables
+const getGeminiConfig = () => {
+  const key = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+  return {
+    key,
+    url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`
+  };
+};
 
 /**
  * Searches for food recipes using Gemini AI
@@ -7,12 +13,15 @@ const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemi
  * @returns {Promise<Array>} List of structured recipe objects
  */
 export const searchRecipes = async (query) => {
-  if (!GEMINI_API_KEY) {
+  const { key, url } = getGeminiConfig();
+
+  if (!key) {
     console.error('CRITICAL: Gemini API Key is UNDEFINED. Check your Vercel/Expo environment variables.');
-    throw new Error('Gemini API Key is missing. If you are on Vercel, make sure to add EXPO_PUBLIC_GEMINI_API_KEY to your project settings.');
+    throw new Error('Gemini API Key is missing. If you are on Vercel, make sure you REDEPLOY after adding EXPO_PUBLIC_GEMINI_API_KEY to project settings.');
   }
 
-  console.log('Gemini Search Query:', query);
+  console.log('Gemini Search starting for:', query);
+  console.log('API Key detected (first 4):', key.substring(0, 4) + '...');
 
   const prompt = `
     You are a ChefStack AI Assistant. Your task is to find and return exactly 3 highly relevant food recipes for the query: "${query}".
@@ -43,7 +52,7 @@ export const searchRecipes = async (query) => {
   `;
 
   try {
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

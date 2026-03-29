@@ -25,6 +25,7 @@ export default function AISearchScreen({ navigation }) {
   const { user } = useAuth();
 
   const handleSearch = async () => {
+    console.log('Find Recipe button clicked! Query:', query);
     if (!query.trim()) return;
     
     setLoading(true);
