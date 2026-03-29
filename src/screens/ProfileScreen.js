@@ -5,7 +5,8 @@ import {
   TextInput, 
   TouchableOpacity, 
   StyleSheet, 
-  ScrollView 
+  ScrollView,
+  Platform
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
@@ -149,7 +150,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.surface,
-    paddingTop: 60, // approximate safe area
+    paddingTop: Platform.OS === 'web' ? 20 : 60, // reduce padding on web
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,

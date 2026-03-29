@@ -4,7 +4,8 @@ import {
   Text, 
   TouchableOpacity, 
   StyleSheet, 
-  ScrollView 
+  ScrollView,
+  Platform
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.surface,
-    paddingTop: 60,
+    paddingTop: Platform.OS === 'web' ? 20 : 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
