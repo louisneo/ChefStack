@@ -64,9 +64,13 @@ export default function AISearchScreen({ navigation }) {
       
       Alert.alert(
         'Success!', 
-        `${recipe.title} has been added to your Kitchen Stack.`,
-        [{ text: 'Great!', onPress: () => navigation.navigate('Dashboard') }]
+        `${recipe.title} has been added to your Kitchen Stack!`,
+        [{ 
+          text: 'Great!', 
+          onPress: () => navigation.navigate('Dashboard', { refresh: true }) 
+        }]
       );
+      console.log('Successfully imported recipe:', recipe.title);
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {

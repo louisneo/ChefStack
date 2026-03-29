@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { 
   View, 
   Text, 
@@ -41,11 +42,24 @@ export default function DashboardScreen({ navigation, route }) {
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [deletingRecipe, setDeletingRecipe] = useState(null);
 
+  // Re-fetch on focus to ensure data is fresh (and handle navigation params)
+  useFocusEffect(
+    useCallback(() => {
+      fetchRecipes();
+      
+      // If we just came back from an import or add
+      if (route.params?.refresh) {
+        fetchRecipes();
+        // Clear params to avoid loop
+        navigation.setParams({ refresh: false });
+      }
+    }, [user, route.params])
+  );
+
   useEffect(() => {
     if (!user) return;
     
-    // Initial fetch
-    fetchRecipes();
+    // Initial fetch handled by focus effect above
 
     // Setup Supabase Realtime Subscription!
     const channel = supabase.channel('schema-db-changes')
