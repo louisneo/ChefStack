@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
-    paddingTop: Platform.OS === 'web' ? 20 : 60,
+    paddingTop: Platform.OS === 'web' ? 5 : 60,
   },
   headerTop: {
     flexDirection: 'row',

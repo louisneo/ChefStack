@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    paddingTop: Platform.OS === 'web' || Platform.OS === 'ios' ? 20 : 60,
+    paddingTop: Platform.OS === 'web' ? 5 : (Platform.OS === 'ios' ? 20 : 60),
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,

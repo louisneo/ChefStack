@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   listContent: {
-    padding: 20,
+    padding: Platform.OS === 'web' ? 10 : 20,
     paddingBottom: 100,
   },
   row: {

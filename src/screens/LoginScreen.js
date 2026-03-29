@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     justifyContent: 'center',
-    padding: 32,
+    padding: Platform.OS === 'web' ? 16 : 32,
   },
   header: {
     alignItems: 'center',

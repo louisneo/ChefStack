@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 60,
+    top: Platform.OS === 'web' ? 10 : 60,
     left: 24,
     width: 44,
     height: 44,
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 32,
-    paddingTop: 120,
+    paddingTop: Platform.OS === 'web' ? 30 : 120,
     paddingBottom: 40,
   },
   header: {
