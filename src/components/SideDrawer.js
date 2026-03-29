@@ -24,7 +24,7 @@ export default function SideDrawerContent(props) {
           <View style={styles.headerTop}>
             <View style={styles.logoContainer}>
               <View style={styles.logoIconBg}>
-                <Image source={require('../../assets/chefstack_logo.png')} style={styles.drawerLogo} />
+                <Image source={require('../../assets/chefstack_logo_v2.png')} style={styles.drawerLogo} />
               </View>
               <Text style={styles.logoText}>ChefStack</Text>
             </View>

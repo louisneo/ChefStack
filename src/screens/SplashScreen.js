@@ -55,7 +55,7 @@ export default function SplashScreen() {
 
       <Animated.View style={[styles.content, { opacity, transform: [{ scale }, { translateY }] }]}>
         <View style={styles.iconCircle}>
-          <Image source={require('../../assets/chefstack_logo.png')} style={styles.logoImage} />
+          <Image source={require('../../assets/chefstack_logo_v2.png')} style={styles.logoImage} />
         </View>
         <Text style={styles.title}>ChefStack</Text>
         <Text style={styles.subtitle}>Your Culinary Companion</Text>

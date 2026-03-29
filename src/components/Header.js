@@ -16,7 +16,7 @@ export default function Header({ onMenuClick, onAddClick }) {
       
       <View style={styles.logoContainer}>
         <View style={styles.logoIconBg}>
-          <Image source={require('../../assets/chefstack_logo.png')} style={styles.headerLogo} />
+          <Image source={require('../../assets/chefstack_logo_v2.png')} style={styles.headerLogo} />
         </View>
         <Text style={styles.logoText}>ChefStack</Text>
       </View>
