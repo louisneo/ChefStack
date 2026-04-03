@@ -86,8 +86,8 @@ function BottomTabNavigator() {
         options={({ navigation }) => ({
           tabBarLabel: () => null,
           tabBarButton: (props) => {
-            // Remove the default onPress from props so it doesn't try to navigate to AddRecipe
-            const { onPress, ...restProps } = props;
+            // Remove the default onPress, href, and onClick to prevent web page reloads
+            const { onPress, href, onClick, ...restProps } = props;
             return (
               <TouchableOpacity
                 {...restProps}
