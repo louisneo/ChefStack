@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'web' ? 5 : 60,
+    paddingTop: Platform.OS === 'web' ? 32 : 60,
     paddingBottom: 16,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
