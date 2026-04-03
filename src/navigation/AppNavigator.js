@@ -83,24 +83,23 @@ function BottomTabNavigator() {
       <Tab.Screen 
         name="AddRecipe" 
         component={AddPlaceholder}
-        options={{
+        options={({ navigation }) => ({
           tabBarLabel: () => null,
-          tabBarButton: (props) => (
-            <TouchableOpacity
-              {...props}
-              style={styles.addButtonContainer}
-              activeOpacity={0.8}
-            >
-              <View style={styles.addButton}>
-                <Ionicons name="add" size={32} color={colors.surface} />
-              </View>
-            </TouchableOpacity>
-          ),
-        }}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            navigation.navigate('Home', { openAdd: true });
+          tabBarButton: (props) => {
+            // Remove the default onPress from props so it doesn't try to navigate to AddRecipe
+            const { onPress, ...restProps } = props;
+            return (
+              <TouchableOpacity
+                {...restProps}
+                onPress={() => navigation.navigate('Home', { openAdd: Date.now() })}
+                style={styles.addButtonContainer}
+                activeOpacity={0.8}
+              >
+                <View style={styles.addButton}>
+                  <Ionicons name="add" size={32} color={colors.surface} />
+                </View>
+              </TouchableOpacity>
+            );
           },
         })}
       />
