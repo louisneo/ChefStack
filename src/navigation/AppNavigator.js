@@ -1,7 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,13 +18,11 @@ import PrivacyScreen from '../screens/PrivacyScreen';
 import HelpScreen from '../screens/HelpScreen';
 import AboutScreen from '../screens/AboutScreen';
 import AISearchScreen from '../screens/AISearchScreen';
-import SideDrawerContent from '../components/SideDrawer';
 
 const Stack = createNativeStackNavigator();
-const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
-// Dummy screen for the "Add" tab (never actually shown)
+// Dummy screen for the "Add" tab (never actually navigated to)
 function AddPlaceholder() { return null; }
 
 // Bottom Tab Navigator with center FAB
@@ -62,7 +59,7 @@ function BottomTabNavigator() {
           } else if (route.name === 'Favorites') {
             iconName = focused ? 'heart' : 'heart-outline';
           } else if (route.name === 'AddRecipe') {
-            return null; // Custom button renders instead
+            return null;
           } else if (route.name === 'AISearch') {
             iconName = focused ? 'sparkles' : 'sparkles-outline';
           } else if (route.name === 'Profile') {
@@ -103,7 +100,6 @@ function BottomTabNavigator() {
         listeners={({ navigation }) => ({
           tabPress: (e) => {
             e.preventDefault();
-            // Navigate to Home first, then trigger add modal via params
             navigation.navigate('Home', { openAdd: true });
           },
         })}
@@ -122,22 +118,6 @@ function BottomTabNavigator() {
   );
 }
 
-// Drawer wraps Tab Navigator
-function DrawerNavigator() {
-  return (
-    <Drawer.Navigator 
-      drawerContent={(props) => <SideDrawerContent {...props} />}
-      screenOptions={{ 
-        headerShown: false,
-        drawerStyle: { width: '85%' },
-        swipeEdgeWidth: 100
-      }}
-    >
-      <Drawer.Screen name="MainTabs" component={BottomTabNavigator} />
-    </Drawer.Navigator>
-  );
-}
-
 export default function AppNavigator() {
   const { user, loading } = useAuth();
 
@@ -150,7 +130,7 @@ export default function AppNavigator() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <>
-            <Stack.Screen name="Drawer" component={DrawerNavigator} />
+            <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="Privacy" component={PrivacyScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />

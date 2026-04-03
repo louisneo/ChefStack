@@ -4,50 +4,26 @@ import { colors } from '../theme/colors';
 import ChefStackLogo from '../components/ChefStackLogo';
 
 export default function SplashScreen() {
-  // Animation Values
   const scale = useRef(new Animated.Value(0.5)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(0)).current;
-
-  // Animated dots
   const dot1 = useRef(new Animated.Value(0.3)).current;
   const dot2 = useRef(new Animated.Value(0.3)).current;
   const dot3 = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
-    // Entrance animation
     Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scale, {
-        toValue: 1,
-        tension: 10,
-        friction: 4,
-        useNativeDriver: true,
-      })
+      Animated.timing(opacity, { toValue: 1, duration: 800, useNativeDriver: true }),
+      Animated.spring(scale, { toValue: 1, tension: 10, friction: 4, useNativeDriver: true })
     ]).start(() => {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(translateY, {
-            toValue: -12,
-            duration: 1200,
-            easing: Easing.inOut(Easing.quad),
-            useNativeDriver: true,
-          }),
-          Animated.timing(translateY, {
-            toValue: 0,
-            duration: 1200,
-            easing: Easing.inOut(Easing.quad),
-            useNativeDriver: true,
-          })
+          Animated.timing(translateY, { toValue: -12, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+          Animated.timing(translateY, { toValue: 0, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true })
         ])
       ).start();
     });
 
-    // Loading dots animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(dot1, { toValue: 1, duration: 400, useNativeDriver: true }),
@@ -60,9 +36,13 @@ export default function SplashScreen() {
     ).start();
   }, []);
 
+  // On web, use fixed positioning to escape any parent container constraints
+  const containerStyle = Platform.OS === 'web' 
+    ? [styles.container, { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh' }]
+    : [styles.container];
+
   return (
-    <View style={styles.container}>
-      {/* Background decorative circles */}
+    <View style={containerStyle}>
       <View style={[styles.blurCircle, styles.circle1]} />
       <View style={[styles.blurCircle, styles.circle2]} />
       <View style={[styles.blurCircle, styles.circle3]} />
@@ -87,39 +67,21 @@ export default function SplashScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 9999,
+    overflow: 'hidden',
   },
   blurCircle: {
     position: 'absolute',
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 9999,
   },
-  circle1: {
-    top: '10%',
-    left: '-12%',
-    width: '50%',
-    aspectRatio: 1,
-  },
-  circle2: {
-    bottom: '5%',
-    right: '-10%',
-    width: '55%',
-    aspectRatio: 1,
-  },
-  circle3: {
-    top: '40%',
-    right: '-15%',
-    width: '35%',
-    aspectRatio: 1,
-  },
+  circle1: { top: '10%', left: '-12%', width: 200, height: 200 },
+  circle2: { bottom: '5%', right: '-10%', width: 220, height: 220 },
+  circle3: { top: '40%', right: '-15%', width: 140, height: 140 },
   content: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -155,10 +117,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dot: {
-    color: colors.surface,
-    fontSize: 28,
-  },
+  dot: { color: colors.surface, fontSize: 28 },
   footer: {
     position: 'absolute',
     bottom: 40,
