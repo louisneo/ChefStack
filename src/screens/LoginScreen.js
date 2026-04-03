@@ -8,14 +8,14 @@ import {
   KeyboardAvoidingView, 
   Platform,
   ActivityIndicator,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import ChefStackLogo from '../components/ChefStackLogo';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -65,7 +65,7 @@ export default function LoginScreen() {
       <View style={styles.formContainer}>
         {/* Logo */}
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
-          <ChefStackLogo size={120} withBackground={true} />
+          <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 120, height: 120, borderRadius: 60 }} />
           <Text style={styles.title}>ChefStack</Text>
           <Text style={styles.subtitle}>Your Personal Recipe Manager</Text>
         </Animated.View>

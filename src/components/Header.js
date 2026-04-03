@@ -1,14 +1,13 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
-import ChefStackLogo from './ChefStackLogo';
 
 export default function Header() {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <ChefStackLogo size={32} withBackground={true} />
+        <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 32, height: 32, borderRadius: 16 }} />
         <Text style={styles.logoText}>ChefStack</Text>
       </View>
     </View>

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Easing, Platform } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, Platform, Image } from 'react-native';
 import { colors } from '../theme/colors';
-import ChefStackLogo from '../components/ChefStackLogo';
 
 export default function SplashScreen() {
   const scale = useRef(new Animated.Value(0.5)).current;
@@ -49,7 +48,7 @@ export default function SplashScreen() {
 
       <Animated.View style={[styles.content, { opacity, transform: [{ scale }, { translateY }] }]}>
         <View style={styles.iconCircle}>
-          <ChefStackLogo size={130} withBackground={true} />
+          <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 130, height: 130, borderRadius: 65 }} />
         </View>
         <Text style={styles.title}>ChefStack</Text>
         <Text style={styles.subtitle}>Your Culinary Companion</Text>
