@@ -47,24 +47,27 @@ export default function DashboardScreen({ navigation, route }) {
   
   const toastRef = React.useRef(null);
 
-  // Re-fetch on focus to ensure data is fresh (and handle navigation params)
-  useFocusEffect(
-    useCallback(() => {
+  // Initial data load
+  useEffect(() => {
+    if (user) fetchRecipes();
+  }, [user]);
+
+  // Handle openAdd param safely without re-fetching everything blindly
+  useEffect(() => {
+    if (route.params?.openAdd) {
+      setEditingRecipe(null);
+      setAddModalVisible(true);
+      navigation.setParams({ openAdd: undefined });
+    }
+  }, [route.params?.openAdd, navigation]);
+
+  // Handle refresh param
+  useEffect(() => {
+    if (route.params?.refresh) {
       fetchRecipes();
-      
-      // If the center "Add" tab button was pressed
-      if (route.params?.openAdd) {
-        setEditingRecipe(null);
-        setAddModalVisible(true);
-        navigation.setParams({ openAdd: false });
-      }
-      
-      // If we just came back from an import
-      if (route.params?.refresh) {
-        navigation.setParams({ refresh: false });
-      }
-    }, [user, route.params])
-  );
+      navigation.setParams({ refresh: undefined });
+    }
+  }, [route.params?.refresh, navigation]);
 
   useEffect(() => {
     if (!user) return;
@@ -98,7 +101,8 @@ export default function DashboardScreen({ navigation, route }) {
   }, [user]);
 
   const fetchRecipes = async () => {
-    setLoading(true);
+    // Only show full-screen spinner if it's the first time loading
+    if (recipes.length === 0) setLoading(true);
     // Grab all recipes for this user 
     const { data: myData, error: myError } = await supabase
       .from('recipes')
