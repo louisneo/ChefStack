@@ -14,12 +14,11 @@ export default function ChefStackLogo({ size = 120, withBackground = true, style
 
   return (
     <Svg width={s} height={s} viewBox="0 0 512 512" style={style}>
-      {/* Background rounded rectangle */}
+      {/* Background circular to match homescreen icon */}
       {withBackground && (
-        <Rect
-          x="0" y="0" width="512" height="512"
-          rx="100" ry="100"
-          fill="#3a7d54"
+        <Circle
+          cx="256" cy="256" r="256"
+          fill="#2D6A4F"
         />
       )}
 
@@ -46,7 +45,7 @@ export default function ChefStackLogo({ size = 120, withBackground = true, style
         <Ellipse cx="256" cy="208" rx="140" ry="30" fill="white" />
 
         {/* Rim line on top plate */}
-        <Ellipse cx="256" cy="208" rx="115" ry="20" fill="none" stroke="#3a7d54" strokeWidth="3" />
+        <Ellipse cx="256" cy="208" rx="115" ry="20" fill="none" stroke="#2D6A4F" strokeWidth="3" />
       </G>
 
       {/* Leaves on top */}

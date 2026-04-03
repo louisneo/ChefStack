@@ -49,7 +49,7 @@ export default function SplashScreen() {
 
       <Animated.View style={[styles.content, { opacity, transform: [{ scale }, { translateY }] }]}>
         <View style={styles.iconCircle}>
-          <ChefStackLogo size={100} withBackground={false} />
+          <ChefStackLogo size={130} withBackground={true} />
         </View>
         <Text style={styles.title}>ChefStack</Text>
         <Text style={styles.subtitle}>Your Culinary Companion</Text>
@@ -88,13 +88,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   iconCircle: {
-    width: 130,
-    height: 130,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 65,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 10,
   },
   title: {
     fontSize: 42,
