@@ -188,9 +188,7 @@ export default function DashboardScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <Header 
-        onAddClick={() => { setEditingRecipe(null); setAddModalVisible(true); }}
-      />
+      <Header />
       
       <FlatList
         data={sortedRecipes}

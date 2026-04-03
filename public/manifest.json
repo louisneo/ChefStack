@@ -1,0 +1,16 @@
+{
+  "short_name": "ChefStack",
+  "name": "ChefStack - Personal Culinary Companion",
+  "icons": [
+    {
+      "src": "/pwa-icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#2D6A4F",
+  "background_color": "#F4F7F5"
+}
