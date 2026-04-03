@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     backgroundColor: colors.surface,
     paddingTop: Platform.OS === 'web' ? 32 : 60,
     paddingBottom: 16,
