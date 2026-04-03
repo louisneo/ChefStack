@@ -94,7 +94,7 @@ export default function AISearchScreen({ navigation }) {
         <View style={styles.searchBox}>
           <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { outlineStyle: 'none' }]}
             placeholder="Search any food recipe..."
             value={query}
             onChangeText={setQuery}

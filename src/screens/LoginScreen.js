@@ -65,7 +65,7 @@ export default function LoginScreen() {
       <View style={styles.formContainer}>
         {/* Logo */}
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
-          <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 120, height: 120, borderRadius: 60 }} />
+          <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 120, height: 120 }} />
           <Text style={styles.title}>ChefStack</Text>
           <Text style={styles.subtitle}>Your Personal Recipe Manager</Text>
         </Animated.View>

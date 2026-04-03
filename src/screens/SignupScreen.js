@@ -99,7 +99,7 @@ export default function SignupScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
-          <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 100, height: 100, borderRadius: 50 }} />
+          <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 100, height: 100 }} />
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join ChefStack community</Text>
         </Animated.View>

@@ -7,7 +7,7 @@ export default function Header() {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 32, height: 32, borderRadius: 16 }} />
+        <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 32, height: 32 }} />
         <Text style={styles.logoText}>ChefStack</Text>
       </View>
     </View>

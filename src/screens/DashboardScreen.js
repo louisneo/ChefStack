@@ -224,7 +224,7 @@ export default function DashboardScreen({ navigation, route }) {
             <View style={styles.searchContainer}>
               <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
               <TextInput
-                style={styles.searchInput}
+                style={[styles.searchInput, { outlineStyle: 'none' }]}
                 placeholder="Search recipes or ingredients..."
                 placeholderTextColor={colors.textMuted}
                 value={searchQuery}
