@@ -9,14 +9,14 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
-  ScrollView,
-  Image
+  ScrollView
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import ChefStackLogo from '../components/ChefStackLogo';
 
 export default function SignupScreen() {
   const [fullName, setFullName] = useState('');
@@ -99,11 +99,7 @@ export default function SignupScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
-          <Image 
-            source={require('../../assets/chefstack_logo.png')} 
-            style={styles.logo} 
-            resizeMode="contain"
-          />
+          <ChefStackLogo size={100} withBackground={true} />
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join ChefStack community</Text>
         </Animated.View>
@@ -249,11 +245,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 24,
-  },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 8,
   },
   title: {
     fontSize: 32,

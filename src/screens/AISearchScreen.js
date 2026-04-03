@@ -69,7 +69,7 @@ export default function AISearchScreen({ navigation }) {
       
       // Navigate back after a short delay so they see the success
       setTimeout(() => {
-        navigation.navigate('Dashboard', { refresh: true });
+        navigation.navigate('Home', { refresh: true });
       }, 1000);
     } catch (error) {
       toastRef.current?.show(error.message, 'error');

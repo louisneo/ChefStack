@@ -184,9 +184,8 @@ export default function DashboardScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <Header 
-        onMenuClick={() => navigation.openDrawer()} 
+        onMenuClick={() => navigation.getParent()?.openDrawer()} 
         onAddClick={() => { setEditingRecipe(null); setAddModalVisible(true); }}
-        onAISearch={() => navigation.navigate('AISearch')}
       />
       
       <FlatList

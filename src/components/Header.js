@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
+import ChefStackLogo from './ChefStackLogo';
 
 export default function Header({ onMenuClick, onAddClick, onAISearch }) {
   return (
@@ -15,9 +16,7 @@ export default function Header({ onMenuClick, onAddClick, onAISearch }) {
       </TouchableOpacity>
       
       <View style={styles.logoContainer}>
-        <View style={styles.logoIconBg}>
-          <Image source={require('../../assets/chefstack_logo.png')} style={styles.headerLogo} />
-        </View>
+        <ChefStackLogo size={32} withBackground={true} />
         <Text style={styles.logoText}>ChefStack</Text>
       </View>
 
@@ -68,20 +67,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  logoIconBg: {
-    width: 32,
-    height: 32,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  headerLogo: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
   },
   logoText: {
     fontSize: 20,

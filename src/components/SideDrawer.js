@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import ChefStackLogo from './ChefStackLogo';
 
 export default function SideDrawerContent(props) {
   const { user, signOut } = useAuth();
@@ -23,9 +24,7 @@ export default function SideDrawerContent(props) {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View style={styles.logoContainer}>
-              <View style={styles.logoIconBg}>
-                <Image source={require('../../assets/chefstack_logo.png')} style={styles.drawerLogo} />
-              </View>
+              <ChefStackLogo size={40} withBackground={true} />
               <Text style={styles.logoText}>ChefStack</Text>
             </View>
             <TouchableOpacity onPress={() => props.navigation.closeDrawer()} style={styles.closeBtn}>
@@ -56,42 +55,43 @@ export default function SideDrawerContent(props) {
           <Text style={styles.menuTitle}>MENU</Text>
 
           <TouchableOpacity 
-            style={[styles.menuItem, activeRoute === 'Dashboard' && styles.menuItemActive]} 
+            style={[styles.menuItem, activeRoute === 'MainTabs' && styles.menuItemActive]} 
             onPress={() => {
-              props.navigation.navigate('Dashboard');
+              props.navigation.navigate('MainTabs', { screen: 'Home' });
               props.navigation.closeDrawer();
             }}
           >
-            <Ionicons name="restaurant" size={24} color={activeRoute === 'Dashboard' ? colors.primary : colors.textSecondary} />
-            <Text style={activeRoute === 'Dashboard' ? styles.menuItemTextActive : styles.menuItemText}>My Recipes</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.menuItem, activeRoute === 'Favorites' && styles.menuItemActive]} 
-            onPress={() => {
-              props.navigation.navigate('Favorites');
-              props.navigation.closeDrawer();
-            }}
-          >
-            <Ionicons name="heart" size={24} color={activeRoute === 'Favorites' ? colors.primary : colors.textSecondary} />
-            <Text style={activeRoute === 'Favorites' ? styles.menuItemTextActive : styles.menuItemText}>Favorites</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.menuItem, activeRoute === 'AISearch' && styles.menuItemActive]} 
-            onPress={() => {
-              props.navigation.navigate('AISearch');
-              props.navigation.closeDrawer();
-            }}
-          >
-            <Ionicons name="sparkles" size={24} color={activeRoute === 'AISearch' ? colors.primary : colors.textSecondary} />
-            <Text style={activeRoute === 'AISearch' ? styles.menuItemTextActive : styles.menuItemText}>AI Recipe Finder</Text>
+            <Ionicons name="restaurant" size={24} color={activeRoute === 'MainTabs' ? colors.primary : colors.textSecondary} />
+            <Text style={activeRoute === 'MainTabs' ? styles.menuItemTextActive : styles.menuItemText}>My Recipes</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={styles.menuItem}
             onPress={() => {
-              props.navigation.navigate('Profile');
+              props.navigation.navigate('MainTabs', { screen: 'Favorites' });
+              props.navigation.closeDrawer();
+            }}
+          >
+            <Ionicons name="heart" size={24} color={colors.textSecondary} />
+            <Text style={styles.menuItemText}>Favorites</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => {
+              props.navigation.navigate('MainTabs', { screen: 'AISearch' });
+              props.navigation.closeDrawer();
+            }}
+          >
+            <Ionicons name="sparkles" size={24} color={colors.textSecondary} />
+            <Text style={styles.menuItemText}>AI Recipe Finder</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => {
+              props.navigation.navigate('MainTabs', { screen: 'Profile' });
+              props.navigation.closeDrawer();
             }}
           >
             <Ionicons name="person-circle-outline" size={28} color={colors.textSecondary} />
@@ -133,20 +133,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-  },
-  logoIconBg: {
-    width: 40,
-    height: 40,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  drawerLogo: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
   },
   logoText: {
     fontSize: 24,
