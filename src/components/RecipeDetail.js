@@ -125,14 +125,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    height: '92%',
+    height: '85%',
     backgroundColor: colors.surface,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     overflow: 'hidden',
   },
   imageContainer: {
-    height: 220,
+    height: 140,
     backgroundColor: colors.borderLight,
     position: 'relative',
   },
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   titleSection: {
-    padding: 24,
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
   },
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    paddingVertical: 20,
+    paddingVertical: 12,
     alignItems: 'center',
   },
   statDivider: {
@@ -218,11 +218,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentPad: {
-    padding: 24,
-    paddingBottom: 40,
+    padding: 16,
+    paddingBottom: 32,
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   sectionHeader: {
     flexDirection: 'row',

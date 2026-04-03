@@ -9,7 +9,8 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  RefreshControl
+  RefreshControl,
+  TextInput
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -36,6 +37,7 @@ export default function DashboardScreen({ navigation, route }) {
   const [categoryFilter, setCategoryFilter] = useState('all'); // categories or all
   const [sortBy, setSortBy] = useState('newest'); // newest, oldest, alpha
   const [sortDropdownVisible, setSortDropdownVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Modals state
   const [selectedRecipe, setSelectedRecipe] = useState(null);
@@ -117,10 +119,14 @@ export default function DashboardScreen({ navigation, route }) {
     setRefreshing(false);
   };
 
-  // Filter & Sort based on new full-category filter
+  // Filter & Sort based on new full-category filter and search query
   const filteredRecipes = recipes.filter(r => {
     if (isFavoritesView && !r.is_favorite) return false;
-    return categoryFilter === 'all' || r.category === categoryFilter;
+    const matchesCategory = categoryFilter === 'all' || r.category === categoryFilter;
+    const matchesSearch = searchQuery === '' || 
+      (r.title && r.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (r.ingredients && r.ingredients.some(i => i.toLowerCase().includes(searchQuery.toLowerCase())));
+    return matchesCategory && matchesSearch;
   });
   
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
@@ -212,6 +218,23 @@ export default function DashboardScreen({ navigation, route }) {
               <Text style={styles.subtitle}>
                 {isFavoritesView ? 'Your most loved recipes.' : 'Manage your curated culinary creations.'}
               </Text>
+            </View>
+
+            {/* Search Bar */}
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search recipes or ingredients..."
+                placeholderTextColor={colors.textMuted}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* Food Panda Style Category Scroller */}
@@ -355,7 +378,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   titleContainer: {
+    marginBottom: 20,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
     marginBottom: 24,
+    paddingHorizontal: 16,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text,
   },
   title: {
     fontSize: 36,
