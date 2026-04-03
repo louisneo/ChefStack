@@ -26,6 +26,14 @@ import AddRecipeModal from '../components/AddRecipeModal';
 import DeleteConfirmation from '../components/DeleteConfirmation';
 import Toast from '../components/Toast';
 
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 export default function DashboardScreen({ navigation, route }) {
   const isFavoritesView = route?.params?.filterFavorites || false;
   const { user } = useAuth();
@@ -157,14 +165,16 @@ export default function DashboardScreen({ navigation, route }) {
       }
     } else {
       // 1. Optimistic Insert (Instant UI)
-      const tempId = Date.now(); 
-      const optimisticRecipe = { ...recipeData, id: tempId, user_id: user.id, is_favorite: false, created_at: new Date().toISOString() };
+      const newId = generateUUID(); 
+      const optimisticRecipe = { ...recipeData, id: newId, user_id: user.id, is_favorite: false, created_at: new Date().toISOString() };
       setRecipes(prev => [optimisticRecipe, ...prev]);
       
       // 2. Background Sync
-      const { error } = await supabase.from('recipes').insert([{ ...recipeData, user_id: user.id }]);
+      const { error } = await supabase.from('recipes').insert([{ ...recipeData, id: newId, user_id: user.id }]);
       if (error) {
         toastRef.current?.show(error.message, 'error');
+        // Rollback optimistic update
+        setRecipes(prev => prev.filter(r => r.id !== newId));
       } else {
         toastRef.current?.show('New recipe added to your Kitchen Stack!');
       }
