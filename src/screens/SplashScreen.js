@@ -1,13 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Easing, useWindowDimensions, Platform } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, Animated, Easing, Platform } from 'react-native';
 import { colors } from '../theme/colors';
 import ChefStackLogo from '../components/ChefStackLogo';
 
 export default function SplashScreen() {
-  const { width, height } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
-
   // Animation Values
   const scale = useRef(new Animated.Value(0.5)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -33,7 +29,6 @@ export default function SplashScreen() {
         useNativeDriver: true,
       })
     ]).start(() => {
-      // Gentle floating animation
       Animated.loop(
         Animated.sequence([
           Animated.timing(translateY, {
@@ -53,48 +48,31 @@ export default function SplashScreen() {
     });
 
     // Loading dots animation
-    const animateDots = () => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(dot1, { toValue: 1, duration: 400, useNativeDriver: true }),
-          Animated.timing(dot2, { toValue: 1, duration: 400, useNativeDriver: true }),
-          Animated.timing(dot3, { toValue: 1, duration: 400, useNativeDriver: true }),
-          Animated.timing(dot1, { toValue: 0.3, duration: 400, useNativeDriver: true }),
-          Animated.timing(dot2, { toValue: 0.3, duration: 400, useNativeDriver: true }),
-          Animated.timing(dot3, { toValue: 0.3, duration: 400, useNativeDriver: true }),
-        ])
-      ).start();
-    };
-    animateDots();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(dot1, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(dot2, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(dot3, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(dot1, { toValue: 0.3, duration: 400, useNativeDriver: true }),
+        Animated.timing(dot2, { toValue: 0.3, duration: 400, useNativeDriver: true }),
+        Animated.timing(dot3, { toValue: 0.3, duration: 400, useNativeDriver: true }),
+      ])
+    ).start();
   }, []);
 
-  // Dynamic sizing based on screen
-  const logoSize = Math.min(width * 0.3, height * 0.18, 140);
-  const titleSize = Math.min(width * 0.11, 48);
-  const subtitleSize = Math.min(width * 0.045, 18);
-
   return (
-    <View style={[styles.container, { width, height }]}>
-      {/* Background decorative circles — responsive */}
-      <View style={[styles.blurCircle, { 
-        top: height * 0.05, left: -width * 0.12, 
-        width: width * 0.5, height: width * 0.5 
-      }]} />
-      <View style={[styles.blurCircle, { 
-        bottom: height * 0.05, right: -width * 0.12, 
-        width: width * 0.55, height: width * 0.55 
-      }]} />
-      <View style={[styles.blurCircle, { 
-        top: height * 0.4, right: -width * 0.2, 
-        width: width * 0.35, height: width * 0.35 
-      }]} />
+    <View style={styles.container}>
+      {/* Background decorative circles */}
+      <View style={[styles.blurCircle, styles.circle1]} />
+      <View style={[styles.blurCircle, styles.circle2]} />
+      <View style={[styles.blurCircle, styles.circle3]} />
 
       <Animated.View style={[styles.content, { opacity, transform: [{ scale }, { translateY }] }]}>
-        <View style={[styles.iconCircle, { width: logoSize + 20, height: logoSize + 20, borderRadius: (logoSize + 20) / 2 }]}>
-          <ChefStackLogo size={logoSize} withBackground={false} />
+        <View style={styles.iconCircle}>
+          <ChefStackLogo size={100} withBackground={false} />
         </View>
-        <Text style={[styles.title, { fontSize: titleSize }]}>ChefStack</Text>
-        <Text style={[styles.subtitle, { fontSize: subtitleSize }]}>Your Culinary Companion</Text>
+        <Text style={styles.title}>ChefStack</Text>
+        <Text style={styles.subtitle}>Your Culinary Companion</Text>
         <View style={styles.loadingDots}>
           <Animated.Text style={[styles.dot, { opacity: dot1 }]}>•</Animated.Text>
           <Animated.Text style={[styles.dot, { opacity: dot2 }]}>•</Animated.Text>
@@ -102,44 +80,69 @@ export default function SplashScreen() {
         </View>
       </Animated.View>
 
-      <Text style={[styles.footer, { bottom: insets.bottom + 20 }]}>
-        Naga City, Camarines Sur 🇵🇭
-      </Text>
+      <Text style={styles.footer}>Naga City, Camarines Sur 🇵🇭</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 9999,
   },
   blurCircle: {
     position: 'absolute',
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 9999,
   },
+  circle1: {
+    top: '10%',
+    left: '-12%',
+    width: '50%',
+    aspectRatio: 1,
+  },
+  circle2: {
+    bottom: '5%',
+    right: '-10%',
+    width: '55%',
+    aspectRatio: 1,
+  },
+  circle3: {
+    top: '40%',
+    right: '-15%',
+    width: '35%',
+    aspectRatio: 1,
+  },
   content: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
-    width: '100%',
   },
   iconCircle: {
+    width: 130,
+    height: 130,
     backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 65,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
   },
   title: {
+    fontSize: 42,
     fontWeight: 'bold',
     color: colors.surface,
     letterSpacing: -1,
     textAlign: 'center',
   },
   subtitle: {
+    fontSize: 18,
     fontWeight: '500',
     color: 'rgba(255,255,255,0.9)',
     marginTop: 8,
@@ -158,6 +161,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
+    bottom: 40,
     color: 'rgba(255,255,255,0.7)',
     fontSize: 14,
     fontWeight: '500',

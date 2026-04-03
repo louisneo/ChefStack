@@ -50,10 +50,15 @@ export default function DashboardScreen({ navigation, route }) {
     useCallback(() => {
       fetchRecipes();
       
-      // If we just came back from an import or add
+      // If the center "Add" tab button was pressed
+      if (route.params?.openAdd) {
+        setEditingRecipe(null);
+        setAddModalVisible(true);
+        navigation.setParams({ openAdd: false });
+      }
+      
+      // If we just came back from an import
       if (route.params?.refresh) {
-        fetchRecipes();
-        // Clear params to avoid loop
         navigation.setParams({ refresh: false });
       }
     }, [user, route.params])

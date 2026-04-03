@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Platform, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
@@ -25,7 +25,10 @@ const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
-// Bottom Tab Navigator
+// Dummy screen for the "Add" tab (never actually shown)
+function AddPlaceholder() { return null; }
+
+// Bottom Tab Navigator with center FAB
 function BottomTabNavigator() {
   return (
     <Tab.Navigator
@@ -52,12 +55,14 @@ function BottomTabNavigator() {
           shadowRadius: 8,
           elevation: 10,
         },
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused, color }) => {
           let iconName;
           if (route.name === 'Home') {
             iconName = focused ? 'restaurant' : 'restaurant-outline';
           } else if (route.name === 'Favorites') {
             iconName = focused ? 'heart' : 'heart-outline';
+          } else if (route.name === 'AddRecipe') {
+            return null; // Custom button renders instead
           } else if (route.name === 'AISearch') {
             iconName = focused ? 'sparkles' : 'sparkles-outline';
           } else if (route.name === 'Profile') {
@@ -77,6 +82,31 @@ function BottomTabNavigator() {
         component={DashboardScreen} 
         initialParams={{ filterFavorites: true }}
         options={{ tabBarLabel: 'Favorites' }}
+      />
+      <Tab.Screen 
+        name="AddRecipe" 
+        component={AddPlaceholder}
+        options={{
+          tabBarLabel: () => null,
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              style={styles.addButtonContainer}
+              activeOpacity={0.8}
+            >
+              <View style={styles.addButton}>
+                <Ionicons name="add" size={32} color={colors.surface} />
+              </View>
+            </TouchableOpacity>
+          ),
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            // Navigate to Home first, then trigger add modal via params
+            navigation.navigate('Home', { openAdd: true });
+          },
+        })}
       />
       <Tab.Screen 
         name="AISearch" 
@@ -119,7 +149,6 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          // Authenticated Screens
           <>
             <Stack.Screen name="Drawer" component={DrawerNavigator} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
@@ -128,7 +157,6 @@ export default function AppNavigator() {
             <Stack.Screen name="About" component={AboutScreen} />
           </>
         ) : (
-          // Auth Screens
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />
@@ -138,3 +166,25 @@ export default function AppNavigator() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  addButtonContainer: {
+    top: Platform.OS === 'web' ? -10 : -15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+  },
+  addButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+});
