@@ -18,9 +18,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     backgroundColor: colors.surface,
-    paddingTop: Platform.OS === 'web' ? 32 : 60,
+    paddingTop: Platform.OS === 'web' ? 16 : 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
