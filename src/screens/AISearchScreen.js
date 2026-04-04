@@ -254,9 +254,10 @@ export default function AISearchScreen({ navigation }) {
 
         <Toast ref={toastRef} />
       </View>
+      <Text style={styles.versionTag}>Search Engine v5.6 (Backoff Active)</Text>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -509,5 +510,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.text,
-  }
+  },
+  versionTag: {
+    fontSize: 10,
+    color: '#94a3b8',
+    textAlign: 'center',
+    paddingVertical: 10,
+    backgroundColor: '#f8fafc',
+  },
 });

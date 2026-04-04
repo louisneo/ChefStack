@@ -157,7 +157,7 @@ export const searchRecipes = async (query) => {
 
   // 3. EMERGENCY VARIATIONS (Prioritized for core terms if AI fails)
   const normalizedQuery = query.toLowerCase();
-  const isCommonTerm = ['adobo', 'matcha', 'sinigang'].some(term => normalizedQuery.includes(term));
+  const isCommonTerm = ['adobo', 'matcha', 'sinigang', 'bicol express', 'sisig'].some(term => normalizedQuery.includes(term));
 
   if (!isCommonTerm) {
     // If it's not a core demo term and AI is busy, return the user-requested error
@@ -170,6 +170,7 @@ export const searchRecipes = async (query) => {
   
   // High-variety variations for core culinary terms during AI downtime
   if (normalizedQuery.includes('adobo')) {
+    console.log("Serving high-variety Adobo emergency fallback.");
     const adoboVariations = [
       { title: "Classic Pork Adobo", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/pork-adobo-3.jpg", time: 45, ingredients: ["Pork Belly", "Soy Sauce", "Vinegar", "Garlic"], steps: ["Sauté garlic", "Brown pork", "Simmer with soy sauce and vinegar"] },
       { title: "Savory Chicken Adobo", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/11/adobo-with-liver-spread-1.jpg", time: 40, ingredients: ["Chicken Thighs", "Soy Sauce", "Vinegar", "Peppercorns"], steps: ["Marinate chicken", "Simmer until tender", "Garnish with garlic chips"] },
@@ -181,6 +182,28 @@ export const searchRecipes = async (query) => {
       { title: "Beef Adobo (Batangas Style)", category: "Hearty Main", image: "https://www.kawalingpinoy.com/wp-content/uploads/2019/08/beef-adobo-3.jpg", time: 90, ingredients: ["Beef Brisket", "Soy Sauce", "Vinegar", "Star Anise"], steps: ["Slow cook beef", "Reduce sauce", "Serve with rice"] }
     ];
     return { recipes: adoboVariations, isFood: true };
+  }
+
+  // Variations for 'Bicol Express'
+  if (normalizedQuery.includes('bicol express')) {
+    const bicolVariations = [
+      { title: "Classic Bicol Express", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/05/pork-bicol-express-2.jpg", time: 40, ingredients: ["Pork Belly", "Coconut Milk", "Bagoong", "Chili"], steps: ["Sauté aromatics", "Add pork and bagoong", "Simmer in coconut milk", "Add lots of chili"] },
+      { title: "Chicken Bicol Express", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/10/chicken-bicol-express-1.jpg", time: 35, ingredients: ["Chicken Thighs", "Coconut Milk", "Chili"], steps: ["Brown chicken", "Simmer with spices", "Finish with thick cream"] },
+      { title: "Vegan Bicol Express (Jackfruit)", category: "Vegetarian", image: "https://www.kawalingpinoy.com/wp-content/uploads/2018/11/ginataang-langka-with-pork-1.jpg", time: 30, ingredients: ["Young Jackfruit", "Coconut Milk", "Miso", "Chili"], steps: ["Stew jackfruit", "Add spicy coconut base"] },
+      { title: "Seafood Bicol Express", category: "Seafood", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/11/ginataang-pusit-1.jpg", time: 25, ingredients: ["Shrimp/Squid", "Coconut Milk", "Bagoong", "Chili"], steps: ["Quick sauté seafood", "Simmer briefly in sauce"] }
+    ];
+    return { recipes: bicolVariations, isFood: true };
+  }
+
+  // Variations for 'Sisig'
+  if (normalizedQuery.includes('sisig')) {
+    const sisigVariations = [
+      { title: "Authentic Pork Sisig", category: "Kapampangan Classic", image: "https://www.kawalingpinoy.com/wp-content/uploads/2015/12/authentic-pork-sisig-4.jpg", time: 60, ingredients: ["Pork Mask", "Liver", "Calamansi", "Onions"], steps: ["Boil and grill pork", "Chop finely", "Sauté with aromatics", "Serve on hot plate"] },
+      { title: "Crispy Sizzling Sisig", category: "Bar Favorite", image: "https://www.kawalingpinoy.com/wp-content/uploads/2015/12/authentic-pork-sisig-4.jpg", time: 45, ingredients: ["Crispy Lechon Kawali", "Mayo", "Egg"], steps: ["Chop lechon", "Sauté until extra crispy", "Add mayo and egg"] },
+      { title: "Chicken Sisig", category: "Healthier Option", image: "https://www.kawalingpinoy.com/wp-content/uploads/2021/04/chicken-sisig-1.jpg", time: 30, ingredients: ["Grilled Chicken", "Calamansi", "Onions"], steps: ["Grill chicken", "Dice and sauté", "Season with calamansi"] },
+      { title: "Tofu Sisig", category: "Vegetarian", image: "https://www.kawalingpinoy.com/wp-content/uploads/2018/06/tofu-sisig-4.jpg", time: 20, ingredients: ["Hard Tofu", "Mayo", "Chili"], steps: ["Deep fry tofu cubes", "Toss in creamy sauce", "Serve sizzling"] }
+    ];
+    return { recipes: sisigVariations, isFood: true };
   }
 
   // Variations for 'Matcha'
