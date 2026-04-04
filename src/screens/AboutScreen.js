@@ -41,7 +41,7 @@ export default function AboutScreen() {
           </Animated.View>
 
           <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.section}>
-            <Text style={sectionTitle}>Features</Text>
+            <Text style={styles.sectionTitle}>Features</Text>
             <View style={styles.featureList}>
               {[
                 { title: 'Recipe Management', desc: 'Create, edit, and organize your recipes with ease' },
