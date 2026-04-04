@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    marginBottom: 24,
+    marginBottom: 16,
     paddingHorizontal: 16,
     height: 48,
     borderRadius: 24,
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   filterRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 24,
+    marginBottom: 16,
     paddingHorizontal: 20, // Add padding inside ScrollView so it aligns with content
   },
   filterPill: {

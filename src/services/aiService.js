@@ -123,12 +123,13 @@ export const searchRecipes = async (query) => {
 
   // 3. THEMEALDB FREE PUBLIC FALLBACK (Absolute Fail-safe)
   try {
-    console.log(`Trying TheMealDB fallback...`);
+    console.log(`Trying TheMealDB fallback for "${query}"...`);
     const mealDbUrl = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`;
     const response = await fetch(mealDbUrl);
     if (response.status === 200) {
       const data = await response.json();
       if (data.meals && data.meals.length > 0) {
+        console.log(`TheMealDB found ${data.meals.length} recipes! Returning results.`);
         const topMeals = data.meals.slice(0, 3);
         return topMeals.map(meal => {
           const ingredients = [];
@@ -153,6 +154,8 @@ export const searchRecipes = async (query) => {
             image: meal.strMealThumb
           };
         });
+      } else {
+        console.log(`TheMealDB found no recipes for "${query}".`);
       }
     }
   } catch (err) {
