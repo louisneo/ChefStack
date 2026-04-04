@@ -7,11 +7,6 @@ const getGeminiConfig = (modelName, version = 'v1beta') => {
 };
 
 /**
- * Searches for food recipes using Gemini AI with robust multi-endpoint fallbacks
- * @param {string} query The user's search query
- * @returns {Promise<Array>} List of structured recipe objects
- */
-/**
  * Dynamically fetches available Gemini models to avoid 404s on deprecated names.
  */
 const fetchAvailableModels = async (apiKey) => {
@@ -21,7 +16,6 @@ const fetchAvailableModels = async (apiKey) => {
       console.log(`Fetching available models for Gemini ${version}...`);
       const url = `https://generativelanguage.googleapis.com/${version}/models?key=${apiKey}`;
       
-      // Short timeout for the list call itself
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -36,8 +30,6 @@ const fetchAvailableModels = async (apiKey) => {
         
         if (supportedModels.length > 0) {
           console.log(`Found ${supportedModels.length} models for ${version}`);
-          
-          // Return the full list so we can try multiple
           return { version, models: supportedModels };
         }
       }
@@ -50,8 +42,6 @@ const fetchAvailableModels = async (apiKey) => {
 
 /**
  * Searches for food recipes using Gemini AI with Dynamic Model Discovery
- * @param {string} query The user's search query
- * @returns {Promise<Array>} List of structured recipe objects
  */
 export const searchRecipes = async (query) => {
   const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
@@ -62,13 +52,12 @@ export const searchRecipes = async (query) => {
   
   if (config) {
     const { version, models } = config;
-    // Sort to prioritize Flash
     const prioritizedModels = [
       ...models.filter(m => m === 'gemini-1.5-flash-latest'),
       ...models.filter(m => m === 'gemini-1.5-flash'),
       ...models.filter(m => m.includes('flash') && !m.includes('latest')),
       ...models.filter(m => !m.includes('flash'))
-    ].slice(0, 3); // Top 3 most likely to work
+    ].slice(0, 3);
 
     for (const modelName of prioritizedModels) {
       try {
@@ -97,14 +86,12 @@ export const searchRecipes = async (query) => {
           if (jsonText) {
             const result = JSON.parse(jsonText);
             const recipes = Array.isArray(result) ? result : (result.recipes || []);
-            const isFood = result.is_food !== false; // Default to true if not specified
+            const isFood = result.is_food !== false;
             return { recipes, isFood };
           }
         } else if (response.status === 429) {
-          console.log(`${modelName} is rate-limited (429). Trying next discovered model...`);
+          console.log(`${modelName} is rate-limited (429).`);
           continue; 
-        } else {
-          console.log(`${modelName} failed with status ${response.status}.`);
         }
       } catch (err) {
         console.log(`${modelName} error:`, err.message);
@@ -112,7 +99,7 @@ export const searchRecipes = async (query) => {
     }
   }
 
-  // 2. OPENAI FALLBACK (Secondary)
+  // 2. OPENAI FALLBACK
   const openaiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
   if (openaiKey) {
     try {
@@ -150,9 +137,7 @@ export const searchRecipes = async (query) => {
     console.log("OpenAI API Key not found. Skipping fallback.");
   }
 
-export const searchRecipes = async (query) => {
-  // ... (previous logic stays same until mealdb)
-  // 3. THEMEALDB FREE PUBLIC FALLBACK
+  // 3. THEMEALDB FALLBACK
   try {
     console.log(`Trying TheMealDB fallback...`);
     const mealDbUrl = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`;
@@ -160,7 +145,6 @@ export const searchRecipes = async (query) => {
     if (response.status === 200) {
       const data = await response.json();
       if (data.meals && data.meals.length > 0) {
-        console.log(`TheMealDB found results!`);
         const recipes = data.meals.slice(0, 5).map(meal => ({
           title: meal.strMeal,
           type: "food",
@@ -173,9 +157,46 @@ export const searchRecipes = async (query) => {
         return { recipes, isFood: true };
       }
     }
-  } catch (err) {}
+  } catch (err) {
+    console.log("TheMealDB Fallback failed.");
+  }
 
-  // ... (emergency and gibberish logic stays same)
+  // 4. HARDCODED EMERGENCY FALLBACK
+  const normalizedQuery = query.toLowerCase();
+  const EMERGENCY_GEMS = [
+    { title: "Ginataang Bilo-Bilo", queryMatch: ["bilo", "ginataan"] },
+    { title: "Matcha Green Tea Latte", queryMatch: ["matcha", "green tea"] },
+    { title: "Pork Adobo", queryMatch: ["adobo"] },
+    { title: "Sinigang na Baboy", queryMatch: ["sinigang"] },
+    { title: "Chicken Curry", queryMatch: ["curry"] }
+  ];
+
+  const match = EMERGENCY_GEMS.find(g => g.queryMatch.some(q => normalizedQuery.includes(q)));
+  if (match) {
+    return {
+      recipes: [{
+        title: match.title,
+        type: "food",
+        category: "Specialties",
+        time: 30,
+        ingredients: ["Main ingredient", "Special sauce", "Seasoning"],
+        steps: ["Prepare base", "Slow cook until perfect", "Garnish and serve"],
+        image: match.title.includes("Matcha") 
+          ? "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?q=80&w=600" 
+          : "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/ginataang-bilo-bilo-1.jpg"
+      }],
+      isFood: true
+    };
+  }
+
+  // Enhanced Gibberish & Non-Food Heuristics
+  const hasVowels = /[aeiouy]/i.test(normalizedQuery);
+  const isTooLongWithNoSpaces = normalizedQuery.length > 10 && !normalizedQuery.includes(' ');
+  const isMashing = /^[asdfghjkl]+$/.test(normalizedQuery) || /^[qwertyuiop]+$/.test(normalizedQuery);
+  const isProbablyGibberish = !hasVowels || isTooLongWithNoSpaces || isMashing || normalizedQuery.length < 3;
+
+  return { recipes: [], isFood: !isProbablyGibberish };
+};
 
 const generatePrompt = (query) => `
   You are a ChefStack AI Assistant. Your task is to find and return at least 3 and up to 5 highly relevant food recipes for the query: "${query}".
