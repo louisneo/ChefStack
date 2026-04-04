@@ -11,80 +11,91 @@ const getGeminiConfig = (modelName, version = 'v1beta') => {
  * @param {string} query The user's search query
  * @returns {Promise<Array>} List of structured recipe objects
  */
-export const searchRecipes = async (query) => {
-  const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error('Gemini API Key is missing.');
-    return [];
-  }
-
-  // 1. GEMINI AI (Primary)
-  // We try v1beta first (supports JSON mode natively) then v1 as backup
-  const apiVersions = ['v1beta', 'v1'];
-  const models = [
-    'gemini-1.5-flash-latest', 
-    'gemini-1.5-flash', 
-    'gemini-1.5-flash-8b', // Highly available
-    'gemini-1.5-pro-latest',
-    'gemini-2.0-flash-exp'
-  ];
-
-  for (const version of apiVersions) {
-    console.log(`Checking Gemini ${version} responsiveness...`);
-    let versionIsOperational = true;
-
-    for (const modelName of models) {
-      if (!versionIsOperational) break;
-
-      try {
-        const { url } = getGeminiConfig(modelName, version);
+/**
+ * Dynamically fetches available Gemini models to avoid 404s on deprecated names.
+ */
+const fetchAvailableModels = async (apiKey) => {
+  const versions = ['v1beta', 'v1'];
+  for (const version of versions) {
+    try {
+      console.log(`Fetching available models for Gemini ${version}...`);
+      const url = `https://generativelanguage.googleapis.com/${version}/models?key=${apiKey}`;
+      const response = await fetch(url);
+      if (response.status === 200) {
+        const data = await response.json();
+        const supportedModels = (data.models || [])
+          .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+          .map(m => m.name.split('/').pop());
         
-        const requestBody = {
-          contents: [{ parts: [{ text: generatePrompt(query) }] }],
-        };
-
-        if (version === 'v1beta') {
-          requestBody.generationConfig = { response_mime_type: "application/json" };
-        }
-        
-        // Add a 5-second timeout to avoid long hangs
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody),
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-
-        if (response.status === 200) {
-          const data = await response.json();
-          if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-            const jsonText = data.candidates[0].content.parts[0].text;
-            const recipes = JSON.parse(jsonText);
-            return Array.isArray(recipes) ? recipes : (recipes.recipes || []);
-          }
-        } else if (response.status === 404) {
-          // If the model or endpoint is 404, the whole version/project config is likely invalid
-          console.log(`Gemini ${version} returned 404. Skipping this endpoint.`);
-          versionIsOperational = false;
-          break; 
-        } else {
-          // Other error (429, 500, 400), try next model
-          const errorData = await response.json().catch(() => ({}));
-          console.log(`${modelName} (${version}) skipped: ${response.status}`);
-        }
-      } catch (err) {
-        if (err.name === 'AbortError') {
-          console.log(`${modelName} (${version}) timed out.`);
-        } else {
-          console.log(`${modelName} (${version}) connectivity issue.`);
+        if (supportedModels.length > 0) {
+          console.log(`Found ${supportedModels.length} models for ${version}:`, supportedModels);
+          // Prefer flash models, specifically the ones that are most stable
+          const preferred = supportedModels.find(m => m.includes('flash-latest')) || 
+                            supportedModels.find(m => m.includes('flash')) || 
+                            supportedModels[0];
+          return { version, modelName: preferred };
         }
       }
+    } catch (err) {
+      console.log(`Failed to fetch models for ${version}:`, err.message);
     }
+  }
+  return null;
+};
+
+/**
+ * Searches for food recipes using Gemini AI with Dynamic Model Discovery
+ * @param {string} query The user's search query
+ * @returns {Promise<Array>} List of structured recipe objects
+ */
+export const searchRecipes = async (query) => {
+  const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+  if (!apiKey) return [];
+
+  // 1. DYNAMIC GEMINI DISCOVERY
+  const config = await fetchAvailableModels(apiKey);
+  
+  if (config) {
+    try {
+      const { version, modelName } = config;
+      console.log(`Using dynamically discovered model: ${modelName} (${version})`);
+      
+      const url = `https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${apiKey}`;
+      const requestBody = {
+        contents: [{ parts: [{ text: generatePrompt(query) }] }],
+      };
+
+      if (version === 'v1beta') {
+        requestBody.generationConfig = { response_mime_type: "application/json" };
+      }
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (response.status === 200) {
+        const data = await response.json();
+        const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (jsonText) {
+          const recipes = JSON.parse(jsonText);
+          return Array.isArray(recipes) ? recipes : (recipes.recipes || []);
+        }
+      } else {
+        console.log(`Dynamic model ${modelName} failed with status ${response.status}`);
+      }
+    } catch (err) {
+      console.log(`Gemini dynamic request failed:`, err.message);
+    }
+  } else {
+    console.log("No available Gemini models found for this key/project.");
   }
 
   // 2. OPENAI FALLBACK (Secondary)
@@ -154,17 +165,12 @@ export const searchRecipes = async (query) => {
             image: meal.strMealThumb
           };
         });
-      } else {
-        console.log(`TheMealDB found no recipes for "${query}".`);
       }
     }
   } catch (err) {
-    console.warn(`TheMealDB Fallback failed:`, err.message);
+    console.log(`TheMealDB Fallback failed for "${query}".`);
   }
 
-  // FINAL RECOURSE: Return empty array instead of throwing.
-  // This allows the UI to show "No recipes found" rather than a crash error.
-  console.log("All AI and fallback providers returned no results for query:", query);
   return [];
 };
 
