@@ -1,66 +1,68 @@
-const getGeminiConfig = (modelName) => {
+const getGeminiConfig = (modelName, version = 'v1beta') => {
   const key = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   return {
     key,
-    url: `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`
+    url: `https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${key}`
   };
 };
 
 /**
- * Searches for food recipes using Gemini AI
+ * Searches for food recipes using Gemini AI with robust multi-endpoint fallbacks
  * @param {string} query The user's search query
  * @returns {Promise<Array>} List of structured recipe objects
  */
 export const searchRecipes = async (query) => {
   const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('Gemini API Key is missing. Check your Vercel project settings.');
+    console.error('Gemini API Key is missing.');
+    return [];
   }
 
-  // List of models to try in order of preference (Updated 2026 for Stability)
+  // 1. GEMINI AI (Primary)
+  // We try v1beta first (supports JSON mode natively) then v1 as backup
+  const apiVersions = ['v1beta', 'v1'];
   const models = [
     'gemini-1.5-flash-latest', 
     'gemini-1.5-flash', 
+    'gemini-1.5-flash-8b', // Highly available
     'gemini-1.5-pro-latest',
-    'gemini-1.5-pro',
     'gemini-2.0-flash-exp'
   ];
-  let lastError = null;
 
-  for (const modelName of models) {
-    try {
-      console.log(`Trying AI model: ${modelName}...`);
-      const { url } = getGeminiConfig(modelName);
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: generatePrompt(query) }] }],
-          generationConfig: { response_mime_type: "application/json" }
-        }),
-      });
+  for (const version of apiVersions) {
+    for (const modelName of models) {
+      try {
+        console.log(`Trying ${version} model: ${modelName}...`);
+        const { url } = getGeminiConfig(modelName, version);
+        
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: generatePrompt(query) }] }],
+            // JSON mode is officially in v1beta, but some models in v1 also support it unofficially or via prompt
+            generationConfig: { response_mime_type: "application/json" }
+          }),
+        });
 
-      const data = await response.json();
-      console.log(`Response from ${modelName}:`, response.status);
-
-      if (response.status === 200 && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-        const jsonText = data.candidates[0].content.parts[0].text;
-        const recipes = JSON.parse(jsonText);
-        return Array.isArray(recipes) ? recipes : (recipes.recipes || []);
+        if (response.status === 200) {
+          const data = await response.json();
+          if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+            const jsonText = data.candidates[0].content.parts[0].text;
+            const recipes = JSON.parse(jsonText);
+            return Array.isArray(recipes) ? recipes : (recipes.recipes || []);
+          }
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.warn(`${modelName} (${version}) failed with status ${response.status}:`, errorData.error?.message || 'Unknown error');
+        }
+      } catch (err) {
+        console.warn(`${modelName} (${version}) error:`, err.message);
       }
-
-      if (data.error) {
-        console.warn(`Model ${modelName} failed:`, data.error.message);
-        lastError = data.error.message;
-      }
-    } catch (err) {
-      console.warn(`Error with ${modelName}:`, err.message);
-      lastError = err.message;
     }
   }
 
-  // 2. OPENAI FALLBACK
+  // 2. OPENAI FALLBACK (Secondary)
   const openaiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
   if (openaiKey) {
     try {
@@ -81,11 +83,13 @@ export const searchRecipes = async (query) => {
         })
       });
 
-      const data = await response.json();
-      if (response.status === 200 && data.choices?.[0]?.message?.content) {
-        const jsonText = data.choices[0].message.content;
-        const result = JSON.parse(jsonText);
-        return Array.isArray(result) ? result : (result.recipes || []);
+      if (response.status === 200) {
+        const data = await response.json();
+        const jsonText = data.choices?.[0]?.message?.content;
+        if (jsonText) {
+          const result = JSON.parse(jsonText);
+          return Array.isArray(result) ? result : (result.recipes || []);
+        }
       }
     } catch (err) {
       console.warn(`OpenAI Fallback failed:`, err.message);
@@ -97,44 +101,43 @@ export const searchRecipes = async (query) => {
     console.log(`Trying TheMealDB fallback...`);
     const mealDbUrl = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`;
     const response = await fetch(mealDbUrl);
-    const data = await response.json();
-    
-    if (data.meals && data.meals.length > 0) {
-      const topMeals = data.meals.slice(0, 3);
-      const fallbackRecipes = topMeals.map(meal => {
-        // Parse up to 20 ingredients provided by the API
-        const ingredients = [];
-        for (let i = 1; i <= 20; i++) {
-          const ingredient = meal[`strIngredient${i}`];
-          const measure = meal[`strMeasure${i}`];
-          if (ingredient && ingredient.trim() !== '') {
-            ingredients.push(`${measure ? measure.trim() + ' ' : ''}${ingredient.trim()}`);
+    if (response.status === 200) {
+      const data = await response.json();
+      if (data.meals && data.meals.length > 0) {
+        const topMeals = data.meals.slice(0, 3);
+        return topMeals.map(meal => {
+          const ingredients = [];
+          for (let i = 1; i <= 20; i++) {
+            const ingredient = meal[`strIngredient${i}`];
+            const measure = meal[`strMeasure${i}`];
+            if (ingredient && ingredient.trim() !== '') {
+              ingredients.push(`${measure ? measure.trim() + ' ' : ''}${ingredient.trim()}`);
+            }
           }
-        }
-        
-        // Parse steps by splitting newlines
-        const steps = meal.strInstructions
-          .split(/(?:\r\n|\r|\n)+/)
-          .filter(step => step.trim().length > 0)
-          .slice(0, 8); // Keep it concise
+          const steps = meal.strInstructions?.split(/(?:\r\n|\r|\n)+/)
+            .filter(step => step.trim().length > 0)
+            .slice(0, 8) || ["Instructions unknown"];
 
-        return {
-          title: meal.strMeal,
-          type: "food",
-          category: meal.strCategory || "Main Course",
-          time: 30, // TheMealDB doesn't provide time, so default to 30
-          ingredients: ingredients.length > 0 ? ingredients : ["Ingredients unknown"],
-          steps: steps.length > 0 ? steps : ["Instructions unknown"],
-          image: meal.strMealThumb
-        };
-      });
-      return fallbackRecipes;
+          return {
+            title: meal.strMeal,
+            type: "food",
+            category: meal.strCategory || "Main Course",
+            time: 30,
+            ingredients: ingredients.length > 0 ? ingredients : ["Ingredients unknown"],
+            steps: steps,
+            image: meal.strMealThumb
+          };
+        });
+      }
     }
   } catch (err) {
     console.warn(`TheMealDB Fallback failed:`, err.message);
   }
 
-  throw new Error(lastError || 'All AI models and fallback providers failed. Please try again later.');
+  // FINAL RECOURSE: Return empty array instead of throwing.
+  // This allows the UI to show "No recipes found" rather than a crash error.
+  console.log("All AI and fallback providers returned no results for query:", query);
+  return [];
 };
 
 const generatePrompt = (query) => `
