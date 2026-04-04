@@ -9,12 +9,14 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Image
+  Image,
+  BackHandler
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp, SlideInDown } from 'react-native-reanimated';
 import * as ImagePicker from 'expo-image-picker';
+import { useEffect } from 'react';
 
 export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe }) {
   const [title, setTitle] = useState('');
@@ -52,6 +54,25 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
       setNewStep('');
     }
   }, [visible, editingRecipe]);
+
+  // Handle Android Hardware Back Button to close modal
+  useEffect(() => {
+    if (!visible) return;
+
+    const onBack = () => {
+      onClose();
+      return true; // Trap the back press
+    };
+
+    if (Platform.OS === 'web') {
+      window.history.pushState({ modal: 'add-recipe' }, '');
+      window.addEventListener('popstate', onBack);
+      return () => window.removeEventListener('popstate', onBack);
+    } else {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBack);
+      return () => subscription.remove();
+    }
+  }, [visible, onClose]);
 
   const addIngredient = () => {
     if (newIngredient.trim()) {
