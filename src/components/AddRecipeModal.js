@@ -143,9 +143,11 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
-            <Ionicons name="close" size={24} color={colors.text} />
+            <Ionicons name="close-outline" size={28} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{editingRecipe ? 'Edit Recipe' : 'New Recipe'}</Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.headerTitle}>{editingRecipe ? 'Edit Recipe' : 'New Recipe'}</Text>
+          </View>
           <TouchableOpacity onPress={handleSave} style={styles.saveBtn}>
             <Text style={styles.saveBtnText}>{editingRecipe ? 'Update' : 'Save'}</Text>
           </TouchableOpacity>
@@ -326,29 +328,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    paddingTop: Platform.OS === 'web' ? 5 : (Platform.OS === 'ios' ? 20 : 60),
-    backgroundColor: colors.surface,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
+    height: 60,
   },
   headerBtn: {
-    width: 40,
-    height: 40,
+    padding: 8,
+    zIndex: 10,
+  },
+  titleContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
-    borderRadius: 20,
+    zIndex: 1,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '700',
     color: colors.text,
   },
   saveBtn: {
     backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
+    zIndex: 10,
   },
   saveBtnText: {
     color: colors.surface,

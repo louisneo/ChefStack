@@ -52,32 +52,38 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
       <Animated.View entering={FadeIn.duration(300)} style={styles.overlay}>
         <Animated.View entering={SlideInDown.duration(400).springify()} style={styles.container}>
           
-          {/* Header Image */}
-          <View style={styles.imageContainer}>
-            {imgError || !recipe.image ? (
-              <View style={styles.imagePlaceholder}>
-                <Ionicons 
-                  name={recipe.type === 'food' ? 'restaurant-outline' : 'cafe-outline'} 
-                  size={64} 
-                  color={colors.primaryActive} 
-                />
+            <View style={styles.header}>
+              <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
+                <Ionicons name="arrow-back" size={28} color={colors.text} />
+              </TouchableOpacity>
+              <View style={styles.titleContainer}>
+                <Text style={styles.headerTitle}>Recipe Details</Text>
               </View>
-            ) : (
-              <Image 
-                source={{ uri: recipe.image }} 
-                style={styles.image} 
-                onError={() => setImgError(true)} 
-              />
-            )}
-            
-            <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-              <Ionicons name="arrow-back" size={24} color={colors.text} />
-            </TouchableOpacity>
-
-            <View style={styles.badgeContainer}>
-              <Text style={styles.badgeText}>{recipe.category}</Text>
+              <View style={{ width: 44 }} /> 
             </View>
-          </View>
+
+            {/* Header Image */}
+            <View style={styles.imageContainer}>
+              {imgError || !recipe.image ? (
+                <View style={styles.imagePlaceholder}>
+                  <Ionicons 
+                    name={recipe.type === 'food' ? 'restaurant-outline' : 'cafe-outline'} 
+                    size={64} 
+                    color={colors.primaryActive} 
+                  />
+                </View>
+              ) : (
+                <Image 
+                  source={{ uri: recipe.image }} 
+                  style={styles.image} 
+                  onError={() => setImgError(true)} 
+                />
+              )}
+              
+              <View style={styles.badgeContainer}>
+                <Text style={styles.badgeText}>{recipe.category}</Text>
+              </View>
+            </View>
 
           {/* Title */}
           <View style={styles.titleSection}>
@@ -159,7 +165,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   imageContainer: {
-    height: 140,
+    height: 250,
     backgroundColor: colors.borderLight,
     position: 'relative',
   },
@@ -174,21 +180,35 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
-  backBtn: {
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+    backgroundColor: colors.surface,
+    height: 60,
+  },
+  headerBtn: {
+    padding: 8,
+    zIndex: 10,
+  },
+  titleContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 48 : 24, 
-    left: 16, 
-    width: 40,
-    height: 40,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    borderRadius: 20,
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    zIndex: 1,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
   },
   badgeContainer: {
     position: 'absolute',

@@ -17,8 +17,14 @@ export const searchRecipes = async (query) => {
     throw new Error('Gemini API Key is missing. Check your Vercel project settings.');
   }
 
-  // List of models to try in order of preference (Updated 2026)
-  const models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'];
+  // List of models to try in order of preference (Updated 2026 for Stability)
+  const models = [
+    'gemini-1.5-flash-latest', 
+    'gemini-1.5-flash', 
+    'gemini-1.5-pro-latest',
+    'gemini-1.5-pro',
+    'gemini-2.0-flash-exp'
+  ];
   let lastError = null;
 
   for (const modelName of models) {
