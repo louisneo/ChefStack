@@ -56,7 +56,7 @@ export default function DashboardScreen({ navigation, route }) {
   
   // Dynamic dimension support for web/desktop responsiveness
   const { width } = useWindowDimensions();
-  const numColumns = width >= 1024 ? 4 : width >= 768 ? 3 : 2;
+  const numColumns = width >= 1440 ? 5 : width >= 1024 ? 4 : width >= 768 ? 3 : 2;
 
   const toastRef = React.useRef(null);
 
@@ -213,9 +213,9 @@ export default function DashboardScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.webDesktopWrapper}>
-        <Header />
-        
+      <Header />
+      
+      <View style={styles.webDesktopPadding}>
         <FlatList
           key={`grid-${numColumns}`}
         data={sortedRecipes}
@@ -324,6 +324,7 @@ export default function DashboardScreen({ navigation, route }) {
         renderItem={({ item, index }) => (
           <RecipeCard
             recipe={item}
+            style={{ width: `${100 / numColumns - 2}%`, marginRight: '2%' }}
             onClick={() => setSelectedRecipe(item)}
             onEdit={() => { setEditingRecipe(item); setAddModalVisible(true); }}
             onDelete={() => setDeletingRecipe(item)}
@@ -392,18 +393,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  webDesktopWrapper: {
+  webDesktopPadding: {
     flex: 1,
-    width: '100%',
-    maxWidth: 1024,
-    alignSelf: 'center',
+    paddingHorizontal: Platform.OS === 'web' ? '2%' : 0,
   },
   listContent: {
-    padding: Platform.OS === 'web' ? 24 : 20,
+    padding: Platform.OS === 'web' ? 16 : 20,
     paddingBottom: 100,
   },
   row: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    marginBottom: Platform.OS === 'web' ? 16 : 0,
   },
   titleContainer: {
     marginBottom: 20,

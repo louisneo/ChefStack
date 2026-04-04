@@ -4,12 +4,12 @@ import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp, Layout } from 'react-native-reanimated';
 
-export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggleFavorite }) {
+export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggleFavorite, style }) {
   return (
     <Animated.View 
       layout={Layout.springify()} 
       entering={FadeInUp.duration(400)}
-      style={styles.container}
+      style={[styles.container, style]}
     >
       <TouchableOpacity 
         style={styles.card} 
