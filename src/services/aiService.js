@@ -145,7 +145,8 @@ export const searchRecipes = async (query) => {
     if (response.status === 200) {
       const data = await response.json();
       if (data.meals && data.meals.length > 0) {
-        const recipes = data.meals.slice(0, 5).map(meal => ({
+        // Return all results from TheMealDB for maximum variety
+        const recipes = data.meals.map(meal => ({
           title: meal.strMeal,
           type: "food",
           category: meal.strCategory || "Main Course",
@@ -199,7 +200,7 @@ export const searchRecipes = async (query) => {
 };
 
 const generatePrompt = (query) => `
-  You are a ChefStack AI Assistant. Your task is to find and return at least 3 and up to 5 highly relevant food recipes for the query: "${query}".
+  You are a ChefStack AI Assistant. Your task is to find and return at least 3 and up to 10 highly relevant food recipes for the query: "${query}".
   
   CRITICAL RULES:
   1. ONLY return food or drink recipes. 

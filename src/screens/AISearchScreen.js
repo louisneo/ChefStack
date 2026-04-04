@@ -25,6 +25,8 @@ export default function AISearchScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [searchError, setSearchError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   // Handle Android Hardware Back Button to return to Home Tab
   useFocusEffect(
@@ -50,6 +52,7 @@ export default function AISearchScreen({ navigation }) {
     setLoading(true);
     setSearchError(null);
     setResults([]);
+    setCurrentPage(1);
 
     try {
       const { recipes, isFood } = await searchRecipes(query);
@@ -67,6 +70,12 @@ export default function AISearchScreen({ navigation }) {
       setLoading(false);
     }
   };
+
+  const totalPages = Math.ceil(results.length / itemsPerPage);
+  const paginatedResults = results.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleImport = async (recipe, index) => {
     if (!user) {
@@ -171,9 +180,9 @@ export default function AISearchScreen({ navigation }) {
             </View>
           )}
 
-          {results.map((recipe, index) => (
+          {paginatedResults.map((recipe, index) => (
             <Animated.View 
-              entering={FadeInUp.delay(index * 100)} 
+              entering={FadeInDown.delay(index * 100)} 
               key={index} 
               style={styles.recipeCard}
             >
@@ -210,6 +219,33 @@ export default function AISearchScreen({ navigation }) {
               </TouchableOpacity>
             </Animated.View>
           ))}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <View style={styles.paginationContainer}>
+              <TouchableOpacity 
+                style={[styles.pageBtn, currentPage === 1 && styles.pageBtnDisabled]}
+                onPress={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <Ionicons name="chevron-back" size={24} color={currentPage === 1 ? colors.textLight : colors.surface} />
+              </TouchableOpacity>
+
+              <View style={styles.pageInfo}>
+                <Text style={styles.pageText}>Page {currentPage} of {totalPages}</Text>
+              </View>
+
+              <TouchableOpacity 
+                style={[styles.pageBtn, currentPage === totalPages && styles.pageBtnDisabled]}
+                onPress={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <Ionicons name="chevron-forward" size={24} color={currentPage === totalPages ? colors.textLight : colors.surface} />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <View style={{ height: 40 }} />
         </ScrollView>
 
         <Toast ref={toastRef} />
@@ -432,5 +468,42 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     fontWeight: '500',
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 30,
+    gap: 15,
+  },
+  pageBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  pageBtnDisabled: {
+    backgroundColor: colors.border,
+    elevation: 0,
+  },
+  pageInfo: {
+    backgroundColor: colors.surfaceVariant,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  pageText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
   }
 });
