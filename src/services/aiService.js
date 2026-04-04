@@ -30,25 +30,35 @@ export const searchRecipes = async (query) => {
   ];
 
   for (const version of apiVersions) {
+    console.log(`Checking Gemini ${version} responsiveness...`);
+    let versionIsOperational = true;
+
     for (const modelName of models) {
+      if (!versionIsOperational) break;
+
       try {
-        console.log(`Trying ${version} model: ${modelName}...`);
         const { url } = getGeminiConfig(modelName, version);
         
         const requestBody = {
           contents: [{ parts: [{ text: generatePrompt(query) }] }],
         };
 
-        // Only use response_mime_type for v1beta (v1 throws 400 Bad Request otherwise)
         if (version === 'v1beta') {
           requestBody.generationConfig = { response_mime_type: "application/json" };
         }
         
+        // Add a 5-second timeout to avoid long hangs
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody),
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
 
         if (response.status === 200) {
           const data = await response.json();
@@ -57,12 +67,22 @@ export const searchRecipes = async (query) => {
             const recipes = JSON.parse(jsonText);
             return Array.isArray(recipes) ? recipes : (recipes.recipes || []);
           }
+        } else if (response.status === 404) {
+          // If the model or endpoint is 404, the whole version/project config is likely invalid
+          console.log(`Gemini ${version} returned 404. Skipping this endpoint.`);
+          versionIsOperational = false;
+          break; 
         } else {
+          // Other error (429, 500, 400), try next model
           const errorData = await response.json().catch(() => ({}));
-          console.warn(`${modelName} (${version}) failed with status ${response.status}:`, errorData.error?.message || 'Unknown error');
+          console.log(`${modelName} (${version}) skipped: ${response.status}`);
         }
       } catch (err) {
-        console.warn(`${modelName} (${version}) error:`, err.message);
+        if (err.name === 'AbortError') {
+          console.log(`${modelName} (${version}) timed out.`);
+        } else {
+          console.log(`${modelName} (${version}) connectivity issue.`);
+        }
       }
     }
   }
