@@ -37,22 +37,8 @@ const fetchAvailableModels = async (apiKey) => {
         if (supportedModels.length > 0) {
           console.log(`Found ${supportedModels.length} models for ${version}`);
           
-          // Selection Strategy:
-          // 1. Prefer stable 1.5-flash-latest
-          // 2. Fallback to 1.5-flash
-          // 3. Fallback to any 1.5 variant
-          // 4. Fallback to 2.0-flash-exp (good for experimental)
-          // 5. Fallback to anything with "flash"
-          // 6. First available
-          const preferred = 
-            supportedModels.find(m => m === 'gemini-1.5-flash-latest') || 
-            supportedModels.find(m => m === 'gemini-1.5-flash') || 
-            supportedModels.find(m => m.includes('1.5-flash')) || 
-            supportedModels.find(m => m.includes('2.0-flash')) || 
-            supportedModels.find(m => m.includes('flash')) || 
-            supportedModels[0];
-            
-          return { version, modelName: preferred };
+          // Return the full list so we can try multiple
+          return { version, models: supportedModels };
         }
       }
     } catch (err) {
@@ -71,22 +57,30 @@ export const searchRecipes = async (query) => {
   const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   if (!apiKey) return [];
 
-  // 1. DYNAMIC GEMINI DISCOVERY
+  // 1. DYNAMIC GEMINI DISCOVERY & ITERATION
   const config = await fetchAvailableModels(apiKey);
   
   if (config) {
-    const { version, modelName } = config;
-    // We'll try the preferred model, and if it's 429 or fails, we might try one more from the list
-    const attemptModel = async (mName) => {
+    const { version, models } = config;
+    // Sort to prioritize Flash
+    const prioritizedModels = [
+      ...models.filter(m => m === 'gemini-1.5-flash-latest'),
+      ...models.filter(m => m === 'gemini-1.5-flash'),
+      ...models.filter(m => m.includes('flash') && !m.includes('latest')),
+      ...models.filter(m => !m.includes('flash'))
+    ].slice(0, 3); // Top 3 most likely to work
+
+    for (const modelName of prioritizedModels) {
       try {
-        console.log(`Using model: ${mName} (${version})`);
-        const url = `https://generativelanguage.googleapis.com/${version}/models/${mName}:generateContent?key=${apiKey}`;
+        console.log(`Trying model: ${modelName} (${version})`);
+        const url = `https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${apiKey}`;
         const requestBody = {
           contents: [{ parts: [{ text: generatePrompt(query) }] }],
         };
         if (version === 'v1beta') {
           requestBody.generationConfig = { response_mime_type: "application/json" };
         }
+        
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 20000);
         const response = await fetch(url, {
@@ -96,6 +90,7 @@ export const searchRecipes = async (query) => {
           signal: controller.signal
         });
         clearTimeout(timeoutId);
+
         if (response.status === 200) {
           const data = await response.json();
           const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -103,22 +98,16 @@ export const searchRecipes = async (query) => {
             const recipes = JSON.parse(jsonText);
             return Array.isArray(recipes) ? recipes : (recipes.recipes || []);
           }
+        } else if (response.status === 429) {
+          console.log(`${modelName} is rate-limited (429). Trying next discovered model...`);
+          continue; 
+        } else {
+          console.log(`${modelName} failed with status ${response.status}.`);
         }
-        return { error: true, status: response.status };
       } catch (err) {
-        return { error: true, message: err.message };
+        console.log(`${modelName} error:`, err.message);
       }
-    };
-
-    let result = await attemptModel(modelName);
-    if (result.error && result.status === 429) {
-      console.log(`Model ${modelName} is rate-limited (429). Trying a fallback model variant...`);
-      // Try one more but different variant (e.g. if we tried 1.5-flash, try 1.5-pro or 1.0-pro)
-      result = await attemptModel('gemini-1.5-pro'); 
     }
-
-    if (!result.error) return result;
-    console.log("Gemini attempts exhausted.");
   }
 
   // 2. OPENAI FALLBACK (Secondary)
@@ -180,26 +169,29 @@ export const searchRecipes = async (query) => {
     }
   } catch (err) {}
 
-  // 4. HARDCODED FILIPINO STANDARDS (Ultimate Fail-safe for local queries)
+  // 4. HARDCODED EMERGENCY FALLBACK (Enhanced)
   const normalizedQuery = query.toLowerCase();
-  const FILIPINO_GEMS = [
-    { title: "Ginataang Bilo-Bilo", queryMatch: "bilo" },
-    { title: "Pork Adobo", queryMatch: "adobo" },
-    { title: "Sinigang na Baboy", queryMatch: "sinigang" },
-    { title: "Chicken Curry", queryMatch: "curry" }
+  const EMERGENCY_GEMS = [
+    { title: "Ginataang Bilo-Bilo", queryMatch: ["bilo", "ginataan"] },
+    { title: "Matcha Green Tea Latte", queryMatch: ["matcha", "green tea"] },
+    { title: "Pork Adobo", queryMatch: ["adobo"] },
+    { title: "Sinigang na Baboy", queryMatch: ["sinigang"] },
+    { title: "Chicken Curry", queryMatch: ["curry"] }
   ];
 
-  const match = FILIPINO_GEMS.find(g => normalizedQuery.includes(g.queryMatch));
+  const match = EMERGENCY_GEMS.find(g => g.queryMatch.some(q => normalizedQuery.includes(q)));
   if (match) {
-    console.log(`Everything failed, but I recognize "${match.title}". Returning hardcoded emergency result.`);
+    console.log(`Everything failed, but I recognize "${match.title}". Returning hardcoded result.`);
     return [{
       title: match.title,
       type: "food",
-      category: "Filipino Classic",
-      time: 45,
-      ingredients: ["Main item", "Coconut milk", "Sugar", "Love"],
-      steps: ["Prepare ingredients", "Cook with care", "Serve hot"],
-      image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/ginataang-bilo-bilo-1.jpg"
+      category: "Specialties",
+      time: 30,
+      ingredients: ["Main ingredient", "Special sauce", "Seasoning"],
+      steps: ["Prepare base", "Slow cook until perfect", "Garnish and serve"],
+      image: match.title.includes("Matcha") 
+        ? "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?q=80&w=600" 
+        : "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/ginataang-bilo-bilo-1.jpg"
     }];
   }
 
