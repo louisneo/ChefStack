@@ -20,7 +20,14 @@ const fetchAvailableModels = async (apiKey) => {
     try {
       console.log(`Fetching available models for Gemini ${version}...`);
       const url = `https://generativelanguage.googleapis.com/${version}/models?key=${apiKey}`;
-      const response = await fetch(url);
+      
+      // Short timeout for the list call itself
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (response.status === 200) {
         const data = await response.json();
         const supportedModels = (data.models || [])
@@ -28,16 +35,28 @@ const fetchAvailableModels = async (apiKey) => {
           .map(m => m.name.split('/').pop());
         
         if (supportedModels.length > 0) {
-          console.log(`Found ${supportedModels.length} models for ${version}:`, supportedModels);
-          // Prefer flash models, specifically the ones that are most stable
-          const preferred = supportedModels.find(m => m.includes('flash-latest')) || 
-                            supportedModels.find(m => m.includes('flash')) || 
-                            supportedModels[0];
+          console.log(`Found ${supportedModels.length} models for ${version}`);
+          
+          // Selection Strategy:
+          // 1. Prefer stable 1.5-flash-latest
+          // 2. Fallback to 1.5-flash
+          // 3. Fallback to any 1.5 variant
+          // 4. Fallback to 2.0-flash-exp (good for experimental)
+          // 5. Fallback to anything with "flash"
+          // 6. First available
+          const preferred = 
+            supportedModels.find(m => m === 'gemini-1.5-flash-latest') || 
+            supportedModels.find(m => m === 'gemini-1.5-flash') || 
+            supportedModels.find(m => m.includes('1.5-flash')) || 
+            supportedModels.find(m => m.includes('2.0-flash')) || 
+            supportedModels.find(m => m.includes('flash')) || 
+            supportedModels[0];
+            
           return { version, modelName: preferred };
         }
       }
     } catch (err) {
-      console.log(`Failed to fetch models for ${version}:`, err.message);
+      console.log(`Gemini ${version} discovery failed:`, err.message);
     }
   }
   return null;
@@ -70,7 +89,7 @@ export const searchRecipes = async (query) => {
       }
       
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout for generation
 
       const response = await fetch(url, {
         method: 'POST',
