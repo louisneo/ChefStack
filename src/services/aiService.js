@@ -137,11 +137,11 @@ export const searchRecipes = async (query) => {
     console.log("OpenAI API Key not found. Skipping fallback.");
   }
 
-  // 3. EMERGENCY VARIATIONS (Prioritized for core terms like 'Adobo' if AI fails)
+  // 3. EMERGENCY VARIATIONS (Prioritized for core terms if AI fails)
   const normalizedQuery = query.toLowerCase();
   
-  if (normalizedQuery === 'adobo' || normalizedQuery.includes('adobo')) {
-    console.log("Serving high-variety Adobo emergency fallback.");
+  // High-variety variations for core culinary terms during AI downtime
+  if (normalizedQuery.includes('adobo')) {
     const adoboVariations = [
       { title: "Classic Pork Adobo", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/pork-adobo-3.jpg", time: 45, ingredients: ["Pork Belly", "Soy Sauce", "Vinegar", "Garlic"], steps: ["Sauté garlic", "Brown pork", "Simmer with soy sauce and vinegar"] },
       { title: "Savory Chicken Adobo", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/11/adobo-with-liver-spread-1.jpg", time: 40, ingredients: ["Chicken Thighs", "Soy Sauce", "Vinegar", "Peppercorns"], steps: ["Marinate chicken", "Simmer until tender", "Garnish with garlic chips"] },
@@ -153,6 +153,29 @@ export const searchRecipes = async (query) => {
       { title: "Beef Adobo (Batangas Style)", category: "Hearty Main", image: "https://www.kawalingpinoy.com/wp-content/uploads/2019/08/beef-adobo-3.jpg", time: 90, ingredients: ["Beef Brisket", "Soy Sauce", "Vinegar", "Star Anise"], steps: ["Slow cook beef", "Reduce sauce", "Serve with rice"] }
     ];
     return { recipes: adoboVariations, isFood: true };
+  }
+
+  // Variations for 'Matcha'
+  if (normalizedQuery.includes('matcha')) {
+    const matchaVariations = [
+      { title: "Matcha Green Tea Latte", category: "Drink", image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?q=80&w=600", time: 5, ingredients: ["Matcha powder", "Milk", "Honey"], steps: ["Whisk matcha", "Froth milk", "Combine and sweeten"] },
+      { title: "Matcha Iced Latte", category: "Cold Drink", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?q=80&w=600", time: 5, ingredients: ["Matcha", "Ice", "Almond Milk"], steps: ["Shake ingredients", "Pour over ice"] },
+      { title: "Matcha Pancake Stack", category: "Breakfast", image: "https://images.unsplash.com/photo-1506084868730-3423e9339e05?q=80&w=600", time: 20, ingredients: ["Matcha", "Flour", "Eggs", "Milk"], steps: ["Mix batter", "Flip on griddle", "Top with honey"] },
+      { title: "Matcha Green Tea Cookie", category: "Dessert", image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=600", time: 15, ingredients: ["Matcha", "Butter", "Sugar", "White Chocolate"], steps: ["Cream butter", "Add matcha", "Bake 10 mins"] },
+      { title: "Matcha Smoothie Bowl", category: "Health", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600", time: 10, ingredients: ["Matcha", "Banana", "Spinach", "Toppings"], steps: ["Blend base", "Add fruit toppings", "Sprinkle nuts"] }
+    ];
+    return { recipes: matchaVariations, isFood: true };
+  }
+
+  // Variations for 'Sinigang'
+  if (normalizedQuery.includes('sinigang')) {
+    const sinigangVariations = [
+      { title: "Sinigang na Baboy (Pork)", category: "Sour Soup", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/01/pork-sinigang-6.jpg", time: 60, ingredients: ["Pork Belly", "Tamarind", "Kangkong", "Radish"], steps: ["Boil pork", "Add tamarind", "Simmer vegetables"] },
+      { title: "Sinigang na Hipon (Shrimp)", category: "Sour Soup", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/05/sinigang-na-hipon-2.jpg", time: 20, ingredients: ["Shrimp", "Tamarind", "Siling Haba"], steps: ["Boil broth", "Quick cook shrimp", "Add veggies"] },
+      { title: "Sinigang na Isda (Fish)", category: "Sour Soup", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/10/sinigang-na-bangus-sa-bayabas-1.jpg", time: 30, ingredients: ["Bangus", "Guava/Tamarind", "Miso"], steps: ["Prepare sour base", "Poach fish", "Simmer greens"] },
+      { title: "Sinigang na Baka (Beef)", category: "Sour Soup", image: "https://www.kawalingpinoy.com/wp-content/uploads/2019/04/sinigang-na-baka-sa-kamias-1.jpg", time: 90, ingredients: ["Beef Short Ribs", "Kamias", "Okra"], steps: ["Slow boil beef", "Add souring agent", "Season to taste"] }
+    ];
+    return { recipes: sinigangVariations, isFood: true };
   }
 
   // 4. THEMEALDB FALLBACK
