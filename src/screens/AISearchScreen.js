@@ -24,6 +24,7 @@ export default function AISearchScreen({ navigation }) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
+  const [searchError, setSearchError] = useState(null);
 
   // Handle Android Hardware Back Button to return to Home Tab
   useFocusEffect(
@@ -47,20 +48,21 @@ export default function AISearchScreen({ navigation }) {
     if (!query.trim()) return;
     
     setLoading(true);
+    setSearchError(null);
+    setResults([]);
+
     try {
       const { recipes, isFood } = await searchRecipes(query);
       if (!isFood) {
-        Alert.alert(
-          'Not a Food Query?', 
-          "I only find food and drinks! 🍳 Try searching for something like 'Chicken Adobo' or 'Iced Coffee'."
-        );
+        setSearchError("I only find food and drinks! 🍳 Try searching for something like 'Chicken Adobo' or 'Iced Coffee'.");
       } else if (recipes.length === 0) {
-        Alert.alert('No results', 'I couldn\'t find any recipes for that. Try a different food name!');
+        setSearchError("I couldn't find any recipes for that. Try a different food name!");
+      } else {
+        setResults(recipes);
       }
-      setResults(recipes);
     } catch (error) {
       console.error('Search Screen Error:', error);
-      Alert.alert('AI Search Failed', 'Something went wrong while talking to the AI. Please try again.');
+      setSearchError('Something went wrong while talking to the AI. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -150,7 +152,14 @@ export default function AISearchScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {results.length === 0 && !loading && (
+          {searchError && !loading && (
+            <Animated.View entering={FadeIn} style={styles.errorCard}>
+              <Ionicons name="information-circle-outline" size={32} color={colors.primary} />
+              <Text style={styles.errorText}>{searchError}</Text>
+            </Animated.View>
+          )}
+
+          {results.length === 0 && !loading && !searchError && (
             <View style={styles.emptyState}>
               <View style={styles.aiIconWave}>
                  <Ionicons name="restaurant-outline" size={48} color={colors.primaryLight} />
@@ -406,5 +415,22 @@ const styles = StyleSheet.create({
     color: colors.surface,
     fontSize: 15,
     fontWeight: 'bold',
+  },
+  errorCard: {
+    backgroundColor: 'rgba(239, 68, 68, 0.05)',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+    marginTop: 20,
+    gap: 12,
+  },
+  errorText: {
+    fontSize: 16,
+    color: colors.text,
+    textAlign: 'center',
+    lineHeight: 24,
+    fontWeight: '500',
   }
 });
