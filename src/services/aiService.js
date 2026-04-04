@@ -200,7 +200,8 @@ export const searchRecipes = async (query) => {
 };
 
 const generatePrompt = (query) => `
-  You are a ChefStack AI Assistant. Your task is to find and return at least 3 and up to 10 highly relevant food recipes for the query: "${query}".
+  You are a ChefStack AI Assistant. Your task is to find and return at least 12 and up to 20 highly relevant, distinct, and varied food recipes for the query: "${query}". 
+  Provide as many regional and ingredient-based variations as possible (e.g. for "Adobo", you MUST include Pork Adobo, Chicken Adobo, Squid Adobo, Eggplant Adobo, Adobong Sitaw, and Beef Adobo).
   
   CRITICAL RULES:
   1. ONLY return food or drink recipes. 
