@@ -6,21 +6,44 @@ import {
   TouchableOpacity, 
   Image, 
   ScrollView,
-  Modal
+  Modal,
+  Platform,
+  BackHandler
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
+import { useEffect } from 'react';
 
 export default function RecipeDetail({ recipe, visible, onClose }) {
   const [imgError, setImgError] = useState(false);
   const navigation = useNavigation();
 
   const handleBack = () => {
+    if (visible && Platform.OS === 'web') {
+      window.history.back();
+    }
     onClose();
-    navigation.navigate('Home');
   };
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const onBack = () => {
+      onClose();
+      return true;
+    };
+
+    if (Platform.OS === 'web') {
+      window.history.pushState({ modal: 'recipe' }, '');
+      window.addEventListener('popstate', onBack);
+      return () => window.removeEventListener('popstate', onBack);
+    } else {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBack);
+      return () => subscription.remove();
+    }
+  }, [visible, onClose]);
 
   if (!recipe) return null;
 
