@@ -14,7 +14,6 @@ import {
   useWindowDimensions,
   BackHandler
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { colors } from '../theme/colors';
