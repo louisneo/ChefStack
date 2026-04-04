@@ -40,11 +40,13 @@ const fetchAvailableModels = async (apiKey) => {
   return null;
 };
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 /**
  * Searches for food recipes using Gemini AI with Dynamic Model Discovery
  */
 export const searchRecipes = async (query) => {
-  console.log(`AI Search Service: v5.2 Active. Query: "${query}"`);
+  console.log(`AI Search Service: v5.5 Active. Query: "${query}"`);
   const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   if (!apiKey) return { recipes: [], isFood: true };
 
@@ -61,46 +63,63 @@ export const searchRecipes = async (query) => {
     ].slice(0, 3);
 
     for (const modelName of prioritizedModels) {
-      try {
-        console.log(`Trying model: ${modelName} (${version})`);
-        const url = `https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${apiKey}`;
-        const requestBody = {
-          contents: [{ parts: [{ text: generatePrompt(query) }] }],
-        };
-        if (version === 'v1beta') {
-          requestBody.generationConfig = { response_mime_type: "application/json" };
-        }
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000);
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
+      const backoffTimes = [2000, 4000]; // 2s, 4s backoff for 429
+      let attempts = 0;
 
-        if (response.status === 200) {
-          const data = await response.json();
-          const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (jsonText) {
-            const result = JSON.parse(jsonText);
-            const recipes = Array.isArray(result) ? result : (result.recipes || []);
-            const isFood = result.is_food !== false;
-            return { recipes, isFood };
+      while (attempts <= backoffTimes.length) {
+        try {
+          console.log(`Trying model: ${modelName} (${version}). Attempt ${attempts + 1}`);
+          const url = `https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${apiKey}`;
+          const requestBody = {
+            contents: [{ parts: [{ text: generatePrompt(query) }] }],
+          };
+          if (version === 'v1beta') {
+            requestBody.generationConfig = { response_mime_type: "application/json" };
           }
-        } else if (response.status === 429) {
-          console.log(`${modelName} is rate-limited (429).`);
-          continue; 
+          
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000);
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (response.status === 200) {
+            const data = await response.json();
+            const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (jsonText) {
+              const result = JSON.parse(jsonText);
+              const recipes = Array.isArray(result) ? result : (result.recipes || []);
+              const isFood = result.is_food !== false;
+              return { recipes, isFood };
+            }
+          } else if (response.status === 429) {
+            if (attempts < backoffTimes.length) {
+              const waitMs = backoffTimes[attempts];
+              console.log(`${modelName} is rate-limited (429). Retrying in ${waitMs/1000}s...`);
+              await delay(waitMs);
+              attempts++;
+              continue;
+            } else {
+              console.log(`${modelName} max retries hit for 429.`);
+              break; // Try next model or fallback
+            }
+          } else {
+            console.log(`${modelName} failure (status ${response.status}). Trying next model.`);
+            break;
+          }
+        } catch (err) {
+          console.log(`${modelName} error:`, err.message);
+          break;
         }
-      } catch (err) {
-        console.log(`${modelName} error:`, err.message);
       }
     }
   }
 
-  // 2. OPENAI FALLBACK
+  // 2. OPENAI FALLBACK (If Gemini failed or was skipped)
   const openaiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
   if (openaiKey) {
     try {
@@ -134,12 +153,20 @@ export const searchRecipes = async (query) => {
     } catch (err) {
       console.warn(`OpenAI Fallback failed:`, err.message);
     }
-  } else {
-    console.log("OpenAI API Key not found. Skipping fallback.");
   }
 
   // 3. EMERGENCY VARIATIONS (Prioritized for core terms if AI fails)
   const normalizedQuery = query.toLowerCase();
+  const isCommonTerm = ['adobo', 'matcha', 'sinigang'].some(term => normalizedQuery.includes(term));
+
+  if (!isCommonTerm) {
+    // If it's not a core demo term and AI is busy, return the user-requested error
+    return { 
+      error: "The AI is currently too busy. Please try again in a minute.", 
+      recipes: [], 
+      isFood: true 
+    };
+  }
   
   // High-variety variations for core culinary terms during AI downtime
   if (normalizedQuery.includes('adobo')) {
