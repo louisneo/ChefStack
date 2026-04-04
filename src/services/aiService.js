@@ -162,12 +162,28 @@ export const searchRecipes = async (query) => {
     console.log("TheMealDB Fallback failed.");
   }
 
-  // 4. HARDCODED EMERGENCY FALLBACK
+  // 4. HARDCODED EMERGENCY FALLBACK (Highly Varied for core queries like 'Adobo')
   const normalizedQuery = query.toLowerCase();
+  
+  // Specialized variations for 'Adobo' if everything else is rate-limited
+  if (normalizedQuery === 'adobo' || normalizedQuery.includes('adobo')) {
+    const adoboVariations = [
+      { title: "Classic Pork Adobo", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/pork-adobo-3.jpg", time: 45, ingredients: ["Pork Belly", "Soy Sauce", "Vinegar", "Garlic"], steps: ["Sauté garlic", "Brown pork", "Simmer with soy sauce and vinegar"] },
+      { title: "Savory Chicken Adobo", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/11/adobo-with-liver-spread-1.jpg", time: 40, ingredients: ["Chicken Thighs", "Soy Sauce", "Vinegar", "Peppercorns"], steps: ["Marinate chicken", "Simmer until tender", "Garnish with garlic chips"] },
+      { title: "Eggplant Adobo (Pinoy Style)", category: "Vegetarian", image: "https://www.kawalingpinoy.com/wp-content/uploads/2018/06/adobong-talong-4.jpg", time: 25, ingredients: ["Eggplant", "Soy Sauce", "Vinegar", "Chili"], steps: ["Fry eggplant", "Sauté aromatics", "Simmer briefly"] },
+      { title: "Adobong Pusit (Squid Adobo)", category: "Seafood", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/05/adobong-pusit-1.jpg", time: 30, ingredients: ["Fresh Squid", "Ink", "Soy Sauce", "Vinegar"], steps: ["Clean squid", "Sauté with ink", "Avoid overcooking"] },
+      { title: "Adobong Sitaw (Yardlong Beans)", category: "Vegetable Side", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/04/adobong-sitaw-with-pork-1.jpg", time: 20, ingredients: ["Yardlong Beans", "Pork Bits", "Soy Sauce"], steps: ["Sauté pork", "Add beans", "Simmer until crisp-tender"] },
+      { title: "Adobong Pula (Red Adobo)", category: "Regional Variety", image: "https://www.kawalingpinoy.com/wp-content/uploads/2019/07/adobo-sa-pula-4.jpg", time: 50, ingredients: ["Pork", "Annatto Seeds", "Vinegar"], steps: ["Cook with annatto", "Slow simmer", "No soy sauce version"] },
+      { title: "Creamy Adobo sa Gata", category: "Bicolano Style", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/11/adobo-sa-gata-1.jpg", time: 45, ingredients: ["Chicken/Pork", "Coconut Milk", "Chili"], steps: ["Prepare regular adobo", "Stir in coconut milk", "Add spice"] },
+      { title: "Beef Adobo (Batangas Style)", category: "Hearty Main", image: "https://www.kawalingpinoy.com/wp-content/uploads/2019/08/beef-adobo-3.jpg", time: 90, ingredients: ["Beef Brisket", "Soy Sauce", "Vinegar", "Star Anise"], steps: ["Slow cook beef", "Reduce sauce", "Serve with rice"] }
+    ];
+    return { recipes: adoboVariations, isFood: true };
+  }
+
   const EMERGENCY_GEMS = [
     { title: "Ginataang Bilo-Bilo", queryMatch: ["bilo", "ginataan"] },
     { title: "Matcha Green Tea Latte", queryMatch: ["matcha", "green tea"] },
-    { title: "Pork Adobo", queryMatch: ["adobo"] },
+    { title: "Pork Adobo", queryMatch: ["adobo"] }, // Should be handled by above but kept for safety
     { title: "Sinigang na Baboy", queryMatch: ["sinigang"] },
     { title: "Chicken Curry", queryMatch: ["curry"] }
   ];
