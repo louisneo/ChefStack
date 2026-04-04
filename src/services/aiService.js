@@ -54,16 +54,90 @@ export const searchRecipes = async (query) => {
     }
   }
 
-  throw new Error(lastError || 'All AI models failed. Please check your API key or quota in Google AI Studio.');
+  // 2. OPENAI FALLBACK
+  const openaiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+  if (openaiKey) {
+    try {
+      console.log(`Trying OpenAI fallback...`);
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: "system", content: "You are a ChefStack AI Assistant." },
+            { role: "user", content: generatePrompt(query) }
+          ],
+          response_format: { type: "json_object" }
+        })
+      });
+
+      const data = await response.json();
+      if (response.status === 200 && data.choices?.[0]?.message?.content) {
+        const jsonText = data.choices[0].message.content;
+        const result = JSON.parse(jsonText);
+        return Array.isArray(result) ? result : (result.recipes || []);
+      }
+    } catch (err) {
+      console.warn(`OpenAI Fallback failed:`, err.message);
+    }
+  }
+
+  // 3. THEMEALDB FREE PUBLIC FALLBACK (Absolute Fail-safe)
+  try {
+    console.log(`Trying TheMealDB fallback...`);
+    const mealDbUrl = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`;
+    const response = await fetch(mealDbUrl);
+    const data = await response.json();
+    
+    if (data.meals && data.meals.length > 0) {
+      const topMeals = data.meals.slice(0, 3);
+      const fallbackRecipes = topMeals.map(meal => {
+        // Parse up to 20 ingredients provided by the API
+        const ingredients = [];
+        for (let i = 1; i <= 20; i++) {
+          const ingredient = meal[`strIngredient${i}`];
+          const measure = meal[`strMeasure${i}`];
+          if (ingredient && ingredient.trim() !== '') {
+            ingredients.push(`${measure ? measure.trim() + ' ' : ''}${ingredient.trim()}`);
+          }
+        }
+        
+        // Parse steps by splitting newlines
+        const steps = meal.strInstructions
+          .split(/(?:\r\n|\r|\n)+/)
+          .filter(step => step.trim().length > 0)
+          .slice(0, 8); // Keep it concise
+
+        return {
+          title: meal.strMeal,
+          type: "food",
+          category: meal.strCategory || "Main Course",
+          time: 30, // TheMealDB doesn't provide time, so default to 30
+          ingredients: ingredients.length > 0 ? ingredients : ["Ingredients unknown"],
+          steps: steps.length > 0 ? steps : ["Instructions unknown"],
+          image: meal.strMealThumb
+        };
+      });
+      return fallbackRecipes;
+    }
+  } catch (err) {
+    console.warn(`TheMealDB Fallback failed:`, err.message);
+  }
+
+  throw new Error(lastError || 'All AI models and fallback providers failed. Please try again later.');
 };
 
 const generatePrompt = (query) => `
   You are a ChefStack AI Assistant. Your task is to find and return exactly 3 highly relevant food recipes for the query: "${query}".
   
   RULES:
-  1. ONLY return food recipes. If the query is not about food, return an empty array.
-  2. Format the response as a VALID JSON array of objects.
-  3. DO NOT include any text outside the JSON array.
+  1. ONLY return food recipes. If the query is not about food, return an empty array {"recipes": []}.
+  2. Format the response as a VALID JSON object containing a "recipes" key which is an array of objects.
+  3. DO NOT include any markdown formatting (like \`\`\`json) or text outside the JSON object.
   4. Each recipe object must have these exact keys:
      - "title": string (Recipe name)
      - "type": string (always "food")
@@ -73,14 +147,16 @@ const generatePrompt = (query) => `
      - "steps": array of strings
   
   JSON format example:
-  [
-    {
-      "title": "Adobo",
-      "type": "food",
-      "category": "Main Course (Ulam)",
-      "time": 60,
-      "ingredients": ["500g Pork", "1/2 cup Soy Sauce"],
-      "steps": ["Marinate pork", "Cook until tender"]
-    }
-  ]
+  {
+    "recipes": [
+      {
+        "title": "Adobo",
+        "type": "food",
+        "category": "Main Course (Ulam)",
+        "time": 60,
+        "ingredients": ["500g Pork", "1/2 cup Soy Sauce"],
+        "steps": ["Marinate pork", "Cook until tender"]
+      }
+    ]
+  }
 `;

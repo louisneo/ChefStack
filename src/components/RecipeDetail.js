@@ -11,14 +11,21 @@ import {
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
 
 export default function RecipeDetail({ recipe, visible, onClose }) {
   const [imgError, setImgError] = useState(false);
+  const navigation = useNavigation();
+
+  const handleBack = () => {
+    onClose();
+    navigation.navigate('Home');
+  };
 
   if (!recipe) return null;
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={handleBack}>
       <Animated.View entering={FadeIn.duration(300)} style={styles.overlay}>
         <Animated.View entering={SlideInDown.duration(400).springify()} style={styles.container}>
           
@@ -40,8 +47,8 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
               />
             )}
             
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-              <Ionicons name="close" size={24} color={colors.text} />
+            <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
 
             <View style={styles.badgeContainer}>
@@ -121,14 +128,11 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: colors.surface,
   },
   container: {
-    height: '85%',
+    flex: 1,
     backgroundColor: colors.surface,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
     overflow: 'hidden',
   },
   imageContainer: {
@@ -147,21 +151,21 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
-  closeBtn: {
+  backBtn: {
     position: 'absolute',
-    top: 20,
-    right: 20,
+    top: Platform.OS === 'ios' ? 48 : 24, 
+    left: 16, 
     width: 40,
     height: 40,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.95)',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 4,
   },
   badgeContainer: {
     position: 'absolute',

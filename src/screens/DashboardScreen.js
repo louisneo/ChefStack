@@ -10,7 +10,8 @@ import {
   Alert,
   ScrollView,
   RefreshControl,
-  TextInput
+  TextInput,
+  useWindowDimensions
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -53,6 +54,10 @@ export default function DashboardScreen({ navigation, route }) {
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [deletingRecipe, setDeletingRecipe] = useState(null);
   
+  // Dynamic dimension support for web/desktop responsiveness
+  const { width } = useWindowDimensions();
+  const numColumns = width >= 1024 ? 4 : width >= 768 ? 3 : 2;
+
   const toastRef = React.useRef(null);
 
   // Initial data load
@@ -211,9 +216,10 @@ export default function DashboardScreen({ navigation, route }) {
       <Header />
       
       <FlatList
+        key={`grid-${numColumns}`}
         data={sortedRecipes}
         keyExtractor={item => item.id.toString()}
-        numColumns={2}
+        numColumns={numColumns}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
