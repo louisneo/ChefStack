@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { searchRecipes } from '../services/aiService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import Toast from '../components/Toast';
 
 export default function AISearchScreen({ navigation }) {
