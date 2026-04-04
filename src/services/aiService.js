@@ -55,7 +55,7 @@ const fetchAvailableModels = async (apiKey) => {
  */
 export const searchRecipes = async (query) => {
   const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-  if (!apiKey) return [];
+  if (!apiKey) return { recipes: [], isFood: true };
 
   // 1. DYNAMIC GEMINI DISCOVERY & ITERATION
   const config = await fetchAvailableModels(apiKey);
@@ -95,8 +95,10 @@ export const searchRecipes = async (query) => {
           const data = await response.json();
           const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (jsonText) {
-            const recipes = JSON.parse(jsonText);
-            return Array.isArray(recipes) ? recipes : (recipes.recipes || []);
+            const result = JSON.parse(jsonText);
+            const recipes = Array.isArray(result) ? result : (result.recipes || []);
+            const isFood = result.is_food !== false; // Default to true if not specified
+            return { recipes, isFood };
           }
         } else if (response.status === 429) {
           console.log(`${modelName} is rate-limited (429). Trying next discovered model...`);
@@ -136,7 +138,9 @@ export const searchRecipes = async (query) => {
         const jsonText = data.choices?.[0]?.message?.content;
         if (jsonText) {
           const result = JSON.parse(jsonText);
-          return Array.isArray(result) ? result : (result.recipes || []);
+          const recipes = Array.isArray(result) ? result : (result.recipes || []);
+          const isFood = result.is_food !== false;
+          return { recipes, isFood };
         }
       }
     } catch (err) {
@@ -155,8 +159,7 @@ export const searchRecipes = async (query) => {
       const data = await response.json();
       if (data.meals && data.meals.length > 0) {
         console.log(`TheMealDB found results!`);
-        const topMeals = data.meals.slice(0, 3);
-        return topMeals.map(meal => ({
+        const recipes = data.meals.slice(0, 3).map(meal => ({
           title: meal.strMeal,
           type: "food",
           category: meal.strCategory || "Main Course",
@@ -165,6 +168,7 @@ export const searchRecipes = async (query) => {
           steps: [meal.strInstructions?.substring(0, 100) + '...'],
           image: meal.strMealThumb
         }));
+        return { recipes, isFood: true };
       }
     }
   } catch (err) {}
@@ -182,47 +186,48 @@ export const searchRecipes = async (query) => {
   const match = EMERGENCY_GEMS.find(g => g.queryMatch.some(q => normalizedQuery.includes(q)));
   if (match) {
     console.log(`Everything failed, but I recognize "${match.title}". Returning hardcoded result.`);
-    return [{
-      title: match.title,
-      type: "food",
-      category: "Specialties",
-      time: 30,
-      ingredients: ["Main ingredient", "Special sauce", "Seasoning"],
-      steps: ["Prepare base", "Slow cook until perfect", "Garnish and serve"],
-      image: match.title.includes("Matcha") 
-        ? "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?q=80&w=600" 
-        : "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/ginataang-bilo-bilo-1.jpg"
-    }];
+    return {
+      recipes: [{
+        title: match.title,
+        type: "food",
+        category: "Specialties",
+        time: 30,
+        ingredients: ["Main ingredient", "Special sauce", "Seasoning"],
+        steps: ["Prepare base", "Slow cook until perfect", "Garnish and serve"],
+        image: match.title.includes("Matcha") 
+          ? "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?q=80&w=600" 
+          : "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/ginataang-bilo-bilo-1.jpg"
+      }],
+      isFood: true
+    };
   }
 
-  return [];
+  // If query is total gibberish/short, we can proactively flag it as not food even if AI is down
+  const isGibberish = query.length < 3 || /^[asdfhjkl]+$/.test(normalizedQuery);
+
+  return { recipes: [], isFood: !isGibberish };
 };
 
 const generatePrompt = (query) => `
   You are a ChefStack AI Assistant. Your task is to find and return exactly 3 highly relevant food recipes for the query: "${query}".
   
   RULES:
-  1. ONLY return food recipes. If the query is not about food, return an empty array {"recipes": []}.
-  2. Format the response as a VALID JSON object containing a "recipes" key which is an array of objects.
+  1. ONLY return food recipes. If the query is NOT about food or drinks, return an empty array and set "is_food": false.
+  2. Format the response as a VALID JSON object containing a "recipes" key (array) and an "is_food" key (boolean).
   3. DO NOT include any markdown formatting (like \`\`\`json) or text outside the JSON object.
-  4. Each recipe object must have these exact keys:
-     - "title": string (Recipe name)
-     - "type": string (always "food")
-     - "category": string (e.g., "Main Course (Ulam)", "Dessert", "Appetizer", "Breakfast")
-     - "time": number (minutes to cook)
-     - "ingredients": array of strings
-     - "steps": array of strings
+  4. Each recipe object must have: title, type (always "food"), category, time (number), ingredients (array), steps (array).
   
-  JSON format example:
+  JSON format:
   {
+    "is_food": true,
     "recipes": [
       {
         "title": "Adobo",
         "type": "food",
         "category": "Main Course (Ulam)",
         "time": 60,
-        "ingredients": ["500g Pork", "1/2 cup Soy Sauce"],
-        "steps": ["Marinate pork", "Cook until tender"]
+        "ingredients": ["Pork", "Soy Sauce"],
+        "steps": ["Step 1", "Step 2"]
       }
     ]
   }

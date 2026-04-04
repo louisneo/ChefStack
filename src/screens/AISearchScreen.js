@@ -48,14 +48,19 @@ export default function AISearchScreen({ navigation }) {
     
     setLoading(true);
     try {
-      const recipes = await searchRecipes(query);
-      if (recipes.length === 0) {
-        Alert.alert('No results', 'Try another search term! I only find food recipes.');
+      const { recipes, isFood } = await searchRecipes(query);
+      if (!isFood) {
+        Alert.alert(
+          'Not a Food Query?', 
+          "I only find food and drinks! 🍳 Try searching for something like 'Chicken Adobo' or 'Iced Coffee'."
+        );
+      } else if (recipes.length === 0) {
+        Alert.alert('No results', 'I couldn\'t find any recipes for that. Try a different food name!');
       }
       setResults(recipes);
     } catch (error) {
       console.error('Search Screen Error:', error);
-      Alert.alert('AI Search Failed', error.message || 'Something went wrong while talking to the AI.');
+      Alert.alert('AI Search Failed', 'Something went wrong while talking to the AI. Please try again.');
     } finally {
       setLoading(false);
     }
