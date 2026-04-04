@@ -117,6 +117,31 @@ function BottomTabNavigator() {
   );
 }
 
+const linking = {
+  prefixes: ['chefstack://', 'https://chefstack.vercel.app'],
+  config: {
+    screens: {
+      MainTabs: {
+        path: '',
+        initialRouteName: 'Home',
+        screens: {
+          Home: '',
+          Favorites: 'favorites',
+          AddRecipe: 'add',
+          AISearch: 'ai',
+          Profile: 'profile'
+        }
+      },
+      Notifications: 'notifications',
+      Privacy: 'privacy',
+      Help: 'help',
+      About: 'about',
+      Login: 'login',
+      Signup: 'signup'
+    }
+  }
+};
+
 export default function AppNavigator() {
   const { user, loading } = useAuth();
 
@@ -125,7 +150,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <>

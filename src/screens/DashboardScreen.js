@@ -213,10 +213,11 @@ export default function DashboardScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <Header />
-      
-      <FlatList
-        key={`grid-${numColumns}`}
+      <View style={styles.webDesktopWrapper}>
+        <Header />
+        
+        <FlatList
+          key={`grid-${numColumns}`}
         data={sortedRecipes}
         keyExtractor={item => item.id.toString()}
         numColumns={numColumns}
@@ -330,6 +331,7 @@ export default function DashboardScreen({ navigation, route }) {
           />
         )}
       />
+      </View>
 
       {/* Modals */}
       <RecipeDetail
@@ -390,8 +392,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  webDesktopWrapper: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 1024,
+    alignSelf: 'center',
+  },
   listContent: {
-    padding: Platform.OS === 'web' ? 10 : 20,
+    padding: Platform.OS === 'web' ? 24 : 20,
     paddingBottom: 100,
   },
   row: {
