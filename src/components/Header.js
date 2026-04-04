@@ -6,9 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 export default function Header() {
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 32, height: 32 }} />
-        <Text style={styles.logoText}>ChefStack</Text>
+      <View style={styles.innerContainer}>
+        <View style={styles.logoContainer}>
+          <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 32, height: 32 }} />
+          <Text style={styles.logoText}>ChefStack</Text>
+        </View>
       </View>
     </View>
   );
@@ -16,15 +18,21 @@ export default function Header() {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+    width: '100%',
+  },
+  innerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    backgroundColor: colors.surface,
     paddingTop: Platform.OS === 'web' ? 16 : 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
+    maxWidth: 1200,
+    width: '100%',
+    alignSelf: 'center',
   },
   logoContainer: {
     flexDirection: 'row',

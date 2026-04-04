@@ -8,8 +8,10 @@ import {
   ScrollView, 
   ActivityIndicator,
   Alert,
-  Platform
+  Platform,
+  BackHandler
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { searchRecipes } from '../services/aiService';
@@ -22,6 +24,19 @@ export default function AISearchScreen({ navigation }) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
+
+  // Handle Android Hardware Back Button to return to Home Tab
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate('Home');
+        return true; 
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [navigation])
+  );
   const [importing, setImporting] = useState(null);
   const { user } = useAuth();
   
@@ -80,105 +95,107 @@ export default function AISearchScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>AI Recipe Finder</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      {/* Search Section */}
-      <View style={styles.searchSection}>
-        <View style={styles.searchBox}>
-          <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
-          <TextInput
-            style={[styles.input, { outlineStyle: 'none' }]}
-            placeholder="Search any food recipe..."
-            value={query}
-            onChangeText={setQuery}
-            onSubmitEditing={handleSearch}
-            placeholderTextColor={colors.textMuted}
-          />
-          {query.length > 0 && (
-            <TouchableOpacity onPress={() => setQuery('')}>
-              <Ionicons name="close-circle" size={20} color={colors.textMuted} />
-            </TouchableOpacity>
-          )}
+      <View style={styles.webWrapper}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>AI Recipe Finder</Text>
+          <View style={{ width: 40 }} />
         </View>
-        <TouchableOpacity 
-          style={styles.searchBtn} 
-          onPress={handleSearch}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color={colors.surface} />
-          ) : (
-            <Text style={styles.searchBtnText}>Find Recipe</Text>
-          )}
-        </TouchableOpacity>
-      </View>
 
-      {/* Results */}
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {results.length === 0 && !loading && (
-          <View style={styles.emptyState}>
-            <View style={styles.aiIconWave}>
-               <Ionicons name="restaurant-outline" size={48} color={colors.primaryLight} />
-            </View>
-            <Text style={styles.emptyTitle}>Ask ChefStack AI</Text>
-            <Text style={styles.emptySubtitle}>
-              Type any food craving like "Filipino Sinigang" or "Chicken Carbonara"
-            </Text>
+        {/* Search Section */}
+        <View style={styles.searchSection}>
+          <View style={styles.searchBox}>
+            <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
+            <TextInput
+              style={[styles.input, { outlineStyle: 'none' }]}
+              placeholder="Search any food recipe..."
+              value={query}
+              onChangeText={setQuery}
+              onSubmitEditing={handleSearch}
+              placeholderTextColor={colors.textMuted}
+            />
+            {query.length > 0 && (
+              <TouchableOpacity onPress={() => setQuery('')}>
+                <Ionicons name="close-circle" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
+            )}
           </View>
-        )}
-
-        {results.map((recipe, index) => (
-          <Animated.View 
-            entering={FadeInUp.delay(index * 100)} 
-            key={index} 
-            style={styles.recipeCard}
+          <TouchableOpacity 
+            style={styles.searchBtn} 
+            onPress={handleSearch}
+            disabled={loading}
           >
-            <View style={styles.cardHeader}>
-              <View style={styles.typeBadge}>
-                <Text style={styles.typeText}>{recipe.category}</Text>
+            {loading ? (
+              <ActivityIndicator color={colors.surface} />
+            ) : (
+              <Text style={styles.searchBtnText}>Find Recipe</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Results */}
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {results.length === 0 && !loading && (
+            <View style={styles.emptyState}>
+              <View style={styles.aiIconWave}>
+                 <Ionicons name="restaurant-outline" size={48} color={colors.primaryLight} />
               </View>
-              <View style={styles.timeBadge}>
-                <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-                <Text style={styles.timeText}>{recipe.time}m</Text>
-              </View>
+              <Text style={styles.emptyTitle}>Ask ChefStack AI</Text>
+              <Text style={styles.emptySubtitle}>
+                Type any food craving like "Filipino Sinigang" or "Chicken Carbonara"
+              </Text>
             </View>
+          )}
 
-            <Text style={styles.recipeTitle}>{recipe.title}</Text>
-            
-            <Text style={styles.sectionLabel}>Ingredients Preview:</Text>
-            <Text style={styles.previewText} numberOfLines={2}>
-              {recipe.ingredients.join(', ')}
-            </Text>
-
-            <TouchableOpacity 
-              style={styles.importBtn} 
-              onPress={() => handleImport(recipe, index)}
-              disabled={importing === index}
+          {results.map((recipe, index) => (
+            <Animated.View 
+              entering={FadeInUp.delay(index * 100)} 
+              key={index} 
+              style={styles.recipeCard}
             >
-              {importing === index ? (
-                <ActivityIndicator color={colors.surface} size="small" />
-              ) : (
-                <>
-                  <Ionicons name="download-outline" size={20} color={colors.surface} />
-                  <Text style={styles.importBtnText}>Import to Dashboard</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </Animated.View>
-        ))}
-      </ScrollView>
+              <View style={styles.cardHeader}>
+                <View style={styles.typeBadge}>
+                  <Text style={styles.typeText}>{recipe.category}</Text>
+                </View>
+                <View style={styles.timeBadge}>
+                  <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
+                  <Text style={styles.timeText}>{recipe.time}m</Text>
+                </View>
+              </View>
 
-      <Toast ref={toastRef} />
+              <Text style={styles.recipeTitle}>{recipe.title}</Text>
+              
+              <Text style={styles.sectionLabel}>Ingredients Preview:</Text>
+              <Text style={styles.previewText} numberOfLines={2}>
+                {recipe.ingredients.join(', ')}
+              </Text>
+
+              <TouchableOpacity 
+                style={styles.importBtn} 
+                onPress={() => handleImport(recipe, index)}
+                disabled={importing === index}
+              >
+                {importing === index ? (
+                  <ActivityIndicator color={colors.surface} size="small" />
+                ) : (
+                  <>
+                    <Ionicons name="download-outline" size={20} color={colors.surface} />
+                    <Text style={styles.importBtnText}>Import to Dashboard</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
+        </ScrollView>
+
+        <Toast ref={toastRef} />
+      </View>
     </View>
   );
 }
@@ -187,6 +204,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  webWrapper: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 1200,
+    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',

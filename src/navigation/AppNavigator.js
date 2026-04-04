@@ -29,6 +29,7 @@ function AddPlaceholder() { return null; }
 function BottomTabNavigator() {
   return (
     <Tab.Navigator
+      backBehavior="initialRoute"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: colors.primary,

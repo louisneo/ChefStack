@@ -11,8 +11,10 @@ import {
   ScrollView,
   RefreshControl,
   TextInput,
-  useWindowDimensions
+  useWindowDimensions,
+  BackHandler
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { colors } from '../theme/colors';
@@ -56,9 +58,24 @@ export default function DashboardScreen({ navigation, route }) {
   
   // Dynamic dimension support for web/desktop responsiveness
   const { width } = useWindowDimensions();
-  const numColumns = width >= 1440 ? 5 : width >= 1024 ? 4 : width >= 768 ? 3 : 2;
+  const numColumns = width >= 1200 ? 4 : width >= 768 ? 3 : 2;
 
   const toastRef = React.useRef(null);
+
+  // Handle Android Hardware Back Button to return to Home Tab
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!isFavoritesView) return; // Home (Recipes) tab should use default exit behavior
+
+      const onBackPress = () => {
+        navigation.navigate('Home');
+        return true; // Stop default behavior (exit)
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [isFavoritesView, navigation])
+  );
 
   // Initial data load
   useEffect(() => {
@@ -395,7 +412,10 @@ const styles = StyleSheet.create({
   },
   webDesktopPadding: {
     flex: 1,
-    paddingHorizontal: Platform.OS === 'web' ? '2%' : 0,
+    width: '100%',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    paddingHorizontal: Platform.OS === 'web' ? 16 : 0,
   },
   listContent: {
     padding: Platform.OS === 'web' ? 16 : 20,

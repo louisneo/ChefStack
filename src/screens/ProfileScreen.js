@@ -6,12 +6,13 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   ScrollView,
-  Platform
+  Platform,
+  BackHandler
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export default function ProfileScreen() {
@@ -24,9 +25,23 @@ export default function ProfileScreen() {
 
   const avatarInitial = fullName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U';
 
+  // Handle Android Hardware Back Button to return to Home Tab
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate('Home');
+        return true; 
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [navigation])
+  );
+
   return (
     <View style={styles.container}>
-      {/* Header */}
+      <View style={styles.webWrapper}>
+        {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -135,7 +150,8 @@ export default function ProfileScreen() {
             <Text style={styles.signOutText}>Sign Out</Text>
           </TouchableOpacity>
         </Animated.View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -144,6 +160,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  webWrapper: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 1200,
+    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',
