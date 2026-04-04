@@ -157,10 +157,25 @@ export const searchRecipes = async (query) => {
 
   // 3. EMERGENCY VARIATIONS (Prioritized for core terms if AI fails)
   const normalizedQuery = query.toLowerCase();
-  const isCommonTerm = ['adobo', 'matcha', 'sinigang', 'bicol express', 'sisig'].some(term => normalizedQuery.includes(term));
+  
+  // Whitelist of ~50 popular food/drink terms to bypass "Busy AI" error
+  const COMMON_TERMS = [
+    // Filipino
+    'adobo', 'sinigang', 'sisig', 'bicol express', 'pancit', 'lumpia', 'menudo', 'caldereta', 
+    'tinola', 'kare-kare', 'pinakbet', 'bulalo', 'halo-halo', 'lechon', 'humba', 'bagoong', 
+    'tocino', 'longganisa', 'tapa', 'lugaw', 'champorado', 'bibingka', 'puto', 'ensaymada', 
+    'pandesal', 'leche flan', 'dinuguan', 'afritada', 'mechado', 'tapsilog',
+    // International
+    'pizza', 'burger', 'pasta', 'sushi', 'ramen', 'taco', 'burrito', 'salad', 'steak', 
+    'chicken', 'fries', 'sandwich', 'soup', 'curry', 'pancake', 'waffle', 'omelette', 
+    'coffee', 'tea', 'juice', 'smoothie', 'matcha', 'latte', 'espresso', 'capuccino',
+    'chocolate', 'cake', 'cookie', 'ice cream', 'donut', 'muffin'
+  ];
+
+  const isCommonTerm = COMMON_TERMS.some(term => normalizedQuery.includes(term));
 
   if (!isCommonTerm) {
-    // If it's not a core demo term and AI is busy, return the user-requested error
+    // If it's not a core demo/common term and AI is busy, return the user-requested error
     return { 
       error: "The AI is currently too busy. Please try again in a minute.", 
       recipes: [], 
