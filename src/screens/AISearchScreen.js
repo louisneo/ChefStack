@@ -56,6 +56,7 @@ export default function AISearchScreen({ navigation }) {
 
     try {
       const { recipes, isFood } = await searchRecipes(query);
+      console.log(`UI Received ${recipes.length} recipes. isFood: ${isFood}. Total Pages: ${Math.ceil(recipes.length / itemsPerPage)}`);
       if (!isFood) {
         setSearchError("I only find food and drinks! 🍳 Try searching for something like 'Chicken Adobo' or 'Iced Coffee'.");
       } else if (recipes.length === 0) {
@@ -349,7 +350,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   emptyState: {
     alignItems: 'center',
