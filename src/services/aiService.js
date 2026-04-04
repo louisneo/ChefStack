@@ -202,20 +202,29 @@ export const searchRecipes = async (query) => {
     };
   }
 
-  // If query is total gibberish/short, we can proactively flag it as not food even if AI is down
-  const isGibberish = query.length < 3 || /^[asdfhjkl]+$/.test(normalizedQuery);
+  // Enhanced Gibberish & Non-Food Heuristics
+  // 1. Matches home-row mashing (asdf, ghjkl, etc)
+  // 2. Matches strings with too many consonants in a row (e.g. "ughuiui122312" is borderline, but 3+ consonants is a good signal)
+  // 3. Matches pure numbers or symbols
+  const hasVowels = /[aeiouy]/i.test(normalizedQuery);
+  const isTooLongWithNoSpaces = normalizedQuery.length > 10 && !normalizedQuery.includes(' ');
+  const isMashing = /^[asdfghjkl]+$/.test(normalizedQuery) || /^[qwertyuiop]+$/.test(normalizedQuery);
+  
+  const isProbablyGibberish = !hasVowels || isTooLongWithNoSpaces || isMashing || normalizedQuery.length < 3;
 
-  return { recipes: [], isFood: !isGibberish };
+  return { recipes: [], isFood: !isProbablyGibberish };
 };
 
 const generatePrompt = (query) => `
   You are a ChefStack AI Assistant. Your task is to find and return exactly 3 highly relevant food recipes for the query: "${query}".
   
-  RULES:
-  1. ONLY return food recipes. If the query is NOT about food or drinks, return an empty array and set "is_food": false.
-  2. Format the response as a VALID JSON object containing a "recipes" key (array) and an "is_food" key (boolean).
-  3. DO NOT include any markdown formatting (like \`\`\`json) or text outside the JSON object.
-  4. Each recipe object must have: title, type (always "food"), category, time (number), ingredients (array), steps (array).
+  CRITICAL RULES:
+  1. ONLY return food or drink recipes. 
+  2. If the query is GIBBERISH (like "asdasd" or "ughuui..."), NONSENSE, or NOT about food/drinks, return: {"is_food": false, "recipes": []}.
+  3. DO NOT hallucinate. If you don't know a real recipe for the query, return {"is_food": true, "recipes": []}.
+  4. Format the response as a VALID JSON object containing a "recipes" key (array) and an "is_food" key (boolean).
+  5. DO NOT include any markdown formatting (like \`\`\`json) or text outside the JSON object.
+  6. Each recipe object must have: title, type (always "food"), category, time (number), ingredients (array), steps (array).
   
   JSON format:
   {
