@@ -16,8 +16,6 @@ import { colors } from '../theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp, SlideInDown } from 'react-native-reanimated';
 import * as ImagePicker from 'expo-image-picker';
-import { useEffect } from 'react';
-
 export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe }) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Ulam');
