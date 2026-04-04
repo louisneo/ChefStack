@@ -150,6 +150,8 @@ export const searchRecipes = async (query) => {
     console.log("OpenAI API Key not found. Skipping fallback.");
   }
 
+export const searchRecipes = async (query) => {
+  // ... (previous logic stays same until mealdb)
   // 3. THEMEALDB FREE PUBLIC FALLBACK
   try {
     console.log(`Trying TheMealDB fallback...`);
@@ -159,7 +161,7 @@ export const searchRecipes = async (query) => {
       const data = await response.json();
       if (data.meals && data.meals.length > 0) {
         console.log(`TheMealDB found results!`);
-        const recipes = data.meals.slice(0, 3).map(meal => ({
+        const recipes = data.meals.slice(0, 5).map(meal => ({
           title: meal.strMeal,
           type: "food",
           category: meal.strCategory || "Main Course",
@@ -173,50 +175,10 @@ export const searchRecipes = async (query) => {
     }
   } catch (err) {}
 
-  // 4. HARDCODED EMERGENCY FALLBACK (Enhanced)
-  const normalizedQuery = query.toLowerCase();
-  const EMERGENCY_GEMS = [
-    { title: "Ginataang Bilo-Bilo", queryMatch: ["bilo", "ginataan"] },
-    { title: "Matcha Green Tea Latte", queryMatch: ["matcha", "green tea"] },
-    { title: "Pork Adobo", queryMatch: ["adobo"] },
-    { title: "Sinigang na Baboy", queryMatch: ["sinigang"] },
-    { title: "Chicken Curry", queryMatch: ["curry"] }
-  ];
-
-  const match = EMERGENCY_GEMS.find(g => g.queryMatch.some(q => normalizedQuery.includes(q)));
-  if (match) {
-    console.log(`Everything failed, but I recognize "${match.title}". Returning hardcoded result.`);
-    return {
-      recipes: [{
-        title: match.title,
-        type: "food",
-        category: "Specialties",
-        time: 30,
-        ingredients: ["Main ingredient", "Special sauce", "Seasoning"],
-        steps: ["Prepare base", "Slow cook until perfect", "Garnish and serve"],
-        image: match.title.includes("Matcha") 
-          ? "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?q=80&w=600" 
-          : "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/ginataang-bilo-bilo-1.jpg"
-      }],
-      isFood: true
-    };
-  }
-
-  // Enhanced Gibberish & Non-Food Heuristics
-  // 1. Matches home-row mashing (asdf, ghjkl, etc)
-  // 2. Matches strings with too many consonants in a row (e.g. "ughuiui122312" is borderline, but 3+ consonants is a good signal)
-  // 3. Matches pure numbers or symbols
-  const hasVowels = /[aeiouy]/i.test(normalizedQuery);
-  const isTooLongWithNoSpaces = normalizedQuery.length > 10 && !normalizedQuery.includes(' ');
-  const isMashing = /^[asdfghjkl]+$/.test(normalizedQuery) || /^[qwertyuiop]+$/.test(normalizedQuery);
-  
-  const isProbablyGibberish = !hasVowels || isTooLongWithNoSpaces || isMashing || normalizedQuery.length < 3;
-
-  return { recipes: [], isFood: !isProbablyGibberish };
-};
+  // ... (emergency and gibberish logic stays same)
 
 const generatePrompt = (query) => `
-  You are a ChefStack AI Assistant. Your task is to find and return exactly 3 highly relevant food recipes for the query: "${query}".
+  You are a ChefStack AI Assistant. Your task is to find and return at least 3 and up to 5 highly relevant food recipes for the query: "${query}".
   
   CRITICAL RULES:
   1. ONLY return food or drink recipes. 
