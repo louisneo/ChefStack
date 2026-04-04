@@ -35,14 +35,19 @@ export const searchRecipes = async (query) => {
         console.log(`Trying ${version} model: ${modelName}...`);
         const { url } = getGeminiConfig(modelName, version);
         
+        const requestBody = {
+          contents: [{ parts: [{ text: generatePrompt(query) }] }],
+        };
+
+        // Only use response_mime_type for v1beta (v1 throws 400 Bad Request otherwise)
+        if (version === 'v1beta') {
+          requestBody.generationConfig = { response_mime_type: "application/json" };
+        }
+        
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: generatePrompt(query) }] }],
-            // JSON mode is officially in v1beta, but some models in v1 also support it unofficially or via prompt
-            generationConfig: { response_mime_type: "application/json" }
-          }),
+          body: JSON.stringify(requestBody),
         });
 
         if (response.status === 200) {

@@ -52,106 +52,108 @@ export default function ProfileScreen() {
         <View style={{ width: 44 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <Animated.View entering={FadeInDown.duration(400)} style={styles.avatarSection}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{avatarInitial}</Text>
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.formContainer}>
+            <Animated.View entering={FadeInDown.duration(400)} style={styles.avatarSection}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{avatarInitial}</Text>
+              </View>
+              <Text style={styles.nameText}>{fullName || 'Chef'}</Text>
+              <Text style={styles.emailText}>{email}</Text>
+            </Animated.View>
+
+            <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.formSection}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Full Name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={fullName}
+                  onChangeText={setFullName}
+                  placeholder="Your Name"
+                  placeholderTextColor={colors.textMuted}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Email Address</Text>
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="your@email.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  placeholderTextColor={colors.textMuted}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Location</Text>
+                <TextInput
+                  style={styles.input}
+                  value={location}
+                  onChangeText={setLocation}
+                  placeholder="City, Country"
+                  placeholderTextColor={colors.textMuted}
+                />
+              </View>
+            </Animated.View>
+
+            <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.settingsSection}>
+              <Text style={styles.sectionTitle}>Settings</Text>
+              
+              <TouchableOpacity 
+                style={styles.settingItem} 
+                onPress={() => navigation.navigate('Notifications')}
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons name="notifications-outline" size={24} color={colors.textSecondary} />
+                  <Text style={styles.settingText}>Notifications</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.settingItem} 
+                onPress={() => navigation.navigate('Privacy')}
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons name="shield-checkmark-outline" size={24} color={colors.textSecondary} />
+                  <Text style={styles.settingText}>Privacy</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.settingItem} 
+                onPress={() => navigation.navigate('Help')}
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons name="help-circle-outline" size={24} color={colors.textSecondary} />
+                  <Text style={styles.settingText}>Help & Support</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.settingItem} 
+                onPress={() => navigation.navigate('About')}
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons name="information-circle-outline" size={24} color={colors.textSecondary} />
+                  <Text style={styles.settingText}>About</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
+            </Animated.View>
+
+            <Animated.View entering={FadeInDown.delay(300).duration(400)}>
+              <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
+                <Ionicons name="log-out-outline" size={24} color={colors.error} />
+                <Text style={styles.signOutText}>Sign Out</Text>
+              </TouchableOpacity>
+            </Animated.View>
           </View>
-          <Text style={styles.nameText}>{fullName || 'Chef'}</Text>
-          <Text style={styles.emailText}>{email}</Text>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.formSection}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full Name</Text>
-            <TextInput
-              style={styles.input}
-              value={fullName}
-              onChangeText={setFullName}
-              placeholder="Your Name"
-              placeholderTextColor={colors.textMuted}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="your@email.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor={colors.textMuted}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Location</Text>
-            <TextInput
-              style={styles.input}
-              value={location}
-              onChangeText={setLocation}
-              placeholder="City, Country"
-              placeholderTextColor={colors.textMuted}
-            />
-          </View>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.settingsSection}>
-          <Text style={styles.sectionTitle}>Settings</Text>
-          
-          <TouchableOpacity 
-            style={styles.settingItem} 
-            onPress={() => navigation.navigate('Notifications')}
-          >
-            <View style={styles.settingLeft}>
-              <Ionicons name="notifications-outline" size={24} color={colors.textSecondary} />
-              <Text style={styles.settingText}>Notifications</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.settingItem} 
-            onPress={() => navigation.navigate('Privacy')}
-          >
-            <View style={styles.settingLeft}>
-              <Ionicons name="shield-checkmark-outline" size={24} color={colors.textSecondary} />
-              <Text style={styles.settingText}>Privacy</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.settingItem} 
-            onPress={() => navigation.navigate('Help')}
-          >
-            <View style={styles.settingLeft}>
-              <Ionicons name="help-circle-outline" size={24} color={colors.textSecondary} />
-              <Text style={styles.settingText}>Help & Support</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.settingItem} 
-            onPress={() => navigation.navigate('About')}
-          >
-            <View style={styles.settingLeft}>
-              <Ionicons name="information-circle-outline" size={24} color={colors.textSecondary} />
-              <Text style={styles.settingText}>About</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </TouchableOpacity>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-          <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
-            <Ionicons name="log-out-outline" size={24} color={colors.error} />
-            <Text style={styles.signOutText}>Sign Out</Text>
-          </TouchableOpacity>
-        </Animated.View>
         </ScrollView>
       </View>
     </View>
@@ -200,6 +202,11 @@ const styles = StyleSheet.create({
   content: {
     padding: 24,
     paddingBottom: 40,
+    alignItems: 'center',
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: 600,
   },
   avatarSection: {
     alignItems: 'center',

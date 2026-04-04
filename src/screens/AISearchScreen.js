@@ -109,33 +109,35 @@ export default function AISearchScreen({ navigation }) {
 
         {/* Search Section */}
         <View style={styles.searchSection}>
-          <View style={styles.searchBox}>
-            <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
-            <TextInput
-              style={[styles.input, { outlineStyle: 'none' }]}
-              placeholder="Search any food recipe..."
-              value={query}
-              onChangeText={setQuery}
-              onSubmitEditing={handleSearch}
-              placeholderTextColor={colors.textMuted}
-            />
-            {query.length > 0 && (
-              <TouchableOpacity onPress={() => setQuery('')}>
-                <Ionicons name="close-circle" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
-            )}
+          <View style={styles.searchContainer}>
+            <View style={styles.searchBox}>
+              <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
+              <TextInput
+                style={[styles.input, { outlineStyle: 'none' }]}
+                placeholder="Search any food recipe..."
+                value={query}
+                onChangeText={setQuery}
+                onSubmitEditing={handleSearch}
+                placeholderTextColor={colors.textMuted}
+              />
+              {query.length > 0 && (
+                <TouchableOpacity onPress={() => setQuery('')}>
+                  <Ionicons name="close-circle" size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+              )}
+            </View>
+            <TouchableOpacity 
+              style={styles.searchBtn} 
+              onPress={handleSearch}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={colors.surface} />
+              ) : (
+                <Text style={styles.searchBtnText}>Find Recipe</Text>
+              )}
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity 
-            style={styles.searchBtn} 
-            onPress={handleSearch}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color={colors.surface} />
-            ) : (
-              <Text style={styles.searchBtnText}>Find Recipe</Text>
-            )}
-          </TouchableOpacity>
         </View>
 
         {/* Results */}
@@ -253,6 +255,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
+    alignItems: 'center',
+  },
+  searchContainer: {
+    width: '100%',
+    maxWidth: 600,
   },
   searchBox: {
     flexDirection: 'row',
