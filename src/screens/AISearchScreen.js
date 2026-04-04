@@ -254,7 +254,7 @@ export default function AISearchScreen({ navigation }) {
 
         <Toast ref={toastRef} />
       </View>
-      <Text style={styles.versionTag}>Search Engine v5.7 (60+ Common Terms Active)</Text>
+      <Text style={styles.versionTag}>Search Engine v5.8 (Pizza-Fix Active)</Text>
     </View>
   );
 };
