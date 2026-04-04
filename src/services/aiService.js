@@ -44,6 +44,7 @@ const fetchAvailableModels = async (apiKey) => {
  * Searches for food recipes using Gemini AI with Dynamic Model Discovery
  */
 export const searchRecipes = async (query) => {
+  console.log(`AI Search Service: v5.2 Active. Query: "${query}"`);
   const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   if (!apiKey) return { recipes: [], isFood: true };
 
