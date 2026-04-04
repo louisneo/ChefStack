@@ -40,23 +40,25 @@ export default function NotificationsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Animated.View entering={FadeInDown.duration(400)}>
-          {SETTINGS.map(({ label, desc, val, set }, index) => (
-            <View key={label} style={styles.settingItem}>
-              <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>{label}</Text>
-                <Text style={styles.settingDesc}>{desc}</Text>
+        <View style={styles.formContainer}>
+          <Animated.View entering={FadeInDown.duration(400)}>
+            {SETTINGS.map(({ label, desc, val, set }, index) => (
+              <View key={label} style={styles.settingItem}>
+                <View style={styles.settingTextContainer}>
+                  <Text style={styles.settingLabel}>{label}</Text>
+                  <Text style={styles.settingDesc}>{desc}</Text>
+                </View>
+                <Switch
+                  trackColor={{ false: colors.border, true: colors.primaryActive }}
+                  thumbColor={val ? colors.primary : colors.surface}
+                  ios_backgroundColor={colors.borderLight}
+                  onValueChange={() => set(!val)}
+                  value={val}
+                />
               </View>
-              <Switch
-                trackColor={{ false: colors.border, true: colors.primaryActive }}
-                thumbColor={val ? colors.primary : colors.surface}
-                ios_backgroundColor={colors.borderLight}
-                onValueChange={() => set(!val)}
-                value={val}
-              />
-            </View>
-          ))}
-        </Animated.View>
+            ))}
+          </Animated.View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -99,6 +101,11 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
+    alignItems: 'center',
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: 600,
   },
   settingItem: {
     flexDirection: 'row',

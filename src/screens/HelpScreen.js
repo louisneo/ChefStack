@@ -56,48 +56,50 @@ export default function HelpScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Animated.View entering={FadeInDown.duration(400)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
-          <View style={styles.faqList}>
-            {FAQS.map((faq, i) => (
-              <View key={i} style={styles.faqItemContainer}>
-                <TouchableOpacity 
-                  style={styles.faqItem} 
-                  onPress={() => toggleFaq(i)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.faqQuestion}>{faq.q}</Text>
-                  <Ionicons 
-                    name="chevron-down" 
-                    size={20} 
-                    color={colors.textMuted} 
-                    style={{ transform: [{ rotate: openFaq === i ? '180deg' : '0deg' }] }}
-                  />
-                </TouchableOpacity>
-                {openFaq === i && (
-                  <View style={styles.faqAnswerContainer}>
-                    <Text style={styles.faqAnswer}>{faq.a}</Text>
-                  </View>
-                )}
-              </View>
-            ))}
-          </View>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Video Tutorials</Text>
-          <View style={styles.videoList}>
-            {['Getting Started', 'Managing Recipes'].map((title, index) => (
-              <TouchableOpacity key={index} style={styles.videoItem}>
-                <View style={styles.videoItemLeft}>
-                  <Ionicons name="play-circle" size={24} color={colors.primary} />
-                  <Text style={styles.videoTitle}>{title}</Text>
+        <View style={styles.formContainer}>
+          <Animated.View entering={FadeInDown.duration(400)} style={styles.section}>
+            <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+            <View style={styles.faqList}>
+              {FAQS.map((faq, i) => (
+                <View key={i} style={styles.faqItemContainer}>
+                  <TouchableOpacity 
+                    style={styles.faqItem} 
+                    onPress={() => toggleFaq(i)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.faqQuestion}>{faq.q}</Text>
+                    <Ionicons 
+                      name="chevron-down" 
+                      size={20} 
+                      color={colors.textMuted} 
+                      style={{ transform: [{ rotate: openFaq === i ? '180deg' : '0deg' }] }}
+                    />
+                  </TouchableOpacity>
+                  {openFaq === i && (
+                    <View style={styles.faqAnswerContainer}>
+                      <Text style={styles.faqAnswer}>{faq.a}</Text>
+                    </View>
+                  )}
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
-            ))}
-          </View>
-        </Animated.View>
+              ))}
+            </View>
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.section}>
+            <Text style={styles.sectionTitle}>Video Tutorials</Text>
+            <View style={styles.videoList}>
+              {['Getting Started', 'Managing Recipes'].map((title, index) => (
+                <TouchableOpacity key={index} style={styles.videoItem}>
+                  <View style={styles.videoItemLeft}>
+                    <Ionicons name="play-circle" size={24} color={colors.primary} />
+                    <Text style={styles.videoTitle}>{title}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Animated.View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -140,6 +142,11 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
+    alignItems: 'center',
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: 800,
   },
   section: {
     backgroundColor: colors.surface,

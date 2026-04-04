@@ -38,30 +38,32 @@ export default function PrivacyScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Animated.View entering={FadeInDown.duration(400)}>
-          {SETTINGS.map(({ label, desc, val, set }, index) => (
-            <View key={label} style={styles.settingItem}>
-              <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>{label}</Text>
-                <Text style={styles.settingDesc}>{desc}</Text>
+        <View style={styles.formContainer}>
+          <Animated.View entering={FadeInDown.duration(400)}>
+            {SETTINGS.map(({ label, desc, val, set }, index) => (
+              <View key={label} style={styles.settingItem}>
+                <View style={styles.settingTextContainer}>
+                  <Text style={styles.settingLabel}>{label}</Text>
+                  <Text style={styles.settingDesc}>{desc}</Text>
+                </View>
+                <Switch
+                  trackColor={{ false: colors.border, true: colors.primaryActive }}
+                  thumbColor={val ? colors.primary : colors.surface}
+                  ios_backgroundColor={colors.borderLight}
+                  onValueChange={() => set(!val)}
+                  value={val}
+                />
               </View>
-              <Switch
-                trackColor={{ false: colors.border, true: colors.primaryActive }}
-                thumbColor={val ? colors.primary : colors.surface}
-                ios_backgroundColor={colors.borderLight}
-                onValueChange={() => set(!val)}
-                value={val}
-              />
-            </View>
-          ))}
+            ))}
 
-          <View style={styles.dangerZone}>
-            <TouchableOpacity style={styles.deleteButton}>
-              <Text style={styles.deleteButtonText}>Delete Account</Text>
-            </TouchableOpacity>
-            <Text style={styles.deleteDesc}>This action cannot be undone</Text>
-          </View>
-        </Animated.View>
+            <View style={styles.dangerZone}>
+              <TouchableOpacity style={styles.deleteButton}>
+                <Text style={styles.deleteButtonText}>Delete Account</Text>
+              </TouchableOpacity>
+              <Text style={styles.deleteDesc}>This action cannot be undone</Text>
+            </View>
+          </Animated.View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -104,6 +106,11 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
+    alignItems: 'center',
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: 600,
   },
   settingItem: {
     flexDirection: 'row',
