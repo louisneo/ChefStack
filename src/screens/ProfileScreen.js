@@ -19,11 +19,8 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const navigation = useNavigation();
   
-  const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [location, setLocation] = useState('Naga City, Philippines');
-
-  const avatarInitial = fullName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U';
+  const isGuest = user?.is_anonymous;
+  const avatarInitial = isGuest ? 'G' : (fullName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U');
 
   // Handle Android Hardware Back Button to return to Home Tab
   useFocusEffect(
@@ -55,14 +52,30 @@ export default function ProfileScreen() {
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.formContainer}>
             <Animated.View entering={FadeInDown.duration(400)} style={styles.avatarSection}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{avatarInitial}</Text>
+              <View style={[styles.avatar, isGuest && styles.guestAvatar]}>
+                <Text style={styles.avatarText}>{isGuest ? <Ionicons name="person-outline" size={40} color={colors.surface} /> : avatarInitial}</Text>
               </View>
-              <Text style={styles.nameText}>{fullName || 'Chef'}</Text>
-              <Text style={styles.emailText}>{email}</Text>
+              <Text style={styles.nameText}>{isGuest ? 'Guest Chef' : (fullName || 'Chef')}</Text>
+              {isGuest ? (
+                <View style={styles.guestBadge}>
+                  <Text style={styles.guestBadgeText}>Guest Mode</Text>
+                </View>
+              ) : (
+                <Text style={styles.emailText}>{email}</Text>
+              )}
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.formSection}>
+            {isGuest && (
+              <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.upgradeCard}>
+                <Ionicons name="star" size={24} color={colors.accent || '#FFD700'} />
+                <View style={styles.upgradeTextContainer}>
+                  <Text style={styles.upgradeTitle}>Enjoying ChefStack?</Text>
+                  <Text style={styles.upgradeSubtitle}>Create a permanent account to sync your recipes across devices.</Text>
+                </View>
+              </Animated.View>
+            )}
+
+            <Animated.View entering={FadeInDown.delay(100).duration(400)} style={[styles.formSection, isGuest && { opacity: 0.6 }]}>
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Full Name</Text>
                 <TextInput
@@ -71,6 +84,7 @@ export default function ProfileScreen() {
                   onChangeText={setFullName}
                   placeholder="Your Name"
                   placeholderTextColor={colors.textMuted}
+                  editable={!isGuest}
                 />
               </View>
 
@@ -78,12 +92,13 @@ export default function ProfileScreen() {
                 <Text style={styles.label}>Email Address</Text>
                 <TextInput
                   style={styles.input}
-                  value={email}
+                  value={isGuest ? 'guest@chefstack.app' : email}
                   onChangeText={setEmail}
                   placeholder="your@email.com"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   placeholderTextColor={colors.textMuted}
+                  editable={!isGuest}
                 />
               </View>
 
@@ -234,6 +249,45 @@ const styles = StyleSheet.create({
   },
   emailText: {
     fontSize: 16,
+    color: colors.textSecondary,
+  },
+  guestAvatar: {
+    backgroundColor: colors.textSecondary,
+  },
+  guestBadge: {
+    backgroundColor: colors.borderLight,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  guestBadgeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+  },
+  upgradeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.primary + '20',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    gap: 16,
+  },
+  upgradeTextContainer: {
+    flex: 1,
+  },
+  upgradeTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  upgradeSubtitle: {
+    fontSize: 14,
     color: colors.textSecondary,
   },
   formSection: {

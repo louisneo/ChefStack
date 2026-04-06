@@ -27,7 +27,7 @@ export default function SignupScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   
-  const { signUp } = useAuth();
+  const { signUp, signInAsGuest } = useAuth();
   const navigation = useNavigation();
 
   // Cooldown effect
@@ -96,6 +96,19 @@ export default function SignupScreen() {
     } finally {
       // Add a tiny delay to prevent rapid-fire clicks even after isLoading is reset
       setTimeout(() => setIsLoading(false), 1000);
+    }
+  };
+
+  const handleGuestSignup = async () => {
+    setIsLoading(true);
+    const { error } = await signInAsGuest();
+    setIsLoading(false);
+    if (error) {
+      if (error.message?.includes('Anonymous sign-ins are not enabled')) {
+        Alert.alert('Configuration Error', 'Guest Mode is not yet enabled in the Supabase Dashboard. Please contact the developer.');
+      } else {
+        Alert.alert('Guest Login Failed', error.message);
+      }
     }
   };
 
@@ -199,6 +212,14 @@ export default function SignupScreen() {
             )}
           </TouchableOpacity>
 
+
+          <TouchableOpacity 
+            style={styles.guestButton} 
+            onPress={handleGuestLogin}
+            disabled={isLoading}
+          >
+            <Text style={styles.guestButtonText}>Continue as Guest</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity 
             style={styles.linkButton} 
@@ -360,6 +381,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,
+  },
+  guestButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  guestButtonText: {
+    color: colors.textSecondary,
+    fontSize: 16,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   linkButton: {
     alignItems: 'center',

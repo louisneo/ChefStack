@@ -102,12 +102,28 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const signInAsGuest = async () => {
+    console.log('AuthProvider: Beginning Anonymous Sign-in');
+    try {
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) {
+        console.error('AuthProvider: Anonymous sign-in error:', error);
+        return { data: null, error };
+      }
+      console.log('AuthProvider: Anonymous sign-in successful:', data?.user?.id);
+      return { data, error: null };
+    } catch (err) {
+      console.error('AuthProvider: Anonymous sign-in exception:', err);
+      return { data: null, error: err };
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signInAsGuest, signOut }}>
       {children}
     </AuthContext.Provider>
   );

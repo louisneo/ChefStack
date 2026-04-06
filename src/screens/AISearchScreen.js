@@ -254,7 +254,7 @@ export default function AISearchScreen({ navigation }) {
 
         <Toast ref={toastRef} />
       </View>
-      <Text style={styles.versionTag}>Search Engine v6.2 (Auth-Hanging-Fix Active)</Text>
+      <Text style={styles.versionTag}>Search Engine v6.3 (Guest-Mode-Active)</Text>
     </View>
   );
 };
