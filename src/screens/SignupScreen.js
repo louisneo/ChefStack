@@ -65,23 +65,34 @@ export default function SignupScreen() {
 
     setIsLoading(true);
     try {
-      const { error } = await signUp(email, password, fullName);
+      console.log('Attempting signup for:', email);
+      const { data, error } = await signUp(email, password, fullName);
       
       if (error) {
+        console.error('Signup error caught:', error);
         if (error.message?.includes('Too Many Requests') || error.status === 429) {
           setCooldown(60);
           Alert.alert(
             'Server Busy', 
-            'Too many signup attempts! Please wait for the cooldown timer (60s) before trying again.'
+            `Too many signup attempts! Please wait for the cooldown timer (60s) before trying again.\n\nTip: You can increase this limit in your Supabase Dashboard.`
           );
         } else {
           Alert.alert('Signup Failed', error.message);
         }
+      } else if (!data?.user) {
+        // Silent failure case
+        console.warn('Signup returned no error and no user data.');
+        Alert.alert('Server Error', 'The signup request failed silently. Please try again on a different network or wait for the cooldown.');
+        setCooldown(10);
       } else {
+        console.log('Signup successful:', data.user.id);
         Alert.alert('Success', 'Account created! Please check your email to verify your account.', [
           { text: 'OK', onPress: () => navigation.navigate('Login') }
         ]);
       }
+    } catch (err) {
+      console.error('Unexpected signup crash:', err);
+      Alert.alert('App Error', `An unexpected failure occurred: ${err.message || 'Unknown error'}`);
     } finally {
       // Add a tiny delay to prevent rapid-fire clicks even after isLoading is reset
       setTimeout(() => setIsLoading(false), 1000);

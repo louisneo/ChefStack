@@ -63,24 +63,43 @@ export function AuthProvider({ children }) {
   };
 
   const signUp = async (email, password, fullName) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    console.log('AuthProvider: Beginning signUp for', email);
+    try {
+      // Race the signup against a 10s timeout
+      const signupPromise = supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
         },
-      },
-    });
+      });
 
-    // Supabase enables "Email Enumeration Protection" by default. 
-    // This means it will secretly pretend a signup succeeded even if the email exists!
-    // We can detect an existing account if identities is an empty array.
-    if (data?.user && data.user.identities && data.user.identities.length === 0) {
-      return { error: { message: 'This email is already registered. Please sign in instead.' } };
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Signup request timed out. Please check your connection.')), 10000)
+      );
+
+      const { data, error } = await Promise.race([signupPromise, timeoutPromise]);
+
+      if (error) {
+        console.error('AuthProvider: Supabase signUp error:', error);
+        return { data: null, error };
+      }
+
+      // Supabase enables "Email Enumeration Protection" by default. 
+      // This means it will secretly pretend a signup succeeded even if the email exists!
+      if (data?.user && data.user.identities && data.user.identities.length === 0) {
+        console.warn('AuthProvider: Email already registered (Enumeration Protection detected)');
+        return { error: { message: 'This email is already registered. Please sign in instead.' } };
+      }
+
+      console.log('AuthProvider: signUp successful for', data?.user?.id);
+      return { data, error: null };
+    } catch (err) {
+      console.error('AuthProvider: signUp exception:', err);
+      return { data: null, error: err };
     }
-
-    return { data, error };
   };
 
   const signOut = async () => {
