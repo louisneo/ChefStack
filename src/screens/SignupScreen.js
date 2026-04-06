@@ -75,7 +75,11 @@ export default function SignupScreen() {
     setIsLoading(false);
 
     if (error) {
-      Alert.alert('Signup Failed', error.message);
+      if (error.message?.includes('Too Many Requests') || error.status === 429) {
+        Alert.alert('Server Busy', 'Too many signup attempts! Please wait a few minutes before trying again.');
+      } else {
+        Alert.alert('Signup Failed', error.message);
+      }
     } else {
       Alert.alert('Success', 'Account created! Please check your email to verify your account (if email confirmation is turned on).', [
         { text: 'OK', onPress: () => navigation.navigate('Login') }

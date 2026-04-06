@@ -62,6 +62,12 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
               <View style={{ width: 44 }} /> 
             </View>
 
+          {/* Content Scroll wraps everything below the static header */}
+          <ScrollView 
+            style={styles.contentScroll} 
+            contentContainerStyle={styles.scrollContentContainer}
+            showsVerticalScrollIndicator={false}
+          >
             {/* Header Image */}
             <View style={styles.imageContainer}>
               {imgError || !recipe.image ? (
@@ -85,66 +91,63 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
               </View>
             </View>
 
-          {/* Title */}
-          <View style={styles.titleSection}>
-            <Text style={styles.title}>{recipe.title}</Text>
-          </View>
+            {/* Title */}
+            <View style={styles.titleSection}>
+              <Text style={styles.title}>{recipe.title}</Text>
+            </View>
 
-          {/* Stats Bar */}
-          <View style={styles.statsBar}>
-            <View style={styles.statBox}>
-              <Ionicons name="time-outline" size={24} color={colors.primary} />
-              <Text style={styles.statLabel}>TIME</Text>
-              <Text style={styles.statValue}>{recipe.time}m</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statBox}>
-              <Ionicons name="list" size={24} color={colors.primary} />
-              <Text style={styles.statLabel}>ITEMS</Text>
-              <Text style={styles.statValue}>{recipe.ingredients?.length || 0}</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statBox}>
-              <Ionicons name="restaurant-outline" size={24} color={colors.primary} />
-              <Text style={styles.statLabel}>TYPE</Text>
-              <Text style={[styles.statValue, { textTransform: 'capitalize' }]}>{recipe.type}</Text>
-            </View>
-          </View>
-
-          {/* Content */}
-          <ScrollView 
-            style={styles.contentScroll} 
-            contentContainerStyle={styles.contentPad}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Ingredients */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="list" size={20} color={colors.primary} />
-                <Text style={styles.sectionTitle}>Ingredients</Text>
+            {/* Stats Bar */}
+            <View style={styles.statsBar}>
+              <View style={styles.statBox}>
+                <Ionicons name="time-outline" size={24} color={colors.primary} />
+                <Text style={styles.statLabel}>TIME</Text>
+                <Text style={styles.statValue}>{recipe.time}m</Text>
               </View>
-              {recipe.ingredients && recipe.ingredients.map((item, index) => (
-                <View key={index} style={styles.listItem}>
-                  <View style={styles.bullet} />
-                  <Text style={styles.listText}>{item}</Text>
+              <View style={styles.statDivider} />
+              <View style={styles.statBox}>
+                <Ionicons name="list" size={24} color={colors.primary} />
+                <Text style={styles.statLabel}>ITEMS</Text>
+                <Text style={styles.statValue}>{recipe.ingredients?.length || 0}</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statBox}>
+                <Ionicons name="restaurant-outline" size={24} color={colors.primary} />
+                <Text style={styles.statLabel}>TYPE</Text>
+                <Text style={[styles.statValue, { textTransform: 'capitalize' }]}>{recipe.type}</Text>
+              </View>
+            </View>
+
+            {/* Detailed Body Content */}
+            <View style={styles.contentBody}>
+              {/* Ingredients */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons name="list" size={20} color={colors.primary} />
+                  <Text style={styles.sectionTitle}>Ingredients</Text>
                 </View>
-              ))}
-            </View>
-
-            {/* Steps */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="list-outline" size={20} color={colors.primary} />
-                <Text style={styles.sectionTitle}>Method</Text>
-              </View>
-              {recipe.steps && recipe.steps.map((step, index) => (
-                <View key={index} style={styles.stepItem}>
-                  <View style={styles.stepNumber}>
-                    <Text style={styles.stepNumberText}>{index + 1}</Text>
+                {recipe.ingredients && recipe.ingredients.map((item, index) => (
+                  <View key={index} style={styles.listItem}>
+                    <View style={styles.bullet} />
+                    <Text style={styles.listText}>{item}</Text>
                   </View>
-                  <Text style={styles.listText}>{step}</Text>
+                ))}
+              </View>
+
+              {/* Steps */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons name="list-outline" size={20} color={colors.primary} />
+                  <Text style={styles.sectionTitle}>Method</Text>
                 </View>
-              ))}
+                {recipe.steps && recipe.steps.map((step, index) => (
+                  <View key={index} style={styles.stepItem}>
+                    <View style={styles.stepNumber}>
+                      <Text style={styles.stepNumberText}>{index + 1}</Text>
+                    </View>
+                    <Text style={styles.listText}>{step}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
           </ScrollView>
 
@@ -162,7 +165,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,
-    overflow: 'hidden',
   },
   imageContainer: {
     height: 250,
@@ -267,6 +269,12 @@ const styles = StyleSheet.create({
   contentPad: {
     padding: 16,
     paddingBottom: 32,
+  },
+  scrollContentContainer: {
+    paddingBottom: 40,
+  },
+  contentBody: {
+    padding: 16,
   },
   section: {
     marginBottom: 24,
