@@ -122,6 +122,9 @@ export function AuthProvider({ children }) {
       
       return { data: true };
     } catch (e) {
+      if (e.message?.includes('provider is not enabled')) {
+        return { error: { message: "Google/Facebook login is not enabled in your Supabase Dashboard. Please go to Authentication -> Providers to enable them." } };
+      }
       return { error: e };
     }
   };
