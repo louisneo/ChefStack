@@ -30,8 +30,11 @@ export default function LoginScreen() {
     const { error } = await signInAsGuest();
     setIsLoading(false);
     if (error) {
-      if (error.message?.includes('Anonymous sign-ins are not enabled')) {
-        Alert.alert('Configuration Error', 'Guest Mode is not yet enabled in the Supabase Dashboard. Please contact the developer.');
+      if (error.message?.includes('Anonymous sign-ins are disabled') || error.message?.includes('not enabled')) {
+        Alert.alert(
+          'Guest Mode Disabled', 
+          'To use this, you MUST enable "Anonymous Sign-ins" in your Supabase Dashboard -> Authentication -> Settings.'
+        );
       } else {
         Alert.alert('Guest Login Failed', error.message);
       }
@@ -124,16 +127,6 @@ export default function LoginScreen() {
             disabled={isLoading}
           >
             <Text style={styles.guestButtonText}>Continue as Guest</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.linkButton} 
-            onPress={() => navigation.navigate('Signup')}
-            disabled={isLoading}
-          >
-            <Text style={styles.linkText}>
-              Don't have an account? <Text style={styles.linkTextBold}>Sign Up</Text>
-            </Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
