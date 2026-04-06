@@ -25,27 +25,20 @@ export default function SignupScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   
-  const { signUp, signInWithGoogle, signInWithFacebook } = useAuth();
+  const { signUp } = useAuth();
   const navigation = useNavigation();
 
-  const handleGoogleSignup = async () => {
-    setIsLoading(true);
-    const { error } = await signInWithGoogle();
-    setIsLoading(false);
-    if (error) {
-      Alert.alert('Google Signup Failed', error.message);
-    }
-  };
+  // Cooldown effect
+  React.useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown(c => c - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
-  const handleFacebookSignup = async () => {
-    setIsLoading(true);
-    const { error } = await signInWithFacebook();
-    setIsLoading(false);
-    if (error) {
-      Alert.alert('Facebook Signup Failed', error.message);
-    }
-  };
 
   const handleSignup = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
@@ -76,9 +69,10 @@ export default function SignupScreen() {
       
       if (error) {
         if (error.message?.includes('Too Many Requests') || error.status === 429) {
+          setCooldown(60);
           Alert.alert(
             'Server Busy', 
-            'Too many signup attempts! Please wait a few minutes, or try using Google/Facebook login instead.'
+            'Too many signup attempts! Please wait for the cooldown timer (60s) before trying again.'
           );
         } else {
           Alert.alert('Signup Failed', error.message);
@@ -181,35 +175,19 @@ export default function SignupScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.signupButton} 
+            style={[styles.signupButton, cooldown > 0 && styles.signupButtonDisabled]} 
             onPress={handleSignup}
-            disabled={isLoading}
+            disabled={isLoading || cooldown > 0}
           >
             {isLoading ? (
               <ActivityIndicator color={colors.surface} />
             ) : (
-              <Text style={styles.signupButtonText}>Create Account</Text>
+              <Text style={styles.signupButtonText}>
+                {cooldown > 0 ? `Wait ${cooldown}s` : 'Create Account'}
+              </Text>
             )}
           </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>or sign up with</Text>
-            <View style={styles.divider} />
-          </View>
-
-          {/* Social Buttons */}
-          <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignup}>
-              <Ionicons name="logo-google" size={24} color="#EA4335" />
-              <Text style={styles.socialButtonText}>Google</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton} onPress={handleFacebookSignup}>
-              <Ionicons name="logo-facebook" size={24} color="#1877F2" />
-              <Text style={styles.socialButtonText}>Facebook</Text>
-            </TouchableOpacity>
-          </View>
 
           <TouchableOpacity 
             style={styles.linkButton} 
@@ -324,6 +302,11 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 32,
+    marginTop: 12,
+  },
+  signupButtonDisabled: {
+    backgroundColor: colors.textMuted,
+    opacity: 0.7,
   },
   signupButtonText: {
     color: colors.surface,

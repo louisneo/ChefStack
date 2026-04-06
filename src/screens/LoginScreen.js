@@ -21,26 +21,9 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signInWithGoogle, signInWithFacebook } = useAuth();
+  const { signIn } = useAuth();
   const navigation = useNavigation();
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    const { error } = await signInWithGoogle();
-    setIsLoading(false);
-    if (error) {
-      Alert.alert('Google Login Failed', error.message);
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    setIsLoading(true);
-    const { error } = await signInWithFacebook();
-    setIsLoading(false);
-    if (error) {
-      Alert.alert('Facebook Login Failed', error.message);
-    }
-  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -121,24 +104,6 @@ export default function LoginScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>or sign in with</Text>
-            <View style={styles.divider} />
-          </View>
-
-          {/* Social Buttons */}
-          <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
-              <Ionicons name="logo-google" size={24} color="#EA4335" />
-              <Text style={styles.socialButtonText}>Google</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton} onPress={handleFacebookLogin}>
-              <Ionicons name="logo-facebook" size={24} color="#1877F2" />
-              <Text style={styles.socialButtonText}>Facebook</Text>
-            </TouchableOpacity>
-          </View>
 
           <TouchableOpacity 
             style={styles.linkButton} 
@@ -214,11 +179,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
   divider: {
     flex: 1,
     height: 1,
@@ -228,28 +188,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     color: colors.textSecondary,
     fontSize: 14,
-  },
-  socialContainer: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 24,
-  },
-  socialButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
-    borderRadius: 16,
-    gap: 8,
-  },
-  socialButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
   },
   linkButton: {
     alignItems: 'center',

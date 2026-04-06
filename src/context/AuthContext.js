@@ -83,61 +83,12 @@ export function AuthProvider({ children }) {
     return { data, error };
   };
 
-  const signInWithOAuth = async (provider) => {
-    try {
-      // Use expo deep linking URL for successful return
-      const redirectUrl = Linking.createURL('');
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: redirectUrl,
-          skipBrowserRedirect: true,
-        }
-      });
-      
-      if (error) return { error };
-
-      // Open Android/iOS native browser window securely
-      const res = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
-
-      if (res.type === 'success' && res.url) {
-        // Parse that hash for the access token Supabase provides!
-        const urlParams = new URLSearchParams(res.url.split('#')[1]);
-        const access_token = urlParams.get('access_token');
-        const refresh_token = urlParams.get('refresh_token');
-
-        if (access_token && refresh_token) {
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token,
-            refresh_token,
-          });
-          if (sessionError) return { error: sessionError };
-        } else {
-          return { error: { message: "Could not retrieve access token from Provider." } };
-        }
-      } else if (res.type === 'cancel') {
-        return { error: { message: "User cancelled the login." } };
-      }
-      
-      return { data: true };
-    } catch (e) {
-      if (e.message?.includes('provider is not enabled')) {
-        return { error: { message: "Google/Facebook login is not enabled in your Supabase Dashboard. Please go to Authentication -> Providers to enable them." } };
-      }
-      return { error: e };
-    }
-  };
-
-  const signInWithGoogle = () => signInWithOAuth('google');
-  const signInWithFacebook = () => signInWithOAuth('facebook');
-
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signInWithGoogle, signInWithFacebook, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
