@@ -19,8 +19,12 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const navigation = useNavigation();
   
+  const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [location, setLocation] = useState('Naga City, Philippines');
+
   const isGuest = user?.is_anonymous;
-  const avatarInitial = isGuest ? 'G' : (fullName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U');
+  const avatarInitial = isGuest ? 'G' : (fullName?.charAt(0)?.toUpperCase() || email?.charAt(0)?.toUpperCase() || 'U');
 
   // Handle Android Hardware Back Button to return to Home Tab
   useFocusEffect(
