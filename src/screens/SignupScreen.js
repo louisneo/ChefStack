@@ -71,19 +71,26 @@ export default function SignupScreen() {
     }
 
     setIsLoading(true);
-    const { error } = await signUp(email, password, fullName);
-    setIsLoading(false);
-
-    if (error) {
-      if (error.message?.includes('Too Many Requests') || error.status === 429) {
-        Alert.alert('Server Busy', 'Too many signup attempts! Please wait a few minutes before trying again.');
+    try {
+      const { error } = await signUp(email, password, fullName);
+      
+      if (error) {
+        if (error.message?.includes('Too Many Requests') || error.status === 429) {
+          Alert.alert(
+            'Server Busy', 
+            'Too many signup attempts! Please wait a few minutes, or try using Google/Facebook login instead.'
+          );
+        } else {
+          Alert.alert('Signup Failed', error.message);
+        }
       } else {
-        Alert.alert('Signup Failed', error.message);
+        Alert.alert('Success', 'Account created! Please check your email to verify your account.', [
+          { text: 'OK', onPress: () => navigation.navigate('Login') }
+        ]);
       }
-    } else {
-      Alert.alert('Success', 'Account created! Please check your email to verify your account (if email confirmation is turned on).', [
-        { text: 'OK', onPress: () => navigation.navigate('Login') }
-      ]);
+    } finally {
+      // Add a tiny delay to prevent rapid-fire clicks even after isLoading is reset
+      setTimeout(() => setIsLoading(false), 1000);
     }
   };
 

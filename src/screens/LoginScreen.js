@@ -49,11 +49,22 @@ export default function LoginScreen() {
     }
 
     setIsLoading(true);
-    const { error } = await signIn(email, password);
-    setIsLoading(false);
-
-    if (error) {
-      Alert.alert('Login Failed', error.message);
+    try {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        if (error.message?.includes('Too Many Requests') || error.status === 429) {
+          Alert.alert(
+            'Server Busy', 
+            'Too many login attempts! Please wait a few minutes, or try using Google/Facebook login instead.'
+          );
+        } else {
+          Alert.alert('Login Failed', error.message);
+        }
+      }
+    } finally {
+      // Add a tiny delay to prevent rapid-fire clicks even after isLoading is reset
+      setTimeout(() => setIsLoading(false), 1000);
     }
   };
 
