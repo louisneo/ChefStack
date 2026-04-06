@@ -32,8 +32,8 @@ export default function LoginScreen() {
     if (error) {
       if (error.message?.includes('Anonymous sign-ins are disabled') || error.message?.includes('not enabled')) {
         Alert.alert(
-          'Guest Mode Disabled', 
-          'To use this, you MUST enable "Anonymous Sign-ins" in your Supabase Dashboard -> Authentication -> Settings.'
+          'Guest Mode Required', 
+          'To use this, you must enable "Anonymous Sign-ins" in your Supabase Dashboard -> Authentication -> Settings.\n\nCheck the "Dashboard Setup" guide I provided for a visual walkthrough!'
         );
       } else {
         Alert.alert('Guest Login Failed', error.message);
