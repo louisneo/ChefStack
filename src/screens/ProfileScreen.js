@@ -167,7 +167,20 @@ export default function ProfileScreen() {
             </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-              <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
+              <TouchableOpacity style={styles.signOutButton} onPress={() => {
+                if (isGuest) {
+                  Alert.alert(
+                    'Warning: Guest Account',
+                    'As a guest, your saved recipes and data will be permanently cleared if you sign out. \n\nAre you sure?',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      { text: 'Sign Out Anyway', style: 'destructive', onPress: signOut }
+                    ]
+                  );
+                } else {
+                  signOut();
+                }
+              }}>
                 <Ionicons name="log-out-outline" size={24} color={colors.error} />
                 <Text style={styles.signOutText}>Sign Out</Text>
               </TouchableOpacity>
