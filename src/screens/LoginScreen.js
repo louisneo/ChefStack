@@ -10,8 +10,10 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  ScrollView
+  ScrollView,
+  Modal
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
@@ -22,7 +24,11 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const { signIn, signInAsGuest } = useAuth();
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetErrorMsg, setResetErrorMsg] = useState('');
+  const [resetSuccessMsg, setResetSuccessMsg] = useState('');
+  const { signIn, signInAsGuest, resetPassword } = useAuth();
   const { colors } = useTheme();
   const navigation = useNavigation();
 
@@ -65,6 +71,34 @@ export default function LoginScreen() {
     }
   };
 
+  const handleResetPassword = async () => {
+    setResetErrorMsg('');
+    setResetSuccessMsg('');
+    if (!resetEmail) {
+      setResetErrorMsg('Please enter your email address.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(resetEmail.trim())) {
+      setResetErrorMsg('Please enter a valid email address.');
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await resetPassword(resetEmail.trim());
+    setIsLoading(false);
+
+    if (error) {
+      if (error.message?.includes('Too Many Requests') || error.status === 429) {
+        setResetErrorMsg('Too many requests. Please wait a few minutes.');
+      } else {
+        setResetErrorMsg(error.message);
+      }
+    } else {
+      setResetSuccessMsg('Recovery link sent! Check your inbox.');
+    }
+  };
+
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -94,7 +128,12 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Password</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <Text style={[styles.label, { color: colors.textSecondary, marginBottom: 0 }]}>Password</Text>
+              <TouchableOpacity onPress={() => setShowResetModal(true)}>
+                <Text style={{ fontSize: 13, color: colors.primary, fontWeight: '600' }}>Forgot password?</Text>
+              </TouchableOpacity>
+            </View>
             <TextInput
               style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
               placeholder="••••••••"
@@ -143,6 +182,57 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
+
+      {/* Password Reset Modal */}
+      <Modal visible={showResetModal} transparent={true} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <Animated.View entering={FadeInDown.duration(300)} style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalIconContainer, { backgroundColor: colors.primary + '15' }]}>
+              <Ionicons name="key-outline" size={40} color={colors.primary} />
+            </View>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Reset Password</Text>
+            <Text style={[styles.modalMessage, { color: colors.textSecondary }]}>
+              Enter your email address to receive a password reset link.
+            </Text>
+            
+            <TextInput
+              style={[styles.input, { width: '100%', marginBottom: 16, backgroundColor: colors.background, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
+              placeholder="you@example.com"
+              value={resetEmail}
+              onChangeText={setResetEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholderTextColor={colors.textMuted}
+            />
+
+            {resetErrorMsg ? (
+              <Text style={{ color: colors.error, fontSize: 13, marginBottom: 12, textAlign: 'center', fontWeight: '500' }}>{resetErrorMsg}</Text>
+            ) : null}
+
+            {resetSuccessMsg ? (
+              <Text style={{ color: colors.success, fontSize: 13, marginBottom: 12, textAlign: 'center', fontWeight: '500' }}>{resetSuccessMsg}</Text>
+            ) : null}
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalBtn, { backgroundColor: colors.borderLight }]} 
+                onPress={() => { setShowResetModal(false); setResetErrorMsg(''); setResetSuccessMsg(''); setResetEmail(''); }}
+              >
+                <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalBtn, { backgroundColor: colors.primary }]} 
+                onPress={handleResetPassword}
+                disabled={isLoading}
+              >
+                {isLoading ? <ActivityIndicator color={colors.surface} /> : <Text style={[styles.modalBtnText, { color: colors.surface, fontWeight: 'bold' }]}>Send Link</Text>}
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
+
     </KeyboardAvoidingView>
   );
 }
@@ -218,5 +308,63 @@ const styles = StyleSheet.create({
   },
   linkTextBold: {
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContainer: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  modalIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: 12,
+    marginTop: 8,
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
   }
 });

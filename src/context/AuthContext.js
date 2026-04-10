@@ -122,8 +122,19 @@ export function AuthProvider({ children }) {
     await supabase.auth.signOut();
   };
 
+  const resetPassword = async (email) => {
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'chefstack://reset',
+      });
+      return { data, error };
+    } catch (err) {
+      return { data: null, error: err };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signInAsGuest, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signInAsGuest, signOut, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
