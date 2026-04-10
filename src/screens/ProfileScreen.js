@@ -180,25 +180,36 @@ export default function ProfileScreen() {
                 style={[styles.signOutButton, { backgroundColor: colors.error + '15' }]} 
                 onPress={() => {
                   if (isGuest) {
-                    Alert.alert(
-                      'Warning: Guest Account',
-                      'As a guest, your saved recipes and data will be permanently cleared if you sign out. \n\nAre you sure?',
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        { 
-                          text: 'Sign Out Anyway', 
-                          style: 'destructive', 
-                          onPress: async () => {
-                            try {
-                              await signOut();
-                            } catch (e) {
-                              console.error('Logout failed:', e);
-                              Alert.alert('Error', 'Failed to sign out. Please try again.');
-                            }
-                          } 
+                    if (Platform.OS === 'web') {
+                      const confirmSignOut = window.confirm('Warning: Guest Account\n\nAs a guest, your saved recipes and data will be permanently cleared if you sign out.\n\nAre you sure you want to sign out anyway?');
+                      if (confirmSignOut) {
+                        try {
+                          signOut();
+                        } catch (e) {
+                          console.error('Logout failed:', e);
                         }
-                      ]
-                    );
+                      }
+                    } else {
+                      Alert.alert(
+                        'Warning: Guest Account',
+                        'As a guest, your saved recipes and data will be permanently cleared if you sign out. \n\nAre you sure?',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          { 
+                            text: 'Sign Out Anyway', 
+                            style: 'destructive', 
+                            onPress: async () => {
+                              try {
+                                await signOut();
+                              } catch (e) {
+                                console.error('Logout failed:', e);
+                                Alert.alert('Error', 'Failed to sign out. Please try again.');
+                              }
+                            } 
+                          }
+                        ]
+                      );
+                    }
                   } else {
                     signOut();
                   }

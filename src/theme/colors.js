@@ -23,14 +23,17 @@ export const themeColors = {
   },
   dark: {
     ...shared,
-    background: '#0D1B15', // Dark deep green charcoal
-    surface: '#15251E', // Darker surface
-    text: '#F4F7F5', // Light off-white
-    textSecondary: '#B0C2BB',
-    textMuted: '#6D8279',
-    border: '#2A3F36',
-    borderLight: '#1D2E26',
-    card: '#1A2F26',
+    primary: '#00E58F', // Neon mint green accent for dark mode
+    primaryHover: '#00C77A',
+    primaryLight: '#00E58F20',
+    background: '#1D1F24', // Very dark gray/charcoal
+    surface: '#262931', // Slightly lighter charoal for panels
+    text: '#FFFFFF', // Clean white
+    textSecondary: '#A0A4B0',
+    textMuted: '#686D7B',
+    border: '#353945',
+    borderLight: '#2C303A',
+    card: '#262931',
   }
 };
 
