@@ -215,7 +215,7 @@ export default function SignupScreen() {
 
           <TouchableOpacity 
             style={styles.guestButton} 
-            onPress={handleGuestLogin}
+            onPress={handleGuestSignup}
             disabled={isLoading}
           >
             <Text style={styles.guestButtonText}>Continue as Guest</Text>

@@ -9,7 +9,8 @@ import {
   Platform,
   BackHandler,
   Alert,
-  Switch
+  Switch,
+  Modal
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -25,6 +26,7 @@ export default function ProfileScreen() {
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [location, setLocation] = useState('Naga City, Philippines');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const isGuest = user?.is_anonymous;
   const avatarInitial = isGuest ? 'G' : (fullName?.charAt(0)?.toUpperCase() || email?.charAt(0)?.toUpperCase() || 'U');
@@ -180,36 +182,7 @@ export default function ProfileScreen() {
                 style={[styles.signOutButton, { backgroundColor: colors.error + '15' }]} 
                 onPress={() => {
                   if (isGuest) {
-                    if (Platform.OS === 'web') {
-                      const confirmSignOut = window.confirm('Warning: Guest Account\n\nAs a guest, your saved recipes and data will be permanently cleared if you sign out.\n\nAre you sure you want to sign out anyway?');
-                      if (confirmSignOut) {
-                        try {
-                          signOut();
-                        } catch (e) {
-                          console.error('Logout failed:', e);
-                        }
-                      }
-                    } else {
-                      Alert.alert(
-                        'Warning: Guest Account',
-                        'As a guest, your saved recipes and data will be permanently cleared if you sign out. \n\nAre you sure?',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          { 
-                            text: 'Sign Out Anyway', 
-                            style: 'destructive', 
-                            onPress: async () => {
-                              try {
-                                await signOut();
-                              } catch (e) {
-                                console.error('Logout failed:', e);
-                                Alert.alert('Error', 'Failed to sign out. Please try again.');
-                              }
-                            } 
-                          }
-                        ]
-                      );
-                    }
+                    setShowLogoutModal(true);
                   } else {
                     signOut();
                   }
@@ -222,6 +195,52 @@ export default function ProfileScreen() {
           </View>
         </ScrollView>
       </View>
+
+      {/* Guest Sign Out Modal */}
+      <Modal
+        visible={showLogoutModal}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View entering={FadeInDown.duration(300)} style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={styles.modalIconContainer}>
+              <Ionicons name="warning" size={40} color={colors.error} />
+            </View>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Warning: Guest Account</Text>
+            <Text style={[styles.modalMessage, { color: colors.textSecondary }]}>
+              As a guest, your saved recipes and data will be permanently cleared if you sign out.
+            </Text>
+            <Text style={[styles.modalMessage, { color: colors.textSecondary, fontWeight: 'bold' }]}>
+              Are you sure you want to proceed?
+            </Text>
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalBtn, { backgroundColor: colors.borderLight }]} 
+                onPress={() => setShowLogoutModal(false)}
+              >
+                <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalBtn, { backgroundColor: colors.error }]} 
+                onPress={async () => {
+                  try {
+                    setShowLogoutModal(false);
+                    await signOut();
+                  } catch (e) {
+                    console.error('Logout failed:', e);
+                    Alert.alert('Error', 'Failed to sign out. Please try again.');
+                  }
+                }}
+              >
+                <Text style={[styles.modalBtnText, { color: colors.surface, fontWeight: 'bold' }]}>Sign Out</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -381,5 +400,64 @@ const styles = StyleSheet.create({
   signOutText: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContainer: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  modalIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(217, 4, 41, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 8,
+    lineHeight: 24,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: 12,
+    marginTop: 16,
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
   }
 });
