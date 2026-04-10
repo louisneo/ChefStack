@@ -282,6 +282,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 12,
+    marginBottom: 16,
   },
   loginButtonText: {
     fontSize: 18,
@@ -290,6 +291,7 @@ const styles = StyleSheet.create({
   guestButton: {
     alignItems: 'center',
     paddingVertical: 12,
+    marginTop: 8,
     marginBottom: 16,
   },
   guestButtonText: {
