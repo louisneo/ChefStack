@@ -128,12 +128,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <Text style={[styles.label, { color: colors.textSecondary, marginBottom: 0 }]}>Password</Text>
-              <TouchableOpacity onPress={() => setShowResetModal(true)}>
-                <Text style={{ fontSize: 13, color: colors.primary, fontWeight: '600' }}>Forgot password?</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Password</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
               placeholder="••••••••"
@@ -143,6 +138,9 @@ export default function LoginScreen() {
               autoCapitalize="none"
               placeholderTextColor={colors.textMuted}
             />
+            <TouchableOpacity onPress={() => setShowResetModal(true)} style={{ alignSelf: 'flex-end', marginTop: 8 }}>
+              <Text style={{ fontSize: 14, color: colors.primary, fontWeight: '600' }}>Forgot password?</Text>
+            </TouchableOpacity>
           </View>
 
           {errorMsg ? (
