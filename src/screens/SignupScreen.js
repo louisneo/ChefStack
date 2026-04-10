@@ -13,7 +13,7 @@ import {
   Image
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
@@ -28,6 +28,7 @@ export default function SignupScreen() {
   const [cooldown, setCooldown] = useState(0);
   
   const { signUp, signInAsGuest } = useAuth();
+  const { colors } = useTheme();
   const navigation = useNavigation();
 
   // Cooldown effect
@@ -115,11 +116,11 @@ export default function SignupScreen() {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       {/* Back button */}
       <TouchableOpacity 
-        style={styles.backButton} 
+        style={[styles.backButton, { backgroundColor: colors.surface }]} 
         onPress={() => navigation.goBack()}
       >
         <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -129,16 +130,16 @@ export default function SignupScreen() {
         {/* Header */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
           <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 100, height: 100 }} />
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join ChefStack community</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Join ChefStack community</Text>
         </Animated.View>
 
         {/* Form */}
-        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.form}>
+        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.formContainer}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Full Name</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
               placeholder="Juan Dela Cruz"
               value={fullName}
               onChangeText={setFullName}
@@ -147,9 +148,9 @@ export default function SignupScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Email Address</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
               placeholder="you@example.com"
               value={email}
               onChangeText={setEmail}
@@ -160,9 +161,9 @@ export default function SignupScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Password</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
               placeholder="••••••••"
               value={password}
               onChangeText={setPassword}
@@ -173,9 +174,9 @@ export default function SignupScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirm Password</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Confirm Password</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
               placeholder="••••••••"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
@@ -190,23 +191,23 @@ export default function SignupScreen() {
             onPress={() => setAgreed(!agreed)}
             activeOpacity={0.8}
           >
-            <View style={[styles.checkbox, agreed && styles.checkboxActive]}>
+            <View style={[styles.checkbox, { backgroundColor: colors.surface, borderColor: colors.borderLight }, agreed && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
               {agreed && <Ionicons name="checkmark" size={16} color={colors.surface} />}
             </View>
-            <Text style={styles.checkboxText}>
-              I agree to the <Text style={styles.linkTextBold}>Terms & Conditions</Text> and <Text style={styles.linkTextBold}>Privacy Policy</Text>
+            <Text style={[styles.checkboxText, { color: colors.textSecondary }]}>
+              I agree to the <Text style={[styles.linkTextBold, { color: colors.primary }]}>Terms & Conditions</Text> and <Text style={[styles.linkTextBold, { color: colors.primary }]}>Privacy Policy</Text>
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={[styles.signupButton, cooldown > 0 && styles.signupButtonDisabled]} 
+            style={[styles.signupButton, { backgroundColor: colors.primary }, cooldown > 0 && { backgroundColor: colors.textMuted, opacity: 0.7 }]} 
             onPress={handleSignup}
             disabled={isLoading || cooldown > 0}
           >
             {isLoading ? (
               <ActivityIndicator color={colors.surface} />
             ) : (
-              <Text style={styles.signupButtonText}>
+              <Text style={[styles.signupButtonText, { color: colors.surface }]}>
                 {cooldown > 0 ? `Wait ${cooldown}s` : 'Create Account'}
               </Text>
             )}
@@ -218,7 +219,7 @@ export default function SignupScreen() {
             onPress={handleGuestSignup}
             disabled={isLoading}
           >
-            <Text style={styles.guestButtonText}>Continue as Guest</Text>
+            <Text style={[styles.guestButtonText, { color: colors.textSecondary }]}>Continue as Guest</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -226,8 +227,8 @@ export default function SignupScreen() {
             onPress={() => navigation.navigate('Login')}
             disabled={isLoading}
           >
-            <Text style={styles.linkText}>
-              Already have an account? <Text style={styles.linkTextBold}>Sign In</Text>
+            <Text style={[styles.linkText, { color: colors.textSecondary }]}>
+              Already have an account? <Text style={[styles.linkTextBold, { color: colors.primary }]}>Sign In</Text>
             </Text>
           </TouchableOpacity>
         </Animated.View>
@@ -239,7 +240,6 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   backButton: {
     position: 'absolute',
@@ -247,7 +247,6 @@ const styles = StyleSheet.create({
     left: 24,
     width: 44,
     height: 44,
-    backgroundColor: colors.surface,
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
@@ -259,9 +258,16 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
     padding: 32,
     paddingTop: Platform.OS === 'web' ? 30 : 120,
     paddingBottom: 40,
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: 400,
+    alignSelf: 'center',
   },
   header: {
     alignItems: 'center',
@@ -271,15 +277,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: colors.textSecondary,
-  },
-  form: {
-    width: '100%',
   },
   inputGroup: {
     marginBottom: 20,
@@ -287,18 +288,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.textSecondary,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.borderLight,
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
     fontSize: 16,
-    color: colors.text,
   },
   checkboxContainer: {
     flexDirection: 'row',
@@ -310,77 +307,27 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 2,
-    borderColor: colors.borderLight,
     borderRadius: 6,
     marginRight: 12,
     marginTop: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.surface,
-  },
-  checkboxActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
   },
   checkboxText: {
     fontSize: 14,
-    color: colors.textSecondary,
     flex: 1,
     lineHeight: 20,
   },
   signupButton: {
-    backgroundColor: colors.primary,
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 32,
     marginTop: 12,
   },
-  signupButtonDisabled: {
-    backgroundColor: colors.textMuted,
-    opacity: 0.7,
-  },
   signupButtonText: {
-    color: colors.surface,
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
-  socialContainer: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 32,
-  },
-  socialButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
-    borderRadius: 16,
-    gap: 8,
-  },
-  socialButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
   },
   guestButton: {
     alignItems: 'center',
@@ -388,7 +335,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   guestButtonText: {
-    color: colors.textSecondary,
     fontSize: 16,
     fontWeight: '600',
     textDecorationLine: 'underline',
@@ -397,11 +343,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: colors.textSecondary,
     fontSize: 16,
   },
   linkTextBold: {
-    color: colors.primary,
     fontWeight: 'bold',
   }
 });
