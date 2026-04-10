@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Image, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
   ScrollView,
   Modal,
   Platform,
@@ -49,7 +49,7 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
     <Modal visible={visible} transparent animationType="none" onRequestClose={handleBack}>
       <Animated.View entering={FadeIn.duration(300)} style={[styles.overlay, { backgroundColor: colors.background }]}>
         <Animated.View entering={SlideInDown.duration(400).springify()} style={[styles.container, { backgroundColor: colors.background }]}>
-          
+
           <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
             <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
               <Ionicons name="arrow-back" size={28} color={colors.text} />
@@ -57,11 +57,11 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
             <View style={styles.titleContainer}>
               <Text style={[styles.headerTitle, { color: colors.text }]}>Recipe Details</Text>
             </View>
-            <View style={{ width: 44 }} /> 
+            <View style={{ width: 44 }} />
           </View>
 
-          <ScrollView 
-            style={styles.contentScroll} 
+          <ScrollView
+            style={styles.contentScroll}
             contentContainerStyle={styles.scrollContentContainer}
             showsVerticalScrollIndicator={false}
           >
@@ -69,20 +69,20 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
             <View style={[styles.imageContainer, { backgroundColor: colors.borderLight }]}>
               {imgError || !recipe.image ? (
                 <View style={[styles.imagePlaceholder, { backgroundColor: colors.primary + '15' }]}>
-                  <Ionicons 
-                    name={recipe.type === 'food' ? 'restaurant-outline' : 'cafe-outline'} 
-                    size={64} 
-                    color={colors.primary} 
+                  <Ionicons
+                    name={recipe.type === 'food' ? 'restaurant-outline' : 'cafe-outline'}
+                    size={64}
+                    color={colors.primary}
                   />
                 </View>
               ) : (
-                <Image 
-                  source={{ uri: recipe.image }} 
-                  style={styles.image} 
-                  onError={() => setImgError(true)} 
+                <Image
+                  source={{ uri: recipe.image }}
+                  style={styles.image}
+                  onError={() => setImgError(true)}
                 />
               )}
-              
+
               <View style={[styles.badgeContainer, { backgroundColor: colors.primary }]}>
                 <Text style={[styles.badgeText, { color: colors.surface }]}>{recipe.category}</Text>
               </View>

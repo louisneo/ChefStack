@@ -26,6 +26,7 @@ export default function SignupScreen() {
   const [agreed, setAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [errorMsg, setErrorMsg] = useState('');
   
   const { signUp, signInAsGuest } = useAuth();
   const { colors } = useTheme();
@@ -42,25 +43,26 @@ export default function SignupScreen() {
 
 
   const handleSignup = async () => {
+    setErrorMsg('');
     if (!fullName || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setErrorMsg('Please fill in all fields.');
       return;
     }
     
     // Strict email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      Alert.alert('Error', 'Please enter a valid, working email address');
+      setErrorMsg('Please enter a valid email address.');
       return;
     }
     
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      setErrorMsg('Passwords do not match.');
       return;
     }
 
     if (!agreed) {
-      Alert.alert('Error', 'You must agree to the Terms & Conditions');
+      setErrorMsg('You must agree to the Terms & Conditions.');
       return;
     }
 
@@ -73,17 +75,16 @@ export default function SignupScreen() {
         console.error('Signup error caught:', error);
         if (error.message?.includes('Too Many Requests') || error.status === 429) {
           setCooldown(60);
-          Alert.alert(
-            'Server Busy', 
-            `Too many signup attempts! Please wait for the cooldown timer (60s) before trying again.\n\nTip: You can increase this limit in your Supabase Dashboard.`
-          );
+          setErrorMsg('Too many signup attempts! Please wait for 60 seconds.');
+        } else if (error.message?.includes('Error sending confirmation email')) {
+          setErrorMsg('Server Error: Supabase Email Confirmations are still ON. Please disable them in your Supabase Auth Providers settings.');
         } else {
-          Alert.alert('Signup Failed', error.message);
+          setErrorMsg(error.message);
         }
       } else if (!data?.user) {
         // Silent failure case
         console.warn('Signup returned no error and no user data.');
-        Alert.alert('Server Error', 'The signup request failed silently. Please try again on a different network or wait for the cooldown.');
+        setErrorMsg('The signup request failed silently. Please try again.');
         setCooldown(10);
       } else {
         console.log('Signup successful:', data.user.id);
@@ -93,7 +94,7 @@ export default function SignupScreen() {
       }
     } catch (err) {
       console.error('Unexpected signup crash:', err);
-      Alert.alert('App Error', `An unexpected failure occurred: ${err.message || 'Unknown error'}`);
+      setErrorMsg(`An unexpected failure occurred: ${err.message || 'Unknown error'}`);
     } finally {
       // Add a tiny delay to prevent rapid-fire clicks even after isLoading is reset
       setTimeout(() => setIsLoading(false), 1000);
@@ -101,14 +102,15 @@ export default function SignupScreen() {
   };
 
   const handleGuestSignup = async () => {
+    setErrorMsg('');
     setIsLoading(true);
     const { error } = await signInAsGuest();
     setIsLoading(false);
     if (error) {
       if (error.message?.includes('Anonymous sign-ins are not enabled')) {
-        Alert.alert('Configuration Error', 'Guest Mode is not yet enabled in the Supabase Dashboard. Please contact the developer.');
+        setErrorMsg('Guest Mode is disabled in the Supabase Dashboard. Please contact the developer.');
       } else {
-        Alert.alert('Guest Login Failed', error.message);
+        setErrorMsg(error.message);
       }
     }
   };
@@ -198,6 +200,12 @@ export default function SignupScreen() {
               I agree to the <Text style={[styles.linkTextBold, { color: colors.primary }]}>Terms & Conditions</Text> and <Text style={[styles.linkTextBold, { color: colors.primary }]}>Privacy Policy</Text>
             </Text>
           </TouchableOpacity>
+
+          {errorMsg ? (
+            <Animated.View entering={FadeInDown} style={{ backgroundColor: colors.error + '20', padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: colors.error + '40' }}>
+              <Text style={{ color: colors.error, fontSize: 14, textAlign: 'center', fontWeight: 'bold' }}>{errorMsg}</Text>
+            </Animated.View>
+          ) : null}
 
           <TouchableOpacity 
             style={[styles.signupButton, { backgroundColor: colors.primary }, cooldown > 0 && { backgroundColor: colors.textMuted, opacity: 0.7 }]} 

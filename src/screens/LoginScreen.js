@@ -21,29 +21,29 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const { signIn, signInAsGuest } = useAuth();
   const { colors } = useTheme();
   const navigation = useNavigation();
 
   const handleGuestLogin = async () => {
+    setErrorMsg('');
     setIsLoading(true);
     const { error } = await signInAsGuest();
     setIsLoading(false);
     if (error) {
       if (error.message?.includes('Anonymous sign-ins are disabled') || error.message?.includes('not enabled')) {
-        Alert.alert(
-          'Guest Mode Required', 
-          'To use this, you must enable "Anonymous Sign-ins" in your Supabase Dashboard -> Authentication -> Settings.'
-        );
+        setErrorMsg('Guest Mode is disabled in your Supabase Dashboard.');
       } else {
-        Alert.alert('Guest Login Failed', error.message);
+        setErrorMsg(error.message);
       }
     }
   };
 
   const handleLogin = async () => {
+    setErrorMsg('');
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setErrorMsg('Please enter both your email address and password.');
       return;
     }
 
@@ -53,12 +53,11 @@ export default function LoginScreen() {
       
       if (error) {
         if (error.message?.includes('Too Many Requests') || error.status === 429) {
-          Alert.alert(
-            'Server Busy', 
-            'Too many login attempts! Please wait a few minutes, or try using Google/Facebook login instead.'
-          );
+          setErrorMsg('Server is currently busy. Please wait a few minutes.');
+        } else if (error.message?.includes('Invalid login credentials')) {
+          setErrorMsg('The email you entered is not registered, or the password is incorrect. Please try again.');
         } else {
-          Alert.alert('Login Failed', error.message);
+          setErrorMsg(error.message);
         }
       }
     } finally {
@@ -106,6 +105,12 @@ export default function LoginScreen() {
               placeholderTextColor={colors.textMuted}
             />
           </View>
+
+          {errorMsg ? (
+            <Animated.View entering={FadeInDown} style={{ backgroundColor: colors.error + '20', padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: colors.error + '40' }}>
+              <Text style={{ color: colors.error, fontSize: 14, textAlign: 'center', fontWeight: 'bold' }}>{errorMsg}</Text>
+            </Animated.View>
+          ) : null}
 
           <TouchableOpacity 
             style={[styles.loginButton, { backgroundColor: colors.primary }]} 
