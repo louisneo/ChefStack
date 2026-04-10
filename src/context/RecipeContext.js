@@ -11,6 +11,16 @@ export const RecipeProvider = ({ children }) => {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
 
+  const openAddRecipe = (recipe = null) => {
+    setEditingRecipe(recipe);
+    setAddModalVisible(true);
+  };
+
+  const closeAddRecipe = () => {
+    setEditingRecipe(null);
+    setAddModalVisible(false);
+  };
+
   useEffect(() => {
     if (!user) {
       setRecipes([]);
