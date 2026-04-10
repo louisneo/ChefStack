@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp, Layout } from 'react-native-reanimated';
 
 export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggleFavorite, style }) {
+  const { colors } = useTheme();
+
   return (
     <Animated.View 
       layout={Layout.springify()} 
@@ -12,34 +14,38 @@ export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggle
       style={[styles.container, style]}
     >
       <TouchableOpacity 
-        style={styles.card} 
+        style={[styles.card, { backgroundColor: colors.surface }]} 
         activeOpacity={0.9} 
         onPress={onClick}
       >
         {/* Image Area */}
-        <View style={styles.imageContainer}>
+        <View style={[styles.imageContainer, { backgroundColor: colors.borderLight }]}>
           {recipe.image ? (
             <Image source={{ uri: recipe.image }} style={styles.image} />
           ) : (
-            <View style={styles.imagePlaceholder}>
+            <View style={[styles.imagePlaceholder, { backgroundColor: colors.primary + '15' }]}>
               <Ionicons 
                 name={recipe.type === 'food' ? 'restaurant-outline' : 'cafe-outline'} 
                 size={40} 
-                color={colors.primaryActive} 
+                color={colors.primary} 
               />
             </View>
           )}
 
           {/* Category Badge */}
-          <View style={styles.badgeContainer}>
-            <Text style={styles.badgeText} numberOfLines={1}>{recipe.category}</Text>
+          <View style={[styles.badgeContainer, { backgroundColor: colors.primary }]}>
+            <Text style={[styles.badgeText, { color: colors.surface }]} numberOfLines={1}>{recipe.category}</Text>
           </View>
 
-          {/* Action buttons (favorite, edit, delete from right to left) */}
+          {/* Action buttons */}
           <View style={styles.actionsContainer}>
             {onToggleFavorite && (
               <TouchableOpacity 
-                style={[styles.actionBtn, recipe.is_favorite && styles.actionBtnActive]} 
+                style={[
+                  styles.actionBtn, 
+                  { backgroundColor: colors.surface + 'CC' },
+                  recipe.is_favorite && { backgroundColor: colors.primary }
+                ]} 
                 onPress={onToggleFavorite}
               >
                 <Ionicons 
@@ -49,31 +55,36 @@ export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggle
                 />
               </TouchableOpacity>
             )}
-            <TouchableOpacity style={styles.actionBtn} onPress={onEdit}>
+            <TouchableOpacity 
+              style={[styles.actionBtn, { backgroundColor: colors.surface + 'CC' }]} 
+              onPress={onEdit}
+            >
               <Ionicons name="pencil" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
             
-            {/* Delete button looks kinda sketchy here but it works */}
-            <TouchableOpacity style={styles.actionBtn} onPress={onDelete}>
-              <Ionicons name="trash" size={16} color={colors.error || colors.textSecondary} />
+            <TouchableOpacity 
+              style={[styles.actionBtn, { backgroundColor: colors.surface + 'CC' }]} 
+              onPress={onDelete}
+            >
+              <Ionicons name="trash" size={16} color={colors.error} />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Content Area below the image */}
+        {/* Content Area */}
         <View style={styles.contentContainer}>
-          <Text style={styles.title} numberOfLines={1}>{recipe.title}</Text>
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{recipe.title}</Text>
           
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
               <Ionicons name="time-outline" size={14} color={colors.primary} />
-              <Text style={styles.statText}>{recipe.time}m</Text>
+              <Text style={[styles.statText, { color: colors.textSecondary }]}>{recipe.time}m</Text>
             </View>
             <View style={styles.statItem}>
               <Ionicons name="list" size={14} color={colors.primary} />
-              <Text style={styles.statText}>{recipe.ingredients?.length || 0} items</Text>
+              <Text style={[styles.statText, { color: colors.textSecondary }]}>{recipe.ingredients?.length || 0} items</Text>
             </View>
-            <Text style={styles.typeText}>{recipe.type}</Text>
+            <Text style={[styles.typeText, { color: colors.primary }]}>{recipe.type}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -83,22 +94,20 @@ export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggle
 
 const styles = StyleSheet.create({
   container: {
-    width: '48%', // roughly half width for 2-column grid
+    width: '48%',
     marginBottom: 16,
   },
   card: {
-    backgroundColor: colors.surface,
     borderRadius: 24,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   imageContainer: {
     height: 140,
-    backgroundColor: colors.borderLight,
     position: 'relative',
   },
   image: {
@@ -109,7 +118,6 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -117,14 +125,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 12,
     left: 12,
-    backgroundColor: colors.primary,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
     maxWidth: '80%',
   },
   badgeText: {
-    color: colors.surface,
     fontSize: 10,
     fontWeight: 'bold',
     textTransform: 'uppercase',
@@ -138,7 +144,6 @@ const styles = StyleSheet.create({
   actionBtn: {
     width: 32,
     height: 32,
-    backgroundColor: 'rgba(255,255,255,0.95)',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
@@ -148,16 +153,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  actionBtnActive: {
-    backgroundColor: colors.primary,
-  },
   contentContainer: {
     padding: 12,
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: 8,
   },
   statsContainer: {
@@ -172,12 +173,10 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 12,
-    color: colors.textSecondary,
   },
   typeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.primary,
     textTransform: 'capitalize',
     marginLeft: 'auto',
   }

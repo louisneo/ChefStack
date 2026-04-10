@@ -12,11 +12,13 @@ import {
   Image,
   BackHandler
 } from 'react-native';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp, SlideInDown } from 'react-native-reanimated';
 import * as ImagePicker from 'expo-image-picker';
+
 export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe }) {
+  const { colors } = useTheme();
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Ulam');
   const [categoryDropdownVisible, setCategoryDropdownVisible] = useState(false);
@@ -29,7 +31,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
   const [newIngredient, setNewIngredient] = useState('');
   const [newStep, setNewStep] = useState('');
   const [errors, setErrors] = useState({});
-
+  
   useEffect(() => {
     if (visible) {
       if (editingRecipe) {
@@ -53,13 +55,12 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
     }
   }, [visible, editingRecipe]);
 
-  // Handle Android Hardware Back Button to close modal
   useEffect(() => {
     if (!visible) return;
 
     const onBack = () => {
       onClose();
-      return true; // Trap the back press
+      return true;
     };
 
     if (Platform.OS === 'web') {
@@ -123,7 +124,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
     onSave({
       ...(editingRecipe || {}),
       title: title.trim(),
-      type: category === 'Drinks' ? 'drink' : 'food', // Fallback for backwards compatibility with older components
+      type: category === 'Drinks' ? 'drink' : 'food',
       category,
       time: parseInt(time),
       ingredients,
@@ -135,29 +136,36 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
   if (!visible) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <KeyboardAvoidingView 
-        style={styles.container}
+        style={[styles.container, { backgroundColor: colors.background }]}
         behavior={Platform.OS === 'ios' ? 'padding' : null}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
           <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
             <Ionicons name="close-outline" size={28} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.titleContainer}>
-            <Text style={styles.headerTitle}>{editingRecipe ? 'Edit Recipe' : 'New Recipe'}</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
+              {editingRecipe ? 'Edit Recipe' : 'New Recipe'}
+            </Text>
           </View>
-          <TouchableOpacity onPress={handleSave} style={styles.saveBtn}>
-            <Text style={styles.saveBtnText}>{editingRecipe ? 'Update' : 'Save'}</Text>
+          <TouchableOpacity onPress={handleSave} style={[styles.saveBtn, { backgroundColor: colors.primary }]}>
+            <Text style={[styles.saveBtnText, { color: colors.surface }]}>
+              {editingRecipe ? 'Update' : 'Save'}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.formContainer} contentContainerStyle={styles.formContent}>
+        <ScrollView style={styles.formContainer} contentContainerStyle={styles.formContent} showsVerticalScrollIndicator={false}>
           {/* Image Picker */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>RECIPE IMAGE</Text>
-            <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImage}>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>RECIPE IMAGE</Text>
+            <TouchableOpacity 
+              style={[styles.imagePickerBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
+              onPress={pickImage}
+            >
               {image ? (
                 <>
                   <Image source={{ uri: image }} style={styles.imagePreview} />
@@ -168,7 +176,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
               ) : (
                 <View style={styles.imagePlaceholder}>
                   <Ionicons name="camera" size={32} color={colors.textMuted} />
-                  <Text style={styles.imagePlaceholderText}>Tap to upload image</Text>
+                  <Text style={[styles.imagePlaceholderText, { color: colors.textMuted }]}>Tap to upload image</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -176,36 +184,45 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
 
           {/* Title */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>RECIPE TITLE</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>RECIPE TITLE</Text>
             <TextInput
-              style={[styles.input, errors.title && styles.inputError]}
+              style={[
+                styles.input, 
+                { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text },
+                errors.title && { borderColor: colors.error, backgroundColor: colors.error + '05' }
+              ]}
               placeholder="e.g. Adobong Manok"
               value={title}
               onChangeText={(val) => { setTitle(val); setErrors({...errors, title: null}); }}
               placeholderTextColor={colors.textMuted}
             />
-            {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
+            {errors.title && <Text style={[styles.errorText, { color: colors.error }]}>{errors.title}</Text>}
           </View>
 
           {/* Category Dropdown */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>CATEGORY</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>CATEGORY</Text>
             <TouchableOpacity 
-              style={styles.dropdownToggle} 
+              style={[styles.dropdownToggle, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
               onPress={() => setCategoryDropdownVisible(true)}
             >
-              <Text style={styles.dropdownToggleText}>{category}</Text>
+              <Text style={[styles.dropdownToggleText, { color: colors.text }]}>{category}</Text>
               <Ionicons name="chevron-down" size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
           {/* Time */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>TIME (MIN)</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>TIME (MIN)</Text>
             <View style={styles.timeInputContainer}>
               <Ionicons name="time-outline" size={24} color={colors.textMuted} style={styles.inputIcon} />
               <TextInput
-                style={[styles.input, styles.inputWithIcon, errors.time && styles.inputError]}
+                style={[
+                  styles.input, 
+                  styles.inputWithIcon, 
+                  { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text },
+                  errors.time && { borderColor: colors.error, backgroundColor: colors.error + '05' }
+                ]}
                 placeholder="30"
                 value={time}
                 onChangeText={(val) => { setTime(val); setErrors({...errors, time: null}); }}
@@ -213,32 +230,38 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
                 placeholderTextColor={colors.textMuted}
               />
             </View>
-            {errors.time && <Text style={styles.errorText}>{errors.time}</Text>}
+            {errors.time && <Text style={[styles.errorText, { color: colors.error }]}>{errors.time}</Text>}
           </View>
 
           {/* Ingredients */}
           <View style={styles.formGroup}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Ingredients</Text>
             <View style={styles.addInputRow}>
               <TextInput
-                style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                style={[
+                  styles.input, 
+                  { flex: 1, marginBottom: 0, backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text }
+                ]}
                 placeholder="e.g. 1 kg chicken"
                 value={newIngredient}
                 onChangeText={setNewIngredient}
                 onSubmitEditing={addIngredient}
                 placeholderTextColor={colors.textMuted}
               />
-              <TouchableOpacity style={styles.addBtn} onPress={addIngredient}>
+              <TouchableOpacity 
+                style={[styles.addBtn, { borderColor: colors.primary }]} 
+                onPress={addIngredient}
+              >
                 <Ionicons name="add" size={24} color={colors.primary} />
-                <Text style={styles.addBtnText}>Add</Text>
+                <Text style={[styles.addBtnText, { color: colors.primary }]}>Add</Text>
               </TouchableOpacity>
             </View>
             
             {ingredients.length > 0 && (
               <View style={styles.listContainer}>
                 {ingredients.map((item, i) => (
-                  <View key={i} style={styles.listItemLine}>
-                    <Text style={styles.listItemText}>{item}</Text>
+                  <View key={i} style={[styles.listItemLine, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                    <Text style={[styles.listItemText, { color: colors.text }]}>{item}</Text>
                     <TouchableOpacity onPress={() => removeIngredient(i)}>
                       <Ionicons name="close-circle" size={20} color={colors.error} />
                     </TouchableOpacity>
@@ -246,35 +269,41 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
                 ))}
               </View>
             )}
-            {errors.ingredients && <Text style={styles.errorText}>{errors.ingredients}</Text>}
+            {errors.ingredients && <Text style={[styles.errorText, { color: colors.error }]}>{errors.ingredients}</Text>}
           </View>
 
           {/* Steps */}
           <View style={styles.formGroup}>
-            <Text style={styles.sectionTitle}>Steps</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Steps</Text>
             <View style={styles.addInputRow}>
               <TextInput
-                style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                style={[
+                  styles.input, 
+                  { flex: 1, marginBottom: 0, backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text }
+                ]}
                 placeholder="e.g. Marinate chicken"
                 value={newStep}
                 onChangeText={setNewStep}
                 onSubmitEditing={addStep}
                 placeholderTextColor={colors.textMuted}
               />
-              <TouchableOpacity style={styles.addBtn} onPress={addStep}>
+              <TouchableOpacity 
+                style={[styles.addBtn, { borderColor: colors.primary }]} 
+                onPress={addStep}
+              >
                 <Ionicons name="add" size={24} color={colors.primary} />
-                <Text style={styles.addBtnText}>Add</Text>
+                <Text style={[styles.addBtnText, { color: colors.primary }]}>Add</Text>
               </TouchableOpacity>
             </View>
             
             {steps.length > 0 && (
               <View style={styles.listContainer}>
                 {steps.map((step, i) => (
-                  <View key={i} style={styles.listItemLine}>
-                    <View style={styles.stepNumBubble}>
-                      <Text style={styles.stepNumText}>{i + 1}</Text>
+                  <View key={i} style={[styles.listItemLine, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                    <View style={[styles.stepNumBubble, { backgroundColor: colors.primary }]}>
+                      <Text style={[styles.stepNumText, { color: colors.surface }]}>{i + 1}</Text>
                     </View>
-                    <Text style={styles.listItemText}>{step}</Text>
+                    <Text style={[styles.listItemText, { color: colors.text }]}>{step}</Text>
                     <TouchableOpacity onPress={() => removeStep(i)}>
                       <Ionicons name="close-circle" size={20} color={colors.error} />
                     </TouchableOpacity>
@@ -282,30 +311,37 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
                 ))}
               </View>
             )}
-            {errors.steps && <Text style={styles.errorText}>{errors.steps}</Text>}
+            {errors.steps && <Text style={[styles.errorText, { color: colors.error }]}>{errors.steps}</Text>}
           </View>
 
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Full Screen Category Dropdown Overlay */}
+      {/* Category Dropdown Overlay */}
       {categoryDropdownVisible && (
         <TouchableOpacity 
           style={styles.dropdownOverlay} 
           activeOpacity={1} 
           onPress={() => setCategoryDropdownVisible(false)}
         >
-          <View style={styles.dropdownMenu}>
+          <View style={[styles.dropdownMenu, { backgroundColor: colors.surface }]}>
             {['Ulam', 'Meryenda', 'Drinks', 'Dessert', 'Appetizer', 'Soup', 'Breakfast'].map(c => (
               <TouchableOpacity 
                 key={c} 
-                style={[styles.dropdownItem, category === c && styles.dropdownItemActive]}
+                style={[
+                  styles.dropdownItem, 
+                  category === c && { backgroundColor: colors.primary + '15' }
+                ]}
                 onPress={() => {
                   setCategory(c);
                   setCategoryDropdownVisible(false);
                 }}
               >
-                <Text style={[styles.dropdownItemText, category === c && styles.dropdownItemTextActive]}>
+                <Text style={[
+                  styles.dropdownItemText, 
+                  { color: colors.textSecondary },
+                  category === c && { color: colors.primary, fontWeight: 'bold' }
+                ]}>
                   {c}
                 </Text>
                 {category === c && <Ionicons name="checkmark" size={20} color={colors.primary} />}
@@ -321,18 +357,14 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 20,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.surface,
     height: 60,
   },
   headerBtn: {
@@ -352,17 +384,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
   },
   saveBtn: {
-    backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     zIndex: 10,
   },
   saveBtnText: {
-    color: colors.surface,
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -379,53 +408,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: colors.textMuted,
     marginBottom: 12,
     letterSpacing: 1,
   },
-  typeSelector: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  typeBtn: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
-    borderRadius: 24,
-    gap: 12,
-  },
-  typeBtnActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primaryLight,
-  },
-  typeBtnText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  typeBtnTextActive: {
-    color: colors.text,
-  },
   input: {
-    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.borderLight,
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
     fontSize: 16,
-    color: colors.text,
-  },
-  inputError: {
-    borderColor: colors.error,
-    backgroundColor: colors.errorBackground,
   },
   errorText: {
-    color: colors.error,
     fontSize: 14,
     marginTop: 8,
     fontWeight: '500',
@@ -434,16 +427,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.borderLight,
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
   dropdownToggleText: {
     fontSize: 16,
-    color: colors.text,
     fontWeight: '600',
   },
   dropdownOverlay: {
@@ -455,7 +445,7 @@ const styles = StyleSheet.create({
   },
   dropdownMenu: {
     width: '80%',
-    backgroundColor: colors.surface,
+    maxWidth: 400,
     borderRadius: 24,
     padding: 16,
     shadowColor: '#000',
@@ -472,17 +462,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
   },
-  dropdownItemActive: {
-    backgroundColor: colors.primaryLight,
-  },
   dropdownItemText: {
     fontSize: 16,
-    color: colors.textSecondary,
-    fontWeight: '500',
-  },
-  dropdownItemTextActive: {
-    color: colors.primary,
-    fontWeight: 'bold',
   },
   timeInputContainer: {
     position: 'relative',
@@ -499,7 +480,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: 16,
   },
   addInputRow: {
@@ -512,12 +492,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     borderWidth: 2,
-    borderColor: colors.primary,
     borderRadius: 16,
     gap: 4,
   },
   addBtnText: {
-    color: colors.primary,
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -527,9 +505,7 @@ const styles = StyleSheet.create({
   listItemLine: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.borderLight,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -537,29 +513,24 @@ const styles = StyleSheet.create({
   listItemText: {
     flex: 1,
     fontSize: 16,
-    color: colors.text,
     marginRight: 12,
   },
   stepNumBubble: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   stepNumText: {
-    color: colors.surface,
     fontSize: 12,
     fontWeight: 'bold',
   },
   imagePickerBtn: {
     width: '100%',
     height: 180,
-    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.borderLight,
     borderStyle: 'dashed',
     borderRadius: 16,
     overflow: 'hidden',
@@ -590,7 +561,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   imagePlaceholderText: {
-    color: colors.textMuted,
     fontWeight: '600',
   }
 });

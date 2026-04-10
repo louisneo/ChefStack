@@ -12,21 +12,28 @@ import {
   BackHandler
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
+import { useRecipes } from '../context/RecipeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { searchRecipes } from '../services/aiService';
-import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import Toast from '../components/Toast';
 
 export default function AISearchScreen({ navigation }) {
+  const { colors, isDark } = useTheme();
+  const { saveRecipe } = useRecipes();
+  const { user } = useAuth();
+  
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [searchError, setSearchError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+  const [importing, setImporting] = useState(null);
+
+  const toastRef = React.useRef(null);
 
   // Handle Android Hardware Back Button to return to Home Tab
   useFocusEffect(
@@ -40,13 +47,8 @@ export default function AISearchScreen({ navigation }) {
       return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     }, [navigation])
   );
-  const [importing, setImporting] = useState(null);
-  const { user } = useAuth();
-  
-  const toastRef = React.useRef(null);
 
   const handleSearch = async () => {
-    console.log('Find Recipe button clicked! Query:', query);
     if (!query.trim()) return;
     
     setLoading(true);
@@ -56,8 +58,6 @@ export default function AISearchScreen({ navigation }) {
 
     try {
       const { recipes, isFood, error } = await searchRecipes(query);
-      console.log(`UI Received ${recipes.length} recipes. isFood: ${isFood}. Total Pages: ${Math.ceil(recipes.length / itemsPerPage)}`);
-      
       if (error) {
         setSearchError(error);
       } else if (!isFood) {
@@ -89,22 +89,18 @@ export default function AISearchScreen({ navigation }) {
 
     setImporting(index);
     try {
-      const { error } = await supabase.from('recipes').insert([
-        {
-          ...recipe,
-          user_id: user.id,
-          image: null, // As requested, no image on import
-          is_favorite: false
-        }
-      ]);
+      const { error } = await saveRecipe({
+        ...recipe,
+        image: null,
+        is_favorite: false
+      });
 
       if (error) throw error;
       
       toastRef.current?.show(`${recipe.title} imported successfully!`);
       
-      // Navigate back after a short delay so they see the success
       setTimeout(() => {
-        navigation.navigate('Home', { refresh: true });
+        navigation.navigate('Home');
       }, 1000);
     } catch (error) {
       toastRef.current?.show(error.message, 'error');
@@ -114,31 +110,32 @@ export default function AISearchScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.webWrapper}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
             <Ionicons name="arrow-back" size={28} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.titleContainer}>
-            <Text style={styles.headerTitle}>AI Recipe Finder</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>AI Recipe Finder</Text>
           </View>
           <View style={{ width: 44 }} />
         </View>
 
         {/* Search Section */}
-        <View style={styles.searchSection}>
+        <View style={[styles.searchSection, { backgroundColor: colors.surface }]}>
           <View style={styles.searchContainer}>
-            <View style={styles.searchBox}>
+            <View style={[styles.searchBox, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
               <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
               <TextInput
-                style={[styles.input, { outlineStyle: 'none' }]}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="Search any food recipe..."
                 value={query}
                 onChangeText={setQuery}
                 onSubmitEditing={handleSearch}
                 placeholderTextColor={colors.textMuted}
+                underlineColorAndroid="transparent"
               />
               {query.length > 0 && (
                 <TouchableOpacity onPress={() => setQuery('')}>
@@ -147,14 +144,14 @@ export default function AISearchScreen({ navigation }) {
               )}
             </View>
             <TouchableOpacity 
-              style={styles.searchBtn} 
+              style={[styles.searchBtn, { backgroundColor: colors.primary, shadowColor: colors.primary }]} 
               onPress={handleSearch}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color={colors.surface} />
               ) : (
-                <Text style={styles.searchBtnText}>Find Recipe</Text>
+                <Text style={[styles.searchBtnText, { color: colors.surface }]}>Find Recipe</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -166,19 +163,19 @@ export default function AISearchScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           {searchError && !loading && (
-            <Animated.View entering={FadeIn} style={styles.errorCard}>
-              <Ionicons name="information-circle-outline" size={32} color={colors.primary} />
-              <Text style={styles.errorText}>{searchError}</Text>
+            <Animated.View entering={FadeIn} style={[styles.errorCard, { backgroundColor: colors.error + '10', borderColor: colors.error + '30' }]}>
+              <Ionicons name="information-circle-outline" size={32} color={colors.error} />
+              <Text style={[styles.errorText, { color: colors.text }]}>{searchError}</Text>
             </Animated.View>
           )}
 
           {results.length === 0 && !loading && !searchError && (
             <View style={styles.emptyState}>
-              <View style={styles.aiIconWave}>
-                 <Ionicons name="restaurant-outline" size={48} color={colors.primaryLight} />
+              <View style={[styles.aiIconWave, { backgroundColor: colors.primary + '15' }]}>
+                 <Ionicons name="restaurant-outline" size={48} color={colors.primary} />
               </View>
-              <Text style={styles.emptyTitle}>Ask ChefStack AI</Text>
-              <Text style={styles.emptySubtitle}>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>Ask ChefStack AI</Text>
+              <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
                 Type any food craving like "Filipino Sinigang" or "Chicken Carbonara"
               </Text>
             </View>
@@ -188,36 +185,36 @@ export default function AISearchScreen({ navigation }) {
             <Animated.View 
               entering={FadeInDown.delay(index * 100)} 
               key={index} 
-              style={styles.recipeCard}
+              style={[styles.recipeCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
             >
               <View style={styles.cardHeader}>
-                <View style={styles.typeBadge}>
-                  <Text style={styles.typeText}>{recipe.category}</Text>
+                <View style={[styles.typeBadge, { backgroundColor: colors.primary + '20' }]}>
+                  <Text style={[styles.typeText, { color: colors.primary }]}>{recipe.category}</Text>
                 </View>
                 <View style={styles.timeBadge}>
                   <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-                  <Text style={styles.timeText}>{recipe.time}m</Text>
+                  <Text style={[styles.timeText, { color: colors.textSecondary }]}>{recipe.time}m</Text>
                 </View>
               </View>
 
-              <Text style={styles.recipeTitle}>{recipe.title}</Text>
+              <Text style={[styles.recipeTitle, { color: colors.text }]}>{recipe.title}</Text>
               
-              <Text style={styles.sectionLabel}>Ingredients Preview:</Text>
-              <Text style={styles.previewText} numberOfLines={2}>
+              <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Ingredients Preview:</Text>
+              <Text style={[styles.previewText, { color: colors.textSecondary }]} numberOfLines={2}>
                 {recipe.ingredients.join(', ')}
               </Text>
 
               <TouchableOpacity 
-                style={styles.importBtn} 
+                style={[styles.importBtn, { backgroundColor: colors.text }]} 
                 onPress={() => handleImport(recipe, index)}
                 disabled={importing === index}
               >
                 {importing === index ? (
-                  <ActivityIndicator color={colors.surface} size="small" />
+                  <ActivityIndicator color={colors.background} size="small" />
                 ) : (
                   <>
-                    <Ionicons name="download-outline" size={20} color={colors.surface} />
-                    <Text style={styles.importBtnText}>Import to Dashboard</Text>
+                    <Ionicons name="download-outline" size={20} color={colors.background} />
+                    <Text style={[styles.importBtnText, { color: colors.background }]}>Import to Dashboard</Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -228,23 +225,23 @@ export default function AISearchScreen({ navigation }) {
           {totalPages > 1 && (
             <View style={styles.paginationContainer}>
               <TouchableOpacity 
-                style={[styles.pageBtn, currentPage === 1 && styles.pageBtnDisabled]}
+                style={[styles.pageBtn, { backgroundColor: colors.primary }, currentPage === 1 && { backgroundColor: colors.borderLight }]}
                 onPress={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
-                <Ionicons name="chevron-back" size={24} color={currentPage === 1 ? colors.textLight : colors.surface} />
+                <Ionicons name="chevron-back" size={24} color={currentPage === 1 ? colors.textMuted : colors.surface} />
               </TouchableOpacity>
 
-              <View style={styles.pageInfo}>
-                <Text style={styles.pageText}>Page {currentPage} of {totalPages}</Text>
+              <View style={[styles.pageInfo, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <Text style={[styles.pageText, { color: colors.text }]}>Page {currentPage} of {totalPages}</Text>
               </View>
 
               <TouchableOpacity 
-                style={[styles.pageBtn, currentPage === totalPages && styles.pageBtnDisabled]}
+                style={[styles.pageBtn, { backgroundColor: colors.primary }, currentPage === totalPages && { backgroundColor: colors.borderLight }]}
                 onPress={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
-                <Ionicons name="chevron-forward" size={24} color={currentPage === totalPages ? colors.textLight : colors.surface} />
+                <Ionicons name="chevron-forward" size={24} color={currentPage === totalPages ? colors.textMuted : colors.surface} />
               </TouchableOpacity>
             </View>
           )}
@@ -254,15 +251,13 @@ export default function AISearchScreen({ navigation }) {
 
         <Toast ref={toastRef} />
       </View>
-      <Text style={styles.versionTag}>Search Engine v6.4 (Guest-Mode-Refined)</Text>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   webWrapper: {
     flex: 1,
@@ -276,9 +271,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
     height: 60,
   },
   headerBtn: {
@@ -298,11 +291,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
   },
   searchSection: {
     padding: 20,
-    backgroundColor: colors.surface,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     shadowColor: '#000',
@@ -319,12 +310,10 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background,
     borderRadius: 16,
     paddingHorizontal: 16,
     height: 56,
     borderWidth: 1,
-    borderColor: colors.borderLight,
     marginBottom: 16,
   },
   searchIcon: {
@@ -333,22 +322,18 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: colors.text,
   },
   searchBtn: {
-    backgroundColor: colors.primary,
     height: 56,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
   },
   searchBtnText: {
-    color: colors.surface,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -364,7 +349,6 @@ const styles = StyleSheet.create({
   aiIconWave: {
     width: 100,
     height: 100,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
@@ -373,23 +357,19 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: colors.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 40,
     lineHeight: 24,
   },
   recipeCard: {
-    backgroundColor: colors.surface,
     borderRadius: 24,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: colors.borderLight,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -403,7 +383,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   typeBadge: {
-    backgroundColor: colors.primaryLight,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -411,7 +390,6 @@ const styles = StyleSheet.create({
   typeText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: colors.primary,
     textTransform: 'uppercase',
   },
   timeBadge: {
@@ -421,25 +399,21 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 14,
-    color: colors.textSecondary,
     fontWeight: '500',
   },
   recipeTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: 12,
   },
   sectionLabel: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: colors.textMuted,
     marginBottom: 4,
     textTransform: 'uppercase',
   },
   previewText: {
     fontSize: 14,
-    color: colors.textSecondary,
     marginBottom: 20,
     lineHeight: 20,
   },
@@ -447,29 +421,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.text,
     paddingVertical: 14,
     borderRadius: 12,
     gap: 8,
   },
   importBtnText: {
-    color: colors.surface,
     fontSize: 15,
     fontWeight: 'bold',
   },
   errorCard: {
-    backgroundColor: 'rgba(239, 68, 68, 0.05)',
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.2)',
     marginTop: 20,
     gap: 12,
   },
   errorText: {
     fontSize: 16,
-    color: colors.text,
     textAlign: 'center',
     lineHeight: 24,
     fontWeight: '500',
@@ -485,7 +454,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,
@@ -494,28 +462,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
-  pageBtnDisabled: {
-    backgroundColor: colors.border,
-    elevation: 0,
-  },
   pageInfo: {
-    backgroundColor: colors.surfaceVariant,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: colors.border,
   },
   pageText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
-  },
-  versionTag: {
-    fontSize: 10,
-    color: '#94a3b8',
-    textAlign: 'center',
-    paddingVertical: 10,
-    backgroundColor: '#f8fafc',
-  },
+  }
 });

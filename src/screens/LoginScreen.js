@@ -9,11 +9,11 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
-  Image
+  Image,
+  ScrollView
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme/colors';
-import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -22,8 +22,8 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signInAsGuest } = useAuth();
+  const { colors } = useTheme();
   const navigation = useNavigation();
-
 
   const handleGuestLogin = async () => {
     setIsLoading(true);
@@ -33,7 +33,7 @@ export default function LoginScreen() {
       if (error.message?.includes('Anonymous sign-ins are disabled') || error.message?.includes('not enabled')) {
         Alert.alert(
           'Guest Mode Required', 
-          'To use this, you must enable "Anonymous Sign-ins" in your Supabase Dashboard -> Authentication -> Settings.\n\nCheck the "Dashboard Setup" guide I provided for a visual walkthrough!'
+          'To use this, you must enable "Anonymous Sign-ins" in your Supabase Dashboard -> Authentication -> Settings.'
         );
       } else {
         Alert.alert('Guest Login Failed', error.message);
@@ -62,7 +62,6 @@ export default function LoginScreen() {
         }
       }
     } finally {
-      // Add a tiny delay to prevent rapid-fire clicks even after isLoading is reset
       setTimeout(() => setIsLoading(false), 1000);
     }
   };
@@ -70,22 +69,22 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <View style={styles.formContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Logo */}
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
           <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 120, height: 120 }} />
-          <Text style={styles.title}>ChefStack</Text>
-          <Text style={styles.subtitle}>Your Personal Recipe Manager</Text>
+          <Text style={[styles.title, { color: colors.text }]}>ChefStack</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Your Personal Recipe Manager</Text>
         </Animated.View>
 
         {/* Form */}
-        <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.form}>
+        <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.formContainer}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Email Address</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
               placeholder="you@example.com"
               value={email}
               onChangeText={setEmail}
@@ -96,9 +95,9 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Password</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
               placeholder="••••••••"
               value={password}
               onChangeText={setPassword}
@@ -109,27 +108,36 @@ export default function LoginScreen() {
           </View>
 
           <TouchableOpacity 
-            style={styles.loginButton} 
+            style={[styles.loginButton, { backgroundColor: colors.primary }]} 
             onPress={handleLogin}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color={colors.surface} />
             ) : (
-              <Text style={styles.loginButtonText}>Sign In</Text>
+              <Text style={[styles.loginButtonText, { color: colors.surface }]}>Sign In</Text>
             )}
           </TouchableOpacity>
-
 
           <TouchableOpacity 
             style={styles.guestButton} 
             onPress={handleGuestLogin}
             disabled={isLoading}
           >
-            <Text style={styles.guestButtonText}>Continue as Guest</Text>
+            <Text style={[styles.guestButtonText, { color: colors.textSecondary }]}>Continue as Guest</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.linkButton} 
+            onPress={() => navigation.navigate('Signup')}
+            disabled={isLoading}
+          >
+            <Text style={[styles.linkText, { color: colors.primary }]}>
+              Don't have an account? <Text style={[styles.linkTextBold, { color: colors.primary }]}>Sign Up</Text>
+            </Text>
           </TouchableOpacity>
         </Animated.View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -137,12 +145,16 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF2F2', // Light red gradient equivalent
   },
-  formContainer: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: Platform.OS === 'web' ? 16 : 32,
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: 400,
+    alignSelf: 'center',
   },
   header: {
     alignItems: 'center',
@@ -152,15 +164,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: colors.textSecondary,
-  },
-  form: {
-    width: '100%',
   },
   inputGroup: {
     marginBottom: 20,
@@ -168,40 +175,24 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.textSecondary,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.borderLight,
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
     fontSize: 16,
-    color: colors.text,
   },
   loginButton: {
-    backgroundColor: colors.primary,
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 12,
   },
   loginButtonText: {
-    color: colors.surface,
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: colors.textSecondary,
-    fontSize: 14,
   },
   guestButton: {
     alignItems: 'center',
@@ -209,16 +200,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   guestButtonText: {
-    color: colors.textSecondary,
     fontSize: 16,
     fontWeight: '600',
     textDecorationLine: 'underline',
   },
   linkButton: {
     alignItems: 'center',
+    paddingBottom: 40,
   },
   linkText: {
-    color: colors.primary,
     fontSize: 16,
   },
   linkTextBold: {

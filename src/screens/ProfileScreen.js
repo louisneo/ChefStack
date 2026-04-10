@@ -7,16 +7,19 @@ import {
   StyleSheet, 
   ScrollView,
   Platform,
-  BackHandler
+  BackHandler,
+  Alert,
+  Switch
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
+  const { colors, isDark, toggleTheme } = useTheme();
   const navigation = useNavigation();
   
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
@@ -40,50 +43,54 @@ export default function ProfileScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.webWrapper}>
         {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={28} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.titleContainer}>
-          <Text style={styles.headerTitle}>Profile</Text>
+        <View style={[styles.header, { backgroundColor: colors.background }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
+            <Ionicons name="arrow-back" size={28} color={colors.text} />
+          </TouchableOpacity>
+          <View style={styles.titleContainer}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
+          </View>
+          <View style={{ width: 44 }} />
         </View>
-        <View style={{ width: 44 }} />
-      </View>
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.formContainer}>
             <Animated.View entering={FadeInDown.duration(400)} style={styles.avatarSection}>
-              <View style={[styles.avatar, isGuest && styles.guestAvatar]}>
-                <Text style={styles.avatarText}>{isGuest ? <Ionicons name="person-outline" size={40} color={colors.surface} /> : avatarInitial}</Text>
+              <View style={[styles.avatar, { backgroundColor: isGuest ? colors.textSecondary : colors.primary }]}>
+                <Text style={styles.avatarText}>
+                  {isGuest ? <Ionicons name="person-outline" size={40} color={colors.surface} /> : avatarInitial}
+                </Text>
               </View>
-              <Text style={styles.nameText}>{isGuest ? 'Guest Chef' : (fullName || 'Chef')}</Text>
+              <Text style={[styles.nameText, { color: colors.text }]}>
+                {isGuest ? 'Guest Chef' : (fullName || 'Chef')}
+              </Text>
               {isGuest ? (
-                <View style={styles.guestBadge}>
-                  <Text style={styles.guestBadgeText}>Guest Mode</Text>
+                <View style={[styles.guestBadge, { backgroundColor: colors.borderLight }]}>
+                  <Text style={[styles.guestBadgeText, { color: colors.textSecondary }]}>Guest Mode</Text>
                 </View>
               ) : (
-                <Text style={styles.emailText}>{email}</Text>
+                <Text style={[styles.emailText, { color: colors.textSecondary }]}>{email}</Text>
               )}
             </Animated.View>
 
             {isGuest && (
-              <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.upgradeCard}>
-                <Ionicons name="star" size={24} color={colors.accent || '#FFD700'} />
+              <Animated.View entering={FadeInDown.delay(150).duration(400)} style={[styles.upgradeCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <Ionicons name="star" size={24} color="#FFD700" />
                 <View style={styles.upgradeTextContainer}>
-                  <Text style={styles.upgradeTitle}>Enjoying ChefStack?</Text>
-                  <Text style={styles.upgradeSubtitle}>Create a permanent account to sync your recipes across devices.</Text>
+                  <Text style={[styles.upgradeTitle, { color: colors.text }]}>Enjoying ChefStack?</Text>
+                  <Text style={[styles.upgradeSubtitle, { color: colors.textSecondary }]}>Create a permanent account to sync your recipes across devices.</Text>
                 </View>
               </Animated.View>
             )}
 
             <Animated.View entering={FadeInDown.delay(100).duration(400)} style={[styles.formSection, isGuest && { opacity: 0.6 }]}>
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Full Name</Text>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>Full Name</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text }]}
                   value={fullName}
                   onChangeText={setFullName}
                   placeholder="Your Name"
@@ -93,9 +100,9 @@ export default function ProfileScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Email Address</Text>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>Email Address</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text }]}
                   value={isGuest ? 'guest@chefstack.app' : email}
                   onChangeText={setEmail}
                   placeholder="your@email.com"
@@ -107,9 +114,9 @@ export default function ProfileScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Location</Text>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>Location</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text }]}
                   value={location}
                   onChangeText={setLocation}
                   placeholder="City, Country"
@@ -119,70 +126,86 @@ export default function ProfileScreen() {
             </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.settingsSection}>
-              <Text style={styles.sectionTitle}>Settings</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Settings</Text>
               
+              <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <View style={styles.settingLeft}>
+                  <Ionicons name={isDark ? "moon" : "sunny-outline"} size={24} color={colors.textSecondary} />
+                  <Text style={[styles.settingText, { color: colors.text }]}>Dark Mode</Text>
+                </View>
+                <Switch
+                  value={isDark}
+                  onValueChange={toggleTheme}
+                  trackColor={{ false: '#767577', true: colors.primary }}
+                  thumbColor={Platform.OS === 'ios' ? '#fff' : isDark ? colors.surface : '#f4f3f4'}
+                />
+              </View>
+
               <TouchableOpacity 
-                style={styles.settingItem} 
+                style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
                 onPress={() => navigation.navigate('Notifications')}
               >
                 <View style={styles.settingLeft}>
                   <Ionicons name="notifications-outline" size={24} color={colors.textSecondary} />
-                  <Text style={styles.settingText}>Notifications</Text>
+                  <Text style={[styles.settingText, { color: colors.text }]}>Notifications</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={styles.settingItem} 
+                style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
                 onPress={() => navigation.navigate('Privacy')}
               >
                 <View style={styles.settingLeft}>
                   <Ionicons name="shield-checkmark-outline" size={24} color={colors.textSecondary} />
-                  <Text style={styles.settingText}>Privacy</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                style={styles.settingItem} 
-                onPress={() => navigation.navigate('Help')}
-              >
-                <View style={styles.settingLeft}>
-                  <Ionicons name="help-circle-outline" size={24} color={colors.textSecondary} />
-                  <Text style={styles.settingText}>Help & Support</Text>
+                  <Text style={[styles.settingText, { color: colors.text }]}>Privacy</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
               </TouchableOpacity>
               
               <TouchableOpacity 
-                style={styles.settingItem} 
+                style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
                 onPress={() => navigation.navigate('About')}
               >
                 <View style={styles.settingLeft}>
                   <Ionicons name="information-circle-outline" size={24} color={colors.textSecondary} />
-                  <Text style={styles.settingText}>About</Text>
+                  <Text style={[styles.settingText, { color: colors.text }]}>About</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
               </TouchableOpacity>
             </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-              <TouchableOpacity style={styles.signOutButton} onPress={() => {
-                if (isGuest) {
-                  Alert.alert(
-                    'Warning: Guest Account',
-                    'As a guest, your saved recipes and data will be permanently cleared if you sign out. \n\nAre you sure?',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      { text: 'Sign Out Anyway', style: 'destructive', onPress: signOut }
-                    ]
-                  );
-                } else {
-                  signOut();
-                }
-              }}>
+              <TouchableOpacity 
+                style={[styles.signOutButton, { backgroundColor: colors.error + '15' }]} 
+                onPress={() => {
+                  if (isGuest) {
+                    Alert.alert(
+                      'Warning: Guest Account',
+                      'As a guest, your saved recipes and data will be permanently cleared if you sign out. \n\nAre you sure?',
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        { 
+                          text: 'Sign Out Anyway', 
+                          style: 'destructive', 
+                          onPress: async () => {
+                            try {
+                              await signOut();
+                            } catch (e) {
+                              console.error('Logout failed:', e);
+                              Alert.alert('Error', 'Failed to sign out. Please try again.');
+                            }
+                          } 
+                        }
+                      ]
+                    );
+                  } else {
+                    signOut();
+                  }
+                }}
+              >
                 <Ionicons name="log-out-outline" size={24} color={colors.error} />
-                <Text style={styles.signOutText}>Sign Out</Text>
+                <Text style={[styles.signOutText, { color: colors.error }]}>Sign Out</Text>
               </TouchableOpacity>
             </Animated.View>
           </View>
@@ -195,7 +218,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   webWrapper: {
     flex: 1,
@@ -209,7 +231,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.background,
     height: 60,
   },
   headerBtn: {
@@ -229,7 +250,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
   },
   content: {
     padding: 24,
@@ -248,7 +268,6 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -256,23 +275,17 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: colors.surface,
+    color: 'white',
   },
   nameText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: 4,
   },
   emailText: {
     fontSize: 16,
-    color: colors.textSecondary,
-  },
-  guestAvatar: {
-    backgroundColor: colors.textSecondary,
   },
   guestBadge: {
-    backgroundColor: colors.borderLight,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 8,
@@ -281,15 +294,12 @@ const styles = StyleSheet.create({
   guestBadgeText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: colors.textSecondary,
     textTransform: 'uppercase',
   },
   upgradeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.primary + '20',
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
@@ -301,11 +311,9 @@ const styles = StyleSheet.create({
   upgradeTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.text,
   },
   upgradeSubtitle: {
     fontSize: 14,
-    color: colors.textSecondary,
   },
   formSection: {
     marginBottom: 32,
@@ -316,18 +324,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.textSecondary,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.borderLight,
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
     fontSize: 16,
-    color: colors.text,
   },
   settingsSection: {
     marginBottom: 32,
@@ -335,16 +339,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: 16,
   },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.borderLight,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -357,13 +358,11 @@ const styles = StyleSheet.create({
   settingText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
   },
   signOutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.errorBackground,
     borderRadius: 16,
     padding: 16,
     gap: 8,
@@ -371,6 +370,5 @@ const styles = StyleSheet.create({
   signOutText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.error,
   }
 });

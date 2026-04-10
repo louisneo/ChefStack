@@ -1,15 +1,16 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
-import { colors } from '../theme/colors';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, Platform, Image } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Header() {
+  const { colors } = useTheme();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
       <View style={styles.innerContainer}>
         <View style={styles.logoContainer}>
           <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 32, height: 32 }} />
-          <Text style={styles.logoText}>ChefStack</Text>
+          <Text style={[styles.logoText, { color: colors.text }]}>ChefStack</Text>
         </View>
       </View>
     </View>
@@ -18,9 +19,7 @@ export default function Header() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
     width: '100%',
   },
   innerContainer: {
@@ -42,6 +41,5 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.text,
   }
 });

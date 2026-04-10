@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -10,15 +10,13 @@ import {
   Platform,
   BackHandler
 } from 'react-native';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
-import { useNavigation } from '@react-navigation/native';
-import { useEffect } from 'react';
 
 export default function RecipeDetail({ recipe, visible, onClose }) {
+  const { colors } = useTheme();
   const [imgError, setImgError] = useState(false);
-  const navigation = useNavigation();
 
   const handleBack = () => {
     if (visible && Platform.OS === 'web') {
@@ -49,33 +47,32 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={handleBack}>
-      <Animated.View entering={FadeIn.duration(300)} style={styles.overlay}>
-        <Animated.View entering={SlideInDown.duration(400).springify()} style={styles.container}>
+      <Animated.View entering={FadeIn.duration(300)} style={[styles.overlay, { backgroundColor: colors.background }]}>
+        <Animated.View entering={SlideInDown.duration(400).springify()} style={[styles.container, { backgroundColor: colors.background }]}>
           
-            <View style={styles.header}>
-              <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
-                <Ionicons name="arrow-back" size={28} color={colors.text} />
-              </TouchableOpacity>
-              <View style={styles.titleContainer}>
-                <Text style={styles.headerTitle}>Recipe Details</Text>
-              </View>
-              <View style={{ width: 44 }} /> 
+          <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
+            <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
+              <Ionicons name="arrow-back" size={28} color={colors.text} />
+            </TouchableOpacity>
+            <View style={styles.titleContainer}>
+              <Text style={[styles.headerTitle, { color: colors.text }]}>Recipe Details</Text>
             </View>
+            <View style={{ width: 44 }} /> 
+          </View>
 
-          {/* Content Scroll wraps everything below the static header */}
           <ScrollView 
             style={styles.contentScroll} 
             contentContainerStyle={styles.scrollContentContainer}
             showsVerticalScrollIndicator={false}
           >
             {/* Header Image */}
-            <View style={styles.imageContainer}>
+            <View style={[styles.imageContainer, { backgroundColor: colors.borderLight }]}>
               {imgError || !recipe.image ? (
-                <View style={styles.imagePlaceholder}>
+                <View style={[styles.imagePlaceholder, { backgroundColor: colors.primary + '15' }]}>
                   <Ionicons 
                     name={recipe.type === 'food' ? 'restaurant-outline' : 'cafe-outline'} 
                     size={64} 
-                    color={colors.primaryActive} 
+                    color={colors.primary} 
                   />
                 </View>
               ) : (
@@ -86,34 +83,34 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
                 />
               )}
               
-              <View style={styles.badgeContainer}>
-                <Text style={styles.badgeText}>{recipe.category}</Text>
+              <View style={[styles.badgeContainer, { backgroundColor: colors.primary }]}>
+                <Text style={[styles.badgeText, { color: colors.surface }]}>{recipe.category}</Text>
               </View>
             </View>
 
             {/* Title */}
-            <View style={styles.titleSection}>
-              <Text style={styles.title}>{recipe.title}</Text>
+            <View style={[styles.titleSection, { borderBottomColor: colors.borderLight }]}>
+              <Text style={[styles.title, { color: colors.text }]}>{recipe.title}</Text>
             </View>
 
             {/* Stats Bar */}
-            <View style={styles.statsBar}>
+            <View style={[styles.statsBar, { borderBottomColor: colors.borderLight }]}>
               <View style={styles.statBox}>
                 <Ionicons name="time-outline" size={24} color={colors.primary} />
-                <Text style={styles.statLabel}>TIME</Text>
-                <Text style={styles.statValue}>{recipe.time}m</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>TIME</Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>{recipe.time}m</Text>
               </View>
-              <View style={styles.statDivider} />
+              <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
               <View style={styles.statBox}>
                 <Ionicons name="list" size={24} color={colors.primary} />
-                <Text style={styles.statLabel}>ITEMS</Text>
-                <Text style={styles.statValue}>{recipe.ingredients?.length || 0}</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>ITEMS</Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>{recipe.ingredients?.length || 0}</Text>
               </View>
-              <View style={styles.statDivider} />
+              <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
               <View style={styles.statBox}>
                 <Ionicons name="restaurant-outline" size={24} color={colors.primary} />
-                <Text style={styles.statLabel}>TYPE</Text>
-                <Text style={[styles.statValue, { textTransform: 'capitalize' }]}>{recipe.type}</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>TYPE</Text>
+                <Text style={[styles.statValue, { textTransform: 'capitalize', color: colors.text }]}>{recipe.type}</Text>
               </View>
             </View>
 
@@ -123,12 +120,12 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <Ionicons name="list" size={20} color={colors.primary} />
-                  <Text style={styles.sectionTitle}>Ingredients</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>Ingredients</Text>
                 </View>
                 {recipe.ingredients && recipe.ingredients.map((item, index) => (
                   <View key={index} style={styles.listItem}>
-                    <View style={styles.bullet} />
-                    <Text style={styles.listText}>{item}</Text>
+                    <View style={[styles.bullet, { backgroundColor: colors.primary }]} />
+                    <Text style={[styles.listText, { color: colors.text }]}>{item}</Text>
                   </View>
                 ))}
               </View>
@@ -137,14 +134,14 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <Ionicons name="list-outline" size={20} color={colors.primary} />
-                  <Text style={styles.sectionTitle}>Method</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>Method</Text>
                 </View>
                 {recipe.steps && recipe.steps.map((step, index) => (
                   <View key={index} style={styles.stepItem}>
-                    <View style={styles.stepNumber}>
-                      <Text style={styles.stepNumberText}>{index + 1}</Text>
+                    <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
+                      <Text style={[styles.stepNumberText, { color: colors.surface }]}>{index + 1}</Text>
                     </View>
-                    <Text style={styles.listText}>{step}</Text>
+                    <Text style={[styles.listText, { color: colors.text }]}>{step}</Text>
                   </View>
                 ))}
               </View>
@@ -160,20 +157,16 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: colors.surface,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.surface,
   },
   imageContainer: {
     height: 250,
-    backgroundColor: colors.borderLight,
     position: 'relative',
   },
   imagePlaceholder: {
     flex: 1,
-    backgroundColor: colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -189,8 +182,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-    backgroundColor: colors.surface,
     height: 60,
   },
   headerBtn: {
@@ -210,19 +201,16 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
   },
   badgeContainer: {
     position: 'absolute',
     bottom: 20,
     left: 20,
-    backgroundColor: colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   badgeText: {
-    color: colors.surface,
     fontSize: 12,
     fontWeight: 'bold',
     textTransform: 'uppercase',
@@ -230,17 +218,14 @@ const styles = StyleSheet.create({
   titleSection: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.text,
   },
   statsBar: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
   },
   statBox: {
     flex: 1,
@@ -249,26 +234,19 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    backgroundColor: colors.borderLight,
   },
   statLabel: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: colors.textSecondary,
     marginBottom: 4,
     marginTop: 8,
   },
   statValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.text,
   },
   contentScroll: {
     flex: 1,
-  },
-  contentPad: {
-    padding: 16,
-    paddingBottom: 32,
   },
   scrollContentContainer: {
     paddingBottom: 40,
@@ -288,7 +266,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.text,
   },
   listItem: {
     flexDirection: 'row',
@@ -300,13 +277,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primaryActive,
     marginTop: 6,
     marginRight: 12,
   },
   listText: {
     fontSize: 16,
-    color: colors.text,
     lineHeight: 24,
     flex: 1,
   },
@@ -320,14 +295,12 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
     marginTop: 2,
   },
   stepNumberText: {
-    color: colors.surface,
     fontSize: 14,
     fontWeight: 'bold',
   }

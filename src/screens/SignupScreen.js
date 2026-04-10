@@ -86,7 +86,7 @@ export default function SignupScreen() {
         setCooldown(10);
       } else {
         console.log('Signup successful:', data.user.id);
-        Alert.alert('Success', 'Account created! Please check your email to verify your account.', [
+        Alert.alert('Success', 'Account created successfully! You can now sign in.', [
           { text: 'OK', onPress: () => navigation.navigate('Login') }
         ]);
       }

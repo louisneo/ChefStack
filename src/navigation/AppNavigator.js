@@ -5,7 +5,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
+import { RecipeProvider, useRecipes } from '../context/RecipeContext';
+import AddRecipeModal from '../components/AddRecipeModal';
+import { supabase } from '../lib/supabase';
 
 // Screens
 import SplashScreen from '../screens/SplashScreen';
@@ -27,6 +30,9 @@ function AddPlaceholder() { return null; }
 
 // Bottom Tab Navigator with center FAB
 function BottomTabNavigator() {
+  const { colors } = useTheme();
+  const { openAddRecipe } = useRecipes();
+
   return (
     <Tab.Navigator
       backBehavior="initialRoute"
@@ -92,11 +98,21 @@ function BottomTabNavigator() {
             return (
               <TouchableOpacity
                 {...restProps}
-                onPress={() => navigation.navigate('Home', { openAdd: Date.now() })}
+                onPress={() => openAddRecipe()}
                 style={styles.addButtonContainer}
                 activeOpacity={0.8}
               >
-                <View style={styles.addButton}>
+                <View style={[
+                  styles.addButton, 
+                  { 
+                    backgroundColor: colors.primary,
+                    shadowColor: colors.primary,
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.35,
+                    shadowRadius: 8,
+                    elevation: 8,
+                  }
+                ]}>
                   <Ionicons name="add" size={32} color={colors.surface} />
                 </View>
               </TouchableOpacity>
@@ -145,17 +161,32 @@ const linking = {
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
+  const { colors } = useTheme();
 
   if (loading) {
     return <SplashScreen />;
   }
+
+  const handleGlobalSaveRecipe = async (recipeData) => {
+    // This is a minimal bridge - we can improve this later with a dedicated service
+    if (!user) return;
+    const { error } = await supabase.from('recipes').insert([{ ...recipeData, user_id: user.id }]);
+    return { error };
+  };
 
   return (
     <NavigationContainer linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <>
-            <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
+            <Stack.Screen name="MainTabs">
+              {(props) => (
+                <RecipeProvider>
+                  <BottomTabNavigator {...props} />
+                  <RecipeConsumer />
+                </RecipeProvider>
+              )}
+            </Stack.Screen>
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="Privacy" component={PrivacyScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
@@ -172,6 +203,27 @@ export default function AppNavigator() {
   );
 }
 
+// Separate component to consume RecipeContext inside the Provider
+function RecipeConsumer() {
+  const { addModalVisible, closeAddRecipe, editingRecipe, saveRecipe } = useRecipes();
+
+  const handleSave = async (data) => {
+    const { error } = await saveRecipe(data);
+    if (!error) {
+      closeAddRecipe();
+    }
+  };
+
+  return (
+    <AddRecipeModal
+      visible={addModalVisible}
+      onClose={closeAddRecipe}
+      onSave={handleSave}
+      editingRecipe={editingRecipe}
+    />
+  );
+}
+
 const styles = StyleSheet.create({
   addButtonContainer: {
     top: Platform.OS === 'web' ? -10 : -15,
@@ -183,13 +235,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 8,
   },
 });
