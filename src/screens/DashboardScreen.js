@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
-  ActivityIndicator,
   RefreshControl,
   ScrollView,
   useWindowDimensions,
@@ -19,6 +18,7 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 // Components
 import Header from '../components/Header';
 import RecipeCard from '../components/RecipeCard';
+import RecipeCardSkeleton from '../components/RecipeCardSkeleton';
 import RecipeDetail from '../components/RecipeDetail';
 import DeleteConfirmation from '../components/DeleteConfirmation';
 import Toast from '../components/Toast';
@@ -98,6 +98,11 @@ export default function DashboardScreen({ navigation, route }) {
     });
   }, [filteredRecipes, sortBy]);
 
+  const showSkeletons = loading && !refreshing;
+  const dataToRender = showSkeletons 
+    ? Array.from({ length: 6 }, (_, i) => ({ id: `skeleton-${i}`, isSkeleton: true })) 
+    : sortedRecipes;
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header />
@@ -105,7 +110,7 @@ export default function DashboardScreen({ navigation, route }) {
       <View style={styles.webDesktopPadding}>
         <FlatList
           key={`grid-${numColumns}`}
-          data={sortedRecipes}
+          data={dataToRender}
           keyExtractor={item => item.id.toString()}
           numColumns={numColumns}
           columnWrapperStyle={numColumns > 1 ? styles.row : null}
@@ -195,35 +200,40 @@ export default function DashboardScreen({ navigation, route }) {
             </>
           }
           ListEmptyComponent={
-            !loading ? (
-              <Animated.View entering={FadeInUp.duration(600)} style={styles.emptyContainer}>
-                <View style={[styles.emptyIconBg, { backgroundColor: colors.surface }]}>
-                  <Ionicons name="book-outline" size={48} color={colors.border} />
-                </View>
-                <Text style={[styles.emptyTitle, { color: colors.text }]}>No Recipes Yet</Text>
-                <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>Start building your recipe collection!</Text>
-                <TouchableOpacity 
-                  style={[styles.emptyBtn, { backgroundColor: colors.primary }]} 
-                  onPress={() => openAddRecipe()}
-                >
-                  <Ionicons name="add" size={20} color="white" />
-                  <Text style={styles.emptyBtnText}>Add Your First Recipe</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            ) : (
-              <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
-            )
+            <Animated.View entering={FadeInUp.duration(600)} style={styles.emptyContainer}>
+              <View style={[styles.emptyIconBg, { backgroundColor: colors.surface }]}>
+                <Ionicons name="book-outline" size={48} color={colors.border} />
+              </View>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>No Recipes Yet</Text>
+              <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>Start building your recipe collection!</Text>
+              <TouchableOpacity 
+                style={[styles.emptyBtn, { backgroundColor: colors.primary }]} 
+                onPress={() => openAddRecipe()}
+              >
+                <Ionicons name="add" size={20} color="white" />
+                <Text style={styles.emptyBtnText}>Add Your First Recipe</Text>
+              </TouchableOpacity>
+            </Animated.View>
           }
-          renderItem={({ item }) => (
-            <RecipeCard
-              recipe={item}
-              style={numColumns > 1 ? { width: `${100 / numColumns - 2}%`, marginRight: '2%' } : { width: '100%' }}
-              onClick={() => setSelectedRecipe(item)}
-              onEdit={() => openAddRecipe(item)}
-              onDelete={() => setDeletingRecipe(item)}
-              onToggleFavorite={() => toggleFavorite(item.id)}
-            />
-          )}
+          renderItem={({ item }) => {
+            if (item.isSkeleton) {
+              return (
+                <RecipeCardSkeleton
+                  style={numColumns > 1 ? { width: `${100 / numColumns - 2}%`, marginRight: '2%' } : { width: '100%' }}
+                />
+              );
+            }
+            return (
+              <RecipeCard
+                recipe={item}
+                style={numColumns > 1 ? { width: `${100 / numColumns - 2}%`, marginRight: '2%' } : { width: '100%' }}
+                onClick={() => setSelectedRecipe(item)}
+                onEdit={() => openAddRecipe(item)}
+                onDelete={() => setDeletingRecipe(item)}
+                onToggleFavorite={() => toggleFavorite(item.id)}
+              />
+            );
+          }}
         />
       </View>
 
