@@ -8,7 +8,6 @@ import {
   ScrollView, 
   ActivityIndicator,
   Alert,
-  Platform,
   BackHandler
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -19,6 +18,7 @@ import { searchRecipes } from '../services/aiService';
 import { useAuth } from '../context/AuthContext';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import Toast from '../components/Toast';
+import AISearchCardSkeleton from '../components/AISearchCardSkeleton';
 
 export default function AISearchScreen({ navigation }) {
   const { colors, isDark } = useTheme();
@@ -167,6 +167,14 @@ export default function AISearchScreen({ navigation }) {
               <Ionicons name="information-circle-outline" size={32} color={colors.error} />
               <Text style={[styles.errorText, { color: colors.text }]}>{searchError}</Text>
             </Animated.View>
+          )}
+
+          {loading && (
+            <>
+              <AISearchCardSkeleton />
+              <AISearchCardSkeleton />
+              <AISearchCardSkeleton />
+            </>
           )}
 
           {results.length === 0 && !loading && !searchError && (
