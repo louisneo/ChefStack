@@ -106,12 +106,21 @@ export const searchRecipes = async (query) => {
         const errData = await response.json().catch(() => ({}));
         console.warn(`Gemini AI (${model}) status ${response.status}:`, errData);
 
-        if (response.status === 400 && errData.error?.reason === 'API_KEY_INVALID') {
+        const errMsg = errData.error?.message || '';
+        const errReason = errData.error?.reason || '';
+
+        if (
+          response.status === 400 || 
+          response.status === 403 || 
+          response.status === 404 || 
+          errReason === 'API_KEY_INVALID' || 
+          errMsg.includes('not found') ||
+          errMsg.includes('API key')
+        ) {
           apiKeyInvalid = true;
-          break;
         }
         
-        lastErrorDetail = errData.error?.message || `Status ${response.status}`;
+        lastErrorDetail = errMsg || `Status ${response.status}`;
       }
     } catch (err) {
       console.warn(`Gemini AI (${model}) exception:`, err.message);
@@ -121,7 +130,7 @@ export const searchRecipes = async (query) => {
 
   if (apiKeyInvalid) {
     return {
-      error: "Google rejected this API Key (API_KEY_INVALID). Please open Google AI Studio (aistudio.google.com), click '+ Create API key in NEW project', and paste the new key here.",
+      error: "Your Gemini API Key is missing, disabled, or invalid for model generateContent. Please click the key icon (🔑) above to paste your newly created key from Google AI Studio.",
       recipes: [],
       isFood: true,
       needsApiKey: true
