@@ -225,14 +225,9 @@ export default function ProfileScreen() {
               
               <TouchableOpacity 
                 style={[styles.modalBtn, { backgroundColor: colors.error }]} 
-                onPress={async () => {
-                  try {
-                    setShowLogoutModal(false);
-                    await signOut();
-                  } catch (e) {
-                    console.error('Logout failed:', e);
-                    Alert.alert('Error', 'Failed to sign out. Please try again.');
-                  }
+                onPress={() => {
+                  setShowLogoutModal(false);
+                  signOut();
                 }}
               >
                 <Text style={[styles.modalBtnText, { color: colors.surface, fontWeight: 'bold' }]}>Sign Out</Text>

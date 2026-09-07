@@ -162,11 +162,34 @@ export function AuthProvider({ children }) {
   };
 
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {}
-    await AsyncStorage.removeItem(OFFLINE_USER_KEY).catch(() => {});
+    // 1. Immediately reset user state so UI updates instantly to LoginScreen
     setUser(null);
+
+    // 2. Clear offline user cache
+    try {
+      await AsyncStorage.removeItem(OFFLINE_USER_KEY);
+    } catch (e) {}
+
+    // 3. Purge any stored Supabase session tokens from browser localStorage
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < window.localStorage.length; i++) {
+          const key = window.localStorage.key(i);
+          if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('chefstack'))) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(k => window.localStorage.removeItem(k));
+      } catch (e) {}
+    }
+
+    // 4. Non-blocking fire-and-forget remote Supabase logout with 500ms timeout
+    try {
+      const remoteLogout = supabase.auth.signOut();
+      const timeout = new Promise(resolve => setTimeout(resolve, 500));
+      await Promise.race([remoteLogout, timeout]);
+    } catch (e) {}
   };
 
   const resetPassword = async (email) => {
