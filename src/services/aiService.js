@@ -16,7 +16,7 @@ export const searchRecipes = async (query) => {
   const cleanQuery = (query || '').trim();
   if (!cleanQuery) return { recipes: [], isFood: true };
 
-  // Check for custom key in storage first, then env
+  // Check custom key in local storage first, then environment variable
   let apiKey = await AsyncStorage.getItem(CUSTOM_KEY_STORAGE).catch(() => null);
   if (!apiKey || !apiKey.trim()) {
     apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
@@ -24,7 +24,7 @@ export const searchRecipes = async (query) => {
 
   if (!apiKey || !apiKey.trim()) {
     return {
-      error: "Missing Google Gemini API Key. Please enter a valid API key from Google AI Studio.",
+      error: "Google Gemini API Key is missing. Please click the key icon (🔑) above to add your key from Google AI Studio.",
       recipes: [],
       isFood: true,
       needsApiKey: true
@@ -32,12 +32,12 @@ export const searchRecipes = async (query) => {
   }
 
   const prompt = `
-    You are an expert AI chef assistant for ChefStack. Search for and generate a comprehensive list of 6 to 12 authentic, highly detailed food/drink recipes for: "${cleanQuery}".
+    You are an expert AI culinary chef. Generate a comprehensive list of 6 to 12 authentic, detailed food or drink recipes for: "${cleanQuery}".
     
-    RULES:
-    1. ONLY return food or drink recipes. If query is non-food/gibberish, set "is_food": false and "recipes": [].
-    2. Format the response strictly as valid JSON without any markdown formatting or commentary.
-    3. Each recipe object must include:
+    STRICT REQUIREMENTS:
+    1. ONLY return food or drink recipes matching the query. If the query is not food/drink related or is gibberish, return {"is_food": false, "recipes": []}.
+    2. Format the response strictly as valid JSON with NO markdown blocks (\`\`\`json) or extra text.
+    3. Each recipe object in the "recipes" array must have:
        - title (string)
        - type ("food" or "drink")
        - category (string)
@@ -45,27 +45,28 @@ export const searchRecipes = async (query) => {
        - ingredients (array of strings)
        - steps (array of strings)
 
-    Format:
+    JSON Structure:
     {
       "is_food": true,
       "recipes": [
         {
-          "title": "Recipe Title",
+          "title": "Classic Beef Steak",
           "type": "food",
           "category": "Main Course",
           "time": 30,
-          "ingredients": ["Ingredient 1", "Ingredient 2"],
-          "steps": ["Step 1", "Step 2"]
+          "ingredients": ["500g Ribeye Steak", "2 tbsp Butter", "3 cloves Garlic", "Fresh Rosemary", "Salt & Black Pepper"],
+          "steps": ["Season steak generously with salt and pepper.", "Sear in a hot skillet for 3-4 minutes per side.", "Baste with butter, garlic, and rosemary.", "Rest for 5 minutes before slicing and serving."]
         }
       ]
     }
   `;
 
-  let lastErrorMessage = '';
+  let lastErrorDetail = '';
+  let apiKeyInvalid = false;
 
   for (const model of GEMINI_MODELS) {
     try {
-      console.log(`Querying Live Gemini AI model: ${model}...`);
+      console.log(`ChefStack AI: Querying live model ${model}...`);
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
 
       const controller = new AbortController();
@@ -99,32 +100,37 @@ export const searchRecipes = async (query) => {
           const recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
           const isFood = parsed.is_food !== false;
 
-          console.log(`Live Gemini AI successfully returned ${recipes.length} recipes.`);
+          console.log(`Live Gemini AI (${model}) successfully returned ${recipes.length} recipes.`);
           return { recipes, isFood, needsApiKey: false };
         }
       } else {
         const errData = await response.json().catch(() => ({}));
-        console.warn(`Gemini AI (${model}) Error status ${response.status}:`, errData);
-        
-        if (response.status === 400 && errData.error?.message?.includes('API key not valid')) {
-          return {
-            error: "Your Google Gemini API Key is invalid or expired. Please update your API key.",
-            recipes: [],
-            isFood: true,
-            needsApiKey: true
-          };
+        console.warn(`Gemini AI (${model}) status ${response.status}:`, errData);
+
+        if (response.status === 400 && errData.error?.reason === 'API_KEY_INVALID') {
+          apiKeyInvalid = true;
+          break;
         }
         
-        lastErrorMessage = errData.error?.message || `HTTP ${response.status} from Gemini AI.`;
+        lastErrorDetail = errData.error?.message || `Status ${response.status}`;
       }
     } catch (err) {
-      console.warn(`Gemini model ${model} fetch exception:`, err.message);
-      lastErrorMessage = err.message;
+      console.warn(`Gemini AI (${model}) exception:`, err.message);
+      lastErrorDetail = err.message;
     }
   }
 
+  if (apiKeyInvalid) {
+    return {
+      error: "Google rejected this API Key (API_KEY_INVALID). Please open Google AI Studio (aistudio.google.com), click '+ Create API key in NEW project', and paste the new key here.",
+      recipes: [],
+      isFood: true,
+      needsApiKey: true
+    };
+  }
+
   return {
-    error: lastErrorMessage ? `AI Search Error: ${lastErrorMessage}` : "Unable to contact Gemini AI. Please check your internet or API key.",
+    error: lastErrorDetail ? `AI Error: ${lastErrorDetail}` : "Unable to reach Gemini AI service. Please check your internet connection.",
     recipes: [],
     isFood: true,
     needsApiKey: false
