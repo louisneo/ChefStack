@@ -701,13 +701,14 @@ Your sole function is to take a search query or culinary prompt and output 3 dis
   ]
 }`;
 
-    for (const model of GEMINI_MODELS) {
+    // Fast-path query: test primary fast model with a strict 3-second timeout
+    for (const model of ['gemini-1.5-flash', 'gemini-1.5-pro']) {
       try {
-        console.log(`ChefStack AI: Querying live model ${model}...`);
+        console.log(`ChefStack AI: Fast querying model ${model}...`);
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
 
         const response = await fetch(url, {
           method: 'POST',
@@ -758,12 +759,12 @@ Your sole function is to take a search query or culinary prompt and output 3 dis
           }
         }
       } catch (err) {
-        console.warn(`Gemini AI (${model}) notice:`, err.message);
+        console.warn(`Gemini AI (${model}) timeout/notice:`, err.message);
       }
     }
   }
 
-  // Seamless zero-setup fallback: returns accurate recipes adhering strictly to master chef rules
+  // Instant smart generator fallback (0ms latency, zero hang)
   console.log(`ChefStack AI: Instant smart generator active for query "${cleanQuery}"`);
   return {
     recipes: generateSmartRecipes(cleanQuery),
