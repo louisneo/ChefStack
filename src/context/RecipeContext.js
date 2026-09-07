@@ -83,32 +83,83 @@ export const RecipeProvider = ({ children }) => {
     }
   }, [user]);
 
+  const DEFAULT_STARTER_RECIPES = [
+    {
+      id: 'demo-1',
+      title: 'Classic Pork Adobo',
+      category: 'Ulam',
+      type: 'food',
+      time: 45,
+      ingredients: ['1kg Pork Belly', '1/2 cup Soy Sauce', '1/2 cup Vinegar', 'Garlic', 'Bay Leaves', 'Peppercorn'],
+      steps: ['Marinate pork in soy sauce and garlic.', 'Brown pork in a pot.', 'Simmer with bay leaves and vinegar until tender.'],
+      is_favorite: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'demo-2',
+      title: 'Creamy Carbonara',
+      category: 'Meryenda',
+      type: 'food',
+      time: 25,
+      ingredients: ['400g Spaghetti', '200g Bacon', '3 Egg Yolks', 'Parmesan Cheese', 'Heavy Cream'],
+      steps: ['Boil pasta until al dente.', 'Fry bacon until crisp.', 'Toss pasta with bacon, eggs, and cheese.'],
+      is_favorite: false,
+      created_at: new Date().toISOString()
+    }
+  ];
+
   const loadCachedRecipes = async (userId) => {
     try {
       const cached = await AsyncStorage.getItem(`${CACHE_KEY_PREFIX}${userId}`);
       if (cached) {
-        setRecipes(JSON.parse(cached));
+        const parsed = JSON.parse(cached);
+        if (parsed.length > 0) {
+          setRecipes(parsed);
+          return true;
+        }
       }
     } catch (e) {
       console.log('Failed to load cached recipes:', e);
     }
+    return false;
   };
 
   const fetchRecipes = async () => {
     if (!user) return;
     setLoading(true);
+
+    // Offline guest user bypasses Supabase network calls
+    if (user.is_offline_guest) {
+      const hasCached = await loadCachedRecipes(user.id);
+      if (!hasCached && recipes.length === 0) {
+        setRecipes(DEFAULT_STARTER_RECIPES);
+      }
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { data, error } = await supabase
-        .from('recipes')
-        .select('*')
-        .eq('user_id', user.id);
-        
-      if (!error && data) {
-        setRecipes(data);
-        await AsyncStorage.setItem(`${CACHE_KEY_PREFIX}${user.id}`, JSON.stringify(data));
+      // Race Supabase fetch against a 3.5s timeout
+      const fetchPromise = supabase.from('recipes').select('*').eq('user_id', user.id);
+      const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 3500));
+
+      const res = await Promise.race([fetchPromise, timeoutPromise]);
+
+      if (res && !res.timeout && !res.error && res.data) {
+        setRecipes(res.data);
+        await AsyncStorage.setItem(`${CACHE_KEY_PREFIX}${user.id}`, JSON.stringify(res.data)).catch(() => {});
+      } else {
+        const hasCached = await loadCachedRecipes(user.id);
+        if (!hasCached && recipes.length === 0) {
+          setRecipes(DEFAULT_STARTER_RECIPES);
+        }
       }
     } catch (e) {
-      console.log('Offline mode fetch fallback active');
+      console.log('Offline mode fetch fallback active:', e);
+      const hasCached = await loadCachedRecipes(user.id);
+      if (!hasCached && recipes.length === 0) {
+        setRecipes(DEFAULT_STARTER_RECIPES);
+      }
     } finally {
       setLoading(false);
     }

@@ -12,25 +12,25 @@ export default function SplashScreen() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 800, useNativeDriver: true }),
-      Animated.spring(scale, { toValue: 1, tension: 10, friction: 4, useNativeDriver: true })
+      Animated.timing(opacity, { toValue: 1, duration: 800, useNativeDriver: Platform.OS !== 'web' }),
+      Animated.spring(scale, { toValue: 1, tension: 10, friction: 4, useNativeDriver: Platform.OS !== 'web' })
     ]).start(() => {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(translateY, { toValue: -12, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-          Animated.timing(translateY, { toValue: 0, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true })
+          Animated.timing(translateY, { toValue: -12, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: Platform.OS !== 'web' }),
+          Animated.timing(translateY, { toValue: 0, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: Platform.OS !== 'web' })
         ])
       ).start();
     });
 
     Animated.loop(
       Animated.sequence([
-        Animated.timing(dot1, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.timing(dot2, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.timing(dot3, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.timing(dot1, { toValue: 0.3, duration: 400, useNativeDriver: true }),
-        Animated.timing(dot2, { toValue: 0.3, duration: 400, useNativeDriver: true }),
-        Animated.timing(dot3, { toValue: 0.3, duration: 400, useNativeDriver: true }),
+        Animated.timing(dot1, { toValue: 1, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(dot2, { toValue: 1, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(dot3, { toValue: 1, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(dot1, { toValue: 0.3, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(dot2, { toValue: 0.3, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(dot3, { toValue: 0.3, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
       ])
     ).start();
   }, []);

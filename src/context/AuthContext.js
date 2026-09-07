@@ -17,10 +17,12 @@ export function AuthProvider({ children }) {
 
     const initializeAuth = async () => {
       try {
+        const getSessionPromise = supabase.auth.getSession().catch(() => null);
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 1500));
+        
         const [authResponse, cachedOfflineUser] = await Promise.all([
-          supabase.auth.getSession().catch(() => null),
+          Promise.race([getSessionPromise, timeoutPromise]),
           AsyncStorage.getItem(OFFLINE_USER_KEY).catch(() => null),
-          new Promise(resolve => setTimeout(resolve, 2000))
         ]);
         
         if (mounted) {
@@ -33,7 +35,7 @@ export function AuthProvider({ children }) {
           }
         }
       } catch (err) {
-        console.error('Auth init error:', err);
+        console.log('Auth init offline fallback:', err);
         const cachedOfflineUser = await AsyncStorage.getItem(OFFLINE_USER_KEY).catch(() => null);
         if (mounted && cachedOfflineUser) {
           setUser(JSON.parse(cachedOfflineUser));
@@ -47,7 +49,7 @@ export function AuthProvider({ children }) {
 
     const timer = setTimeout(() => {
       if (mounted && loading) setLoading(false);
-    }, 3000);
+    }, 1500);
 
     let subscription;
     try {
@@ -72,7 +74,7 @@ export function AuthProvider({ children }) {
       });
       subscription = data?.subscription;
     } catch (err) {
-      console.error('Auth subscription error:', err);
+      console.log('Auth subscription offline notice:', err);
     }
 
     return () => {
@@ -84,13 +86,18 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, password) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const signInPromise = supabase.auth.signInWithPassword({ email, password });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Network connection failed. Please check internet connection.')), 4000)
+      );
+
+      const { data, error } = await Promise.race([signInPromise, timeoutPromise]);
       if (data?.user) {
         await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(data.user)).catch(() => {});
       }
       return { data, error };
     } catch (err) {
-      return { data: null, error: { message: 'Network connection failed. Please check internet connection.' } };
+      return { data: null, error: { message: 'Unable to connect to online server. Would you like to enter Offline Mode?' } };
     }
   };
 
@@ -108,7 +115,7 @@ export function AuthProvider({ children }) {
       });
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Signup request timed out. Please check your connection.')), 10000)
+        setTimeout(() => reject(new Error('Signup request timed out. Please check your connection.')), 5000)
       );
 
       const { data, error } = await Promise.race([signupPromise, timeoutPromise]);
@@ -130,13 +137,15 @@ export function AuthProvider({ children }) {
   const signInAsGuest = async () => {
     console.log('AuthProvider: Beginning Guest Sign-in');
     try {
-      const { data, error } = await supabase.auth.signInAnonymously();
-      if (!error && data?.user) {
-        await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(data.user)).catch(() => {});
-        return { data, error: null };
+      const guestPromise = supabase.auth.signInAnonymously();
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Offline guest mode')), 1500));
+      const res = await Promise.race([guestPromise, timeoutPromise]);
+      if (res && !res.error && res.data?.user) {
+        await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(res.data.user)).catch(() => {});
+        return { data: res.data, error: null };
       }
     } catch (err) {
-      console.log('Online guest login unavailable, switching to offline guest mode');
+      console.log('Online guest login unavailable, instantly active offline guest mode');
     }
 
     // Offline / Fallback local guest account
