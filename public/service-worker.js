@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chefstack-v3';
+const CACHE_NAME = 'chefstack-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
