@@ -15,62 +15,253 @@ const generateSmartRecipes = (query) => {
   const titleQuery = q.charAt(0).toUpperCase() + q.slice(1);
   const lowerQ = q.toLowerCase();
 
-  // 1. ICE CREAM & COLD DESSERTS
-  if (lowerQ.includes('ice cream') || lowerQ.includes('gelato') || lowerQ.includes('sorbet') || lowerQ.includes('sundae') || lowerQ.includes('parfait')) {
+  // 1. ICE CREAM, DESSERTS, SWEETS, BAKERY, CAKES & PASTRIES
+  const isSweet = lowerQ.includes('ice cream') || lowerQ.includes('gelato') || lowerQ.includes('sorbet') || 
+                  lowerQ.includes('sundae') || lowerQ.includes('parfait') || lowerQ.includes('cake') || 
+                  lowerQ.includes('pie') || lowerQ.includes('cookie') || lowerQ.includes('donut') || 
+                  lowerQ.includes('doughnut') || lowerQ.includes('brownie') || lowerQ.includes('pudding') || 
+                  lowerQ.includes('chocolate') || lowerQ.includes('sweet') || lowerQ.includes('dessert') || 
+                  lowerQ.includes('tart') || lowerQ.includes('pastry') || lowerQ.includes('waffle') || 
+                  lowerQ.includes('pancake') || lowerQ.includes('crepe') || lowerQ.includes('candy') || 
+                  lowerQ.includes('sugar') || lowerQ.includes('berry') || lowerQ.includes('vanilla') || 
+                  lowerQ.includes('mango') || lowerQ.includes('banana') || lowerQ.includes('strawberry') || 
+                  lowerQ.includes('caramel') || lowerQ.includes('custard');
+
+  if (isSweet) {
     return [
       {
-        title: `Classic Vanilla Bean Ice Cream`,
+        title: `Classic ${titleQuery} Delight`,
         type: 'food',
         category: 'Dessert',
         time: 20,
-        ingredients: ['2 cups Heavy Cream', '1 cup Whole Milk', '3/4 cup Granulated Sugar', '1 tbsp Pure Vanilla Extract or Bean', 'Pinch of Fine Sea Salt'],
-        steps: ['Whisk heavy cream, whole milk, sugar, vanilla, and salt in a bowl until sugar dissolves.', 'Pour mixture into an ice cream maker churn for 20-25 minutes.', 'Transfer to an airtight container and freeze for 4 hours until firm.', 'Scoop into chilled bowls and serve.']
+        ingredients: [
+          `2 cups Fresh ${titleQuery} base`,
+          '1 cup Heavy Whipping Cream',
+          '3/4 cup Granulated Sugar or Honey',
+          '1 tbsp Pure Vanilla Extract',
+          'Pinch of Sea Salt'
+        ],
+        steps: [
+          `Combine fresh ${q} base with heavy whipping cream, sugar, and vanilla extract in a chilled bowl.`,
+          'Whisk thoroughly until smooth and well blended.',
+          'Chill in the refrigerator or churn in an ice cream maker for 20 minutes.',
+          'Scoop into chilled dessert glasses and garnish with mint or fruit.'
+        ]
       },
       {
-        title: `Decadent Chocolate Fudge Sundae`,
-        type: 'food',
-        category: 'Dessert',
-        time: 10,
-        ingredients: ['3 scoops Vanilla or Chocolate Ice Cream', '1/4 cup Hot Chocolate Fudge Sauce', '2 tbsp Whipped Cream', '1 tbsp Chopped Toasted Peanuts', '1 Maraschino Cherry'],
-        steps: ['Place scoops of rich ice cream into a glass sundae dish.', 'Warm chocolate fudge sauce gently and drizzle generously over the scoops.', 'Top with a dollop of whipped cream, toasted peanuts, and a cherry.']
-      },
-      {
-        title: `Fresh Mango Graham Ice Cream Float`,
-        type: 'food',
-        category: 'Dessert',
-        time: 15,
-        ingredients: ['2 Ripe Sweet Mangoes (cubed)', '1 cup Chilled All-Purpose Cream', '1/2 cup Sweetened Condensed Milk', '1/2 cup Crushed Graham Crackers', '2 scoops Vanilla Ice Cream'],
-        steps: ['Whip all-purpose cream and condensed milk until fluffy.', 'Layer crushed grahams, cream, and ripe mango cubes in serving glasses.', 'Top with a large scoop of vanilla ice cream and fresh mango slices.', 'Chill for 30 minutes before serving.']
-      },
-      {
-        title: `Matcha Green Tea Gelato`,
-        type: 'food',
-        category: 'Dessert',
-        time: 25,
-        ingredients: ['2 tbsp Culinary Grade Matcha Powder', '1 1/2 cups Whole Milk', '1 cup Heavy Cream', '3/4 cup Sugar', '3 Large Egg Yolks'],
-        steps: ['Whisk matcha powder with warm milk until smooth without lumps.', 'Heat milk and cream in a saucepan over medium heat.', 'Whisk egg yolks and sugar until pale, then temper with warm milk mixture.', 'Cook until thickened, chill completely, churn in gelato maker, and freeze.']
-      },
-      {
-        title: `Berry Sorbet Delicacy`,
-        type: 'food',
-        category: 'Dessert',
-        time: 10,
-        ingredients: ['3 cups Frozen Mixed Berries (Strawberries, Blueberries, Raspberries)', '3 tbsp Honey or Agave Syrup', '1 tbsp Fresh Lemon Juice', '1/4 cup Cold Water', 'Fresh Mint for garnish'],
-        steps: ['Combine frozen berries, honey, lemon juice, and water in a high-speed blender.', 'Blend on high for 1-2 minutes until silky smooth and frozen.', 'Scoop immediately into chilled dessert bowls and garnish with mint.']
-      },
-      {
-        title: `Crispy Fried Ice Cream Tempura`,
+        title: `Fresh ${titleQuery} Parfait`,
         type: 'food',
         category: 'Dessert',
         time: 15,
-        ingredients: ['4 Hard Frozen Ice Cream Balls', '4 Slices White Bread or Pound Cake', '1/2 cup Ice Water', '1/2 cup Tempura Flour', 'Oil for deep frying', 'Chocolate Drizzle'],
-        steps: ['Wrap hard frozen ice cream balls tightly in cake slices and freeze for 2 hours.', 'Whisk tempura flour and ice water to create a cold batter.', 'Dip frozen wrapped balls into batter and deep fry in hot oil for 30 seconds until golden.', 'Serve immediately drizzled with chocolate sauce.']
+        ingredients: [
+          `1.5 cups Diced or Pureed ${titleQuery}`,
+          '1 cup Greek Yogurt or Sweetened Cream',
+          '1/2 cup Honey Oat Granola',
+          '2 tbsp Maple Syrup or Honey',
+          'Fresh Berries for topping'
+        ],
+        steps: [
+          'Layer Greek yogurt or sweetened cream in tall parfait glasses.',
+          `Add a generous layer of prepped ${q} followed by honey oat granola.`,
+          'Repeat layers until glasses are filled to the brim.',
+          'Drizzle with maple syrup and top with fresh berries before serving cold.'
+        ]
+      },
+      {
+        title: `Golden ${titleQuery} Bakery Cake`,
+        type: 'food',
+        category: 'Dessert',
+        time: 35,
+        ingredients: [
+          `1 cup ${titleQuery} (pureed or finely diced)`,
+          '2 cups All-Purpose Flour',
+          '1 cup Sugar',
+          '1/2 cup Unsalted Butter (melted)',
+          '2 Large Eggs',
+          '1 tsp Baking Powder & 1/2 tsp Vanilla'
+        ],
+        steps: [
+          'Preheat oven to 350°F (175°C) and grease a round cake pan.',
+          'Whisk flour, baking powder, and sugar in a large bowl.',
+          `Beat eggs with melted butter and vanilla, then fold in ${q} puree.`,
+          'Pour batter into pan and bake for 30-35 minutes until a toothpick comes out clean.',
+          'Let cool completely before slicing and serving.'
+        ]
+      },
+      {
+        title: `Fluffy ${titleQuery} Pancakes & Cream`,
+        type: 'food',
+        category: 'Breakfast',
+        time: 15,
+        ingredients: [
+          `1/2 cup ${titleQuery} topping or puree`,
+          '1.5 cups Pancake Flour Mix',
+          '1 cup Whole Milk',
+          '1 Egg',
+          '2 tbsp Melted Butter',
+          'Whipped Cream & Maple Syrup'
+        ],
+        steps: [
+          'Whisk pancake flour mix, milk, egg, and melted butter in a bowl until smooth.',
+          'Heat a non-stick griddle over medium heat and pour 1/4 cup batter for each pancake.',
+          'Cook until bubbles form on top, then flip and cook for another 1-2 minutes until golden.',
+          `Stack high, top generously with ${q} and whipped cream, and drizzle with maple syrup.`
+        ]
+      },
+      {
+        title: `Decadent ${titleQuery} Chocolate Mousse`,
+        type: 'food',
+        category: 'Dessert',
+        time: 20,
+        ingredients: [
+          `1 cup ${titleQuery} flavor base`,
+          '1 cup Dark Chocolate Chips',
+          '1.5 cups Heavy Cream (chilled)',
+          '2 tbsp Powdered Sugar',
+          '1 tsp Vanilla Extract'
+        ],
+        steps: [
+          'Melt dark chocolate chips over a water bath or microwave in short bursts.',
+          `Whip heavy cream with powdered sugar and vanilla until stiff peaks form, then fold in ${q}.`,
+          'Gently fold melted chocolate into the whipped cream mixture.',
+          'Pipe into dessert ramekins and chill for at least 1 hour until firm.'
+        ]
+      },
+      {
+        title: `Crispy ${titleQuery} Tart & Pastry`,
+        type: 'food',
+        category: 'Dessert',
+        time: 30,
+        ingredients: [
+          `1.5 cups Fresh ${titleQuery}`,
+          '1 Pre-made Tart Shell or Puff Pastry Sheet',
+          '1/2 cup Custard or Cream Cheese',
+          '3 tbsp Powdered Sugar',
+          '1 tbsp Apricot Jam (glazed)'
+        ],
+        steps: [
+          'Bake tart shell according to package directions until golden and crispy.',
+          'Spread thick custard or sweetened cream cheese evenly over the bottom of the cooled shell.',
+          `Arrange fresh ${q} slices elegantly on top of the cream layer.`,
+          'Warm apricot jam and brush over fruit for a glossy, sweet finish.'
+        ]
       }
     ];
   }
 
-  // 2. TUNA & EGG DISHES
-  if (lowerQ.includes('tuna') && lowerQ.includes('egg')) {
+  // 2. BEVERAGES, DRINKS, COFFEE, TEA, SMOOTHIES, JUICES
+  const isDrink = lowerQ.includes('drink') || lowerQ.includes('beverage') || lowerQ.includes('coffee') || 
+                  lowerQ.includes('tea') || lowerQ.includes('latte') || lowerQ.includes('espresso') || 
+                  lowerQ.includes('juice') || lowerQ.includes('smoothie') || lowerQ.includes('shake') || 
+                  lowerQ.includes('matcha') || lowerQ.includes('boba') || lowerQ.includes('cocktail') || 
+                  lowerQ.includes('mocktail') || lowerQ.includes('soda') || lowerQ.includes('lemonade') || 
+                  lowerQ.includes('cider') || lowerQ.includes('milkshake');
+
+  if (isDrink) {
+    return [
+      {
+        title: `Iced ${titleQuery} Refreshing Blend`,
+        type: 'drink',
+        category: 'Drinks',
+        time: 5,
+        ingredients: [
+          `1 cup Fresh ${titleQuery} base or juice`,
+          '1 cup Cold Water or Whole Milk',
+          '2 tbsp Honey or Simple Syrup',
+          '1 cup Ice Cubes',
+          'Fresh Mint Leaves for garnish'
+        ],
+        steps: [
+          `Combine ${q} base with milk or cold water in a shaker or pitcher.`,
+          'Add honey or simple syrup and stir or shake vigorously for 20 seconds.',
+          'Fill a tall serving glass with ice cubes.',
+          'Pour drink over ice and garnish with fresh mint leaves.'
+        ]
+      },
+      {
+        title: `Hot ${titleQuery} Gourmet Latte`,
+        type: 'drink',
+        category: 'Drinks',
+        time: 8,
+        ingredients: [
+          `1/2 cup Brewed ${titleQuery} base or concentrate`,
+          '1 cup Whole Milk or Oat Milk',
+          '1 tbsp Caramel or Vanilla Syrup',
+          'Whipped Cream & Cinnamon powder'
+        ],
+        steps: [
+          `Prepare hot ${q} concentrate in a ceramic coffee mug.`,
+          'Steam or froth whole milk until creamy and velvet soft.',
+          'Pour frothed milk gently over concentrate and stir in syrup.',
+          'Top with a mountain of whipped cream and a sprinkle of cinnamon.'
+        ]
+      },
+      {
+        title: `Creamy ${titleQuery} Smoothie Shake`,
+        type: 'drink',
+        category: 'Drinks',
+        time: 5,
+        ingredients: [
+          `1 cup ${titleQuery} (frozen)`,
+          '1/2 cup Greek Yogurt',
+          '1/2 cup Almond Milk or Oat Milk',
+          '1 tbsp Chia Seeds or Honey'
+        ],
+        steps: [
+          `Place frozen ${q}, Greek yogurt, almond milk, and honey into a high-speed blender.`,
+          'Blend on high speed for 60 seconds until silky smooth.',
+          'Pour into a tall smoothie cup and serve immediately with a straw.'
+        ]
+      }
+    ];
+  }
+
+  // 3. PIZZA, PASTA & ITALIAN
+  if (lowerQ.includes('pizza') || lowerQ.includes('pasta') || lowerQ.includes('spaghetti') || lowerQ.includes('lasagna') || lowerQ.includes('carbonara') || lowerQ.includes('bolognese') || lowerQ.includes('macaroni')) {
+    return [
+      {
+        title: `Gourmet ${titleQuery} Italian Pasta`,
+        type: 'food',
+        category: 'Main Course',
+        time: 25,
+        ingredients: ['250g Fettuccine or Penne Pasta', `1 cup ${titleQuery} toppings or sauce`, '1/2 cup Heavy Cream', '1/2 cup Grated Parmesan Cheese', '3 cloves Garlic (minced)', '2 tbsp Olive Oil', 'Fresh Basil'],
+        steps: ['Boil pasta in salted water until al dente, reserving 1/2 cup pasta water.', 'Sauté minced garlic in olive oil in a skillet until fragrant.', `Add ${q} and sauté for 3 minutes before pouring in heavy cream and parmesan.`, 'Toss cooked pasta into sauce, adding pasta water if needed to loosen.', 'Garnish with fresh basil and serve hot.']
+      },
+      {
+        title: `Crispy Artisan ${titleQuery} Pizza`,
+        type: 'food',
+        category: 'Main Course',
+        time: 30,
+        ingredients: ['1 Pre-made Pizza Dough Base', '1/2 cup Tomato Sauce', '1.5 cups Shredded Mozzarella Cheese', `1 cup Prepped ${titleQuery}`, '1 tbsp Olive Oil', 'Dried Oregano'],
+        steps: ['Preheat oven to 450°F (230°C) and line a baking sheet.', 'Spread tomato sauce evenly over dough base, leaving 1/2 inch border.', `Cover with shredded mozzarella and arrange ${q} generously on top.`, 'Drizzle with olive oil and sprinkle oregano.', 'Bake for 12-15 minutes until crust is golden brown and cheese is bubbling.']
+      }
+    ];
+  }
+
+  // 4. BURGERS, SANDWICHES & FAST FOOD
+  if (lowerQ.includes('burger') || lowerQ.includes('hamburger') || lowerQ.includes('cheeseburger') || lowerQ.includes('sandwich') || lowerQ.includes('wrap') || lowerQ.includes('taco') || lowerQ.includes('burrito') || lowerQ.includes('fries')) {
+    return [
+      {
+        title: `Ultimate ${titleQuery} Gourmet Burger`,
+        type: 'food',
+        category: 'Quick Meal',
+        time: 20,
+        ingredients: [`1 ${titleQuery} Burger Patty`, '2 Brioche Burger Buns (toasted)', '2 Slices Cheddar Cheese', 'Lettuce, Slice Tomato & Red Onion', '2 tbsp Chef Special Burger Sauce'],
+        steps: ['Sear patty on a hot skillet for 3-4 minutes per side until juicy and cooked.', 'Melt cheddar cheese slice on top of the patty during the last minute.', 'Spread burger sauce on toasted brioche bun bottoms.', 'Assemble with lettuce, tomato, cooked patty, onions, and top bun.']
+      },
+      {
+        title: `Loaded ${titleQuery} Crispy Wrap`,
+        type: 'food',
+        category: 'Quick Meal',
+        time: 15,
+        ingredients: [`1 cup Sliced ${titleQuery}`, '2 Large Tortilla Wraps', '1/2 cup Shredded Cheese', '1/4 cup Sour Cream or Mayo', 'Shredded Lettuce & Diced Tomatoes'],
+        steps: ['Sauté sliced filling in a skillet until crisp and golden.', 'Warm tortilla wraps on griddle for 20 seconds.', 'Fill wraps with lettuce, tomato, cheese, cooked filling, and sour cream.', 'Fold sides and roll tightly, then toast wrap on skillet for 1 minute per side.']
+      }
+    ];
+  }
+
+  // 5. TUNA & EGG DISHES
+  if (lowerQ.includes('tuna') || (lowerQ.includes('egg') && lowerQ.includes('tuna'))) {
     return [
       {
         title: `Sizzling Tuna Egg Sisig`,
@@ -95,19 +286,11 @@ const generateSmartRecipes = (query) => {
         time: 12,
         ingredients: ['1 can Flaked Tuna', '2 Hard-Boiled Eggs (diced)', '3 tbsp Mayonnaise', '1 tsp Dijon Mustard', '1/4 cup Diced Celery', '4 Slices Whole Wheat Bread', 'Lettuce Leaves'],
         steps: ['Mash hard-boiled eggs in a bowl and mix with flaked tuna.', 'Add mayonnaise, Dijon mustard, diced celery, salt, and pepper.', 'Stir well until creamy and well combined.', 'Spread generously onto toasted bread slices layered with lettuce leaves.']
-      },
-      {
-        title: `Tuna Egg Garlic Fried Rice`,
-        type: 'food',
-        category: 'Main Course',
-        time: 15,
-        ingredients: ['3 cups Day-Old Cold Rice', '1 can Flaked Tuna', '2 Scrambled Eggs', '5 cloves Garlic (minced)', '1 tbsp Soy Sauce', '1 tbsp Sesame Oil', 'Green Onions'],
-        steps: ['Sauté minced garlic in a wok with sesame oil until golden brown.', 'Add flaked tuna and stir-fry for 2 minutes.', 'Add cold day-old rice, breaking up any clumps, and toss with soy sauce.', 'Push rice to the side, scramble eggs, and fold into the fried rice.', 'Garnish with green onions and serve hot.']
       }
     ];
   }
 
-  // 3. FILIPINO DISHES (MENUDO, ADOBO, SINIGANG, SISIG, KINILAW, BICOL EXPRESS)
+  // 6. FILIPINO DISHES (MENUDO, ADOBO, SINIGANG, SISIG, KINILAW)
   if (lowerQ.includes('menudo')) {
     return [
       {
@@ -117,14 +300,6 @@ const generateSmartRecipes = (query) => {
         time: 40,
         ingredients: ['500g Pork Shoulder (cubed)', '150g Pork Liver (cubed)', '2 Hotdogs (sliced)', '1 Potato (diced)', '1 Carrot (diced)', '1 cup Tomato Sauce', '1/4 cup Raisins', 'Garlic & Onion'],
         steps: ['Marinate pork and liver in soy sauce and calamansi juice for 20 minutes.', 'Sauté garlic and onion in a pot, then brown the marinated pork.', 'Pour in tomato sauce and water, cover and simmer for 25 minutes until pork is tender.', 'Add pork liver, diced potatoes, carrots, hotdogs, and raisins.', 'Simmer for another 10 minutes until vegetables are cooked and sauce thickens.']
-      },
-      {
-        title: `Beef & Chickpea Menudo`,
-        type: 'food',
-        category: 'Main Course',
-        time: 45,
-        ingredients: ['500g Beef Sirloin (cubed)', '1/2 cup Cooked Chickpeas (Garbanzos)', '1 Red Bell Pepper (diced)', '1 cup Tomato Paste & Water', 'Garlic, Onion & Bay Leaves'],
-        steps: ['Sauté garlic and onion, then add beef cubes and sear until browned.', 'Add bay leaves, tomato paste, and beef broth.', 'Simmer covered for 35 minutes until beef is tender.', 'Stir in garbanzos and bell peppers, cooking for 5 more minutes.']
       }
     ];
   }
@@ -138,14 +313,6 @@ const generateSmartRecipes = (query) => {
         time: 45,
         ingredients: ['500g Pork Belly & Chicken Thighs', '1/2 cup Soy Sauce', '1/3 cup White Vinegar', '1 Head Garlic (crushed)', '2 Bay Leaves', '1 tsp Whole Black Peppercorns'],
         steps: ['Combine meat, crushed garlic, soy sauce, bay leaves, and peppercorns in a pot.', 'Simmer covered for 30 minutes until meat is tender.', 'Pour in vinegar and bring to a simmer uncovered without stirring for 10 minutes.', 'Sear meat in a skillet until crisp, then pour adobo sauce back over.']
-      },
-      {
-        title: `Crispy Adobo Flakes`,
-        type: 'food',
-        category: 'Quick Meal',
-        time: 20,
-        ingredients: ['2 cups Leftover Cooked Adobo Meat (shredded)', '3 tbsp Oil for frying', 'Garlic Chips'],
-        steps: ['Shred cooked adobo meat finely with forks.', 'Heat oil in a frying pan and fry shredded meat until golden brown and super crispy.', 'Garnish with crispy toasted garlic chips and serve over warm garlic rice.']
       }
     ];
   }
@@ -189,88 +356,46 @@ const generateSmartRecipes = (query) => {
     ];
   }
 
-  // 4. DRINKS & BEVERAGES
-  if (lowerQ.includes('drink') || lowerQ.includes('coffee') || lowerQ.includes('tea') || lowerQ.includes('latte') || lowerQ.includes('juice') || lowerQ.includes('smoothie') || lowerQ.includes('matcha')) {
-    return [
-      {
-        title: `Iced ${titleQuery} Special`,
-        type: 'drink',
-        category: 'Drinks',
-        time: 5,
-        ingredients: [`Fresh ${titleQuery} Base`, '1 cup Cold Milk or Oat Milk', '1-2 tbsp Sweetener or Honey', 'Ice Cubes'],
-        steps: ['Combine beverage base with milk and sweetener in a glass or shaker.', 'Stir or shake vigorously for 20 seconds.', 'Fill a glass with ice cubes and pour beverage over.', 'Serve cold with a straw.']
-      },
-      {
-        title: `Hot ${titleQuery} Latte`,
-        type: 'drink',
-        category: 'Drinks',
-        time: 8,
-        ingredients: [`${titleQuery} Concentrate`, '1 cup Steamed Whole Milk', '1 tbsp Vanilla Syrup or Brown Sugar', 'Whipped Cream'],
-        steps: ['Prepare beverage concentrate in a mug.', 'Steam or froth warm milk until silky smooth.', 'Pour frothed milk into concentrate and sweeten.', 'Top with whipped cream and serve hot.']
-      }
-    ];
-  }
-
-  // 5. DEFAULT AUTHENTIC DISH FALLBACK
+  // 7. DEFAULT SAVORY DISH FALLBACK (FOR CHICKEN, PORK, BEEF, VEGGIES, MEAL ITEMS)
   return [
     {
-      title: `Special ${titleQuery} Stir-Fry`,
+      title: `Classic ${titleQuery} Garlic Sauté`,
       type: 'food',
       category: 'Main Course',
       time: 20,
       ingredients: [
-        `Fresh ${titleQuery} main ingredients`,
-        '2 tbsp Sesame Oil or Butter',
-        '3 cloves Garlic (minced)',
+        `500g Fresh ${titleQuery}`,
+        '2 tbsp Olive Oil or Butter',
+        '4 cloves Garlic (minced)',
         '1/2 cup Chopped Onions',
-        '1 tbsp Soy Sauce or Seasoning',
-        'Salt & Freshly Ground Black Pepper to taste'
+        '1 tbsp Seasoning or Soy Sauce',
+        'Salt & Black Pepper to taste'
       ],
       steps: [
-        'Heat sesame oil or butter in a wide skillet over medium heat.',
-        'Sauté minced garlic and onions until aromatic and translucent.',
-        `Add prepped ${q} into the skillet and toss gently for 4-5 minutes.`,
-        'Season generously with soy sauce, pepper, and herbs of choice.',
-        'Serve warm alongside steamed rice or fresh greens.'
+        'Heat olive oil or butter in a skillet over medium heat.',
+        'Sauté minced garlic and onions until aromatic and soft.',
+        `Add prepped ${q} into the skillet and cook for 6-8 minutes until tender and cooked through.`,
+        'Season generously with salt, pepper, and herbs of choice.',
+        'Serve warm with steamed rice or roasted vegetables.'
       ]
     },
     {
-      title: `Sizzling ${titleQuery} Skillet`,
-      type: 'food',
-      category: 'Quick Meal',
-      time: 15,
-      ingredients: [
-        `Sliced ${titleQuery}`,
-        '1 tbsp Soy Sauce or Teriyaki',
-        '1 tsp Calamansi or Lemon Juice',
-        '1/2 tsp Chili Flakes',
-        'Garlic & Onions'
-      ],
-      steps: [
-        'Prep all ingredients and preheat a sizzling skillet over medium-high heat.',
-        `In a bowl, toss ${q} with lemon juice, soy sauce, and garlic.`,
-        'Sear in the skillet for 3-4 minutes per side until golden brown.',
-        'Garnish with chili flakes and serve hot.'
-      ]
-    },
-    {
-      title: `Creamy ${titleQuery} Bistro Bowl`,
+      title: `Gourmet ${titleQuery} Bistro Plate`,
       type: 'food',
       category: 'Comfort Food',
-      time: 20,
+      time: 25,
       ingredients: [
         `Selected ${titleQuery} portions`,
-        '1/2 cup Heavy Cream or Milk',
-        '1/4 cup Melted Cheese or Parmesan',
         '1 tbsp Butter',
+        '1/2 cup Vegetable or Meat Broth',
+        'Fresh Rosemary or Thyme',
         'Garlic Powder & Black Pepper'
       ],
       steps: [
-        'Melt butter in a saucepan over low-medium heat.',
-        `Add ${q} and gently sauté until warm and fragrant.`,
-        'Pour in cream and melted cheese, stirring continuously until smooth.',
-        'Simmer for 4-5 minutes until sauce thickens to rich bistro quality.',
-        'Plate hot and enjoy with garlic bread or warm pasta.'
+        'Melt butter in a skillet and sear ingredients over medium-high heat until golden brown.',
+        'Pour in broth and fresh herbs, reducing heat to medium-low.',
+        'Simmer for 10 minutes until sauce reduces to a rich glaze.',
+        'Plate neatly and serve hot with mashed potatoes or warm bread.'
       ]
     },
     {
@@ -280,14 +405,14 @@ const generateSmartRecipes = (query) => {
       time: 18,
       ingredients: [
         `Prepped ${titleQuery}`,
-        '1/2 cup Panko Breadcrumbs or Flour',
+        '1/2 cup Breadcrumbs or Seasoned Flour',
         '1 Beaten Egg',
         '1/2 tsp Paprika & Salt',
         'Cooking Oil for frying'
       ],
       steps: [
         'Dredge ingredients in seasoned flour, dip in beaten egg, and coat with breadcrumbs.',
-        'Heat 1 inch of cooking oil in a pan to 350°F (175°C).',
+        'Heat cooking oil in a pan to 350°F (175°C).',
         'Fry in small batches for 3-4 minutes until golden brown and crispy.',
         'Drain on paper towels and serve hot with dipping sauce.'
       ]
