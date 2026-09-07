@@ -19,6 +19,7 @@ import { searchRecipes, saveCustomApiKey, getCustomApiKey, searchLocalRecipes } 
 import { Modal } from 'react-native';
 import Toast from '../components/Toast';
 import AISearchCardSkeleton from '../components/AISearchCardSkeleton';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 export default function AISearchScreen({ navigation }) {
   const { colors, isDark } = useTheme();

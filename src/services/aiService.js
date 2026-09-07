@@ -1,10 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
   'gemini-1.5-flash',
-  'gemini-1.5-pro'
+  'gemini-1.5-pro',
+  'gemini-2.0-flash-exp'
 ];
 
 const CUSTOM_KEY_STORAGE = '@chefstack_gemini_api_key';
