@@ -126,6 +126,13 @@ export default function AISearchScreen({ navigation }) {
         {/* Search Section */}
         <View style={[styles.searchSection, { backgroundColor: colors.surface }]}>
           <View style={styles.searchContainer}>
+            <View style={[styles.disclaimerBox, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+              <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
+              <Text style={[styles.disclaimerText, { color: colors.textSecondary }]}>
+                AI recipes are generated automatically. Always verify raw ingredient freshness, cooking temperatures, and potential allergens.
+              </Text>
+            </View>
+
             <View style={[styles.searchBox, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
               <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
               <TextInput
@@ -136,9 +143,10 @@ export default function AISearchScreen({ navigation }) {
                 onSubmitEditing={handleSearch}
                 placeholderTextColor={colors.textMuted}
                 underlineColorAndroid="transparent"
+                accessibilityLabel="Search food recipe input"
               />
               {query.length > 0 && (
-                <TouchableOpacity onPress={() => setQuery('')}>
+                <TouchableOpacity onPress={() => setQuery('')} accessibilityLabel="Clear search text">
                   <Ionicons name="close-circle" size={20} color={colors.textMuted} />
                 </TouchableOpacity>
               )}
@@ -147,6 +155,8 @@ export default function AISearchScreen({ navigation }) {
               style={[styles.searchBtn, { backgroundColor: colors.primary, shadowColor: colors.primary }]} 
               onPress={handleSearch}
               disabled={loading}
+              accessibilityLabel="Find Recipe button"
+              accessibilityRole="button"
             >
               {loading ? (
                 <ActivityIndicator color={colors.surface} />
@@ -314,6 +324,20 @@ const styles = StyleSheet.create({
   searchContainer: {
     width: '100%',
     maxWidth: 600,
+  },
+  disclaimerBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 14,
+    gap: 8,
+  },
+  disclaimerText: {
+    fontSize: 12,
+    flex: 1,
+    lineHeight: 16,
   },
   searchBox: {
     flexDirection: 'row',

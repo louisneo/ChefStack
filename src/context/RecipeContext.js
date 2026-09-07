@@ -1,15 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 
 const RecipeContext = createContext();
+const CACHE_KEY_PREFIX = '@chefstack_cached_recipes_';
 
 export const RecipeProvider = ({ children }) => {
   const { user } = useAuth();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
+
+  // Monitor connectivity status
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleOnline = () => setIsOffline(false);
+      const handleOffline = () => setIsOffline(true);
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
+    }
+  }, []);
 
   const openAddRecipe = (recipe = null) => {
     setEditingRecipe(recipe);
@@ -21,51 +38,80 @@ export const RecipeProvider = ({ children }) => {
     setAddModalVisible(false);
   };
 
+  // Cache recipes locally whenever they change
+  useEffect(() => {
+    if (user && recipes.length > 0) {
+      AsyncStorage.setItem(`${CACHE_KEY_PREFIX}${user.id}`, JSON.stringify(recipes)).catch(() => {});
+    }
+  }, [recipes, user]);
+
   useEffect(() => {
     if (!user) {
       setRecipes([]);
       return;
     }
 
+    loadCachedRecipes(user.id);
     fetchRecipes();
 
-    // Setup Supabase Realtime Subscription!
-    const channel = supabase.channel('schema-db-changes')
-      .on(
-        'postgres',
-        { event: '*', schema: 'public', table: 'recipes', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setRecipes(prev => {
-              if (prev.find(r => r.id === payload.new.id)) return prev;
-              return [payload.new, ...prev];
-            });
-          } else if (payload.eventType === 'UPDATE') {
-            setRecipes(prev => prev.map(r => r.id === payload.new.id ? payload.new : r));
-          } else if (payload.eventType === 'DELETE') {
-            setRecipes(prev => prev.filter(r => r.id !== payload.old.id));
+    // Setup Supabase Realtime Subscription
+    try {
+      const channel = supabase.channel('schema-db-changes')
+        .on(
+          'postgres',
+          { event: '*', schema: 'public', table: 'recipes', filter: `user_id=eq.${user.id}` },
+          (payload) => {
+            if (payload.eventType === 'INSERT') {
+              setRecipes(prev => {
+                if (prev.find(r => r.id === payload.new.id)) return prev;
+                return [payload.new, ...prev];
+              });
+            } else if (payload.eventType === 'UPDATE') {
+              setRecipes(prev => prev.map(r => r.id === payload.new.id ? payload.new : r));
+            } else if (payload.eventType === 'DELETE') {
+              setRecipes(prev => prev.filter(r => r.id !== payload.old.id));
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (e) {
+      console.log('Realtime subscription offline mode:', e);
+    }
   }, [user]);
+
+  const loadCachedRecipes = async (userId) => {
+    try {
+      const cached = await AsyncStorage.getItem(`${CACHE_KEY_PREFIX}${userId}`);
+      if (cached) {
+        setRecipes(JSON.parse(cached));
+      }
+    } catch (e) {
+      console.log('Failed to load cached recipes:', e);
+    }
+  };
 
   const fetchRecipes = async () => {
     if (!user) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('*')
-      .eq('user_id', user.id);
-      
-    if (!error && data) {
-      setRecipes(data);
+    try {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('*')
+        .eq('user_id', user.id);
+        
+      if (!error && data) {
+        setRecipes(data);
+        await AsyncStorage.setItem(`${CACHE_KEY_PREFIX}${user.id}`, JSON.stringify(data));
+      }
+    } catch (e) {
+      console.log('Offline mode fetch fallback active');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const generateUUID = () => {
@@ -80,25 +126,28 @@ export const RecipeProvider = ({ children }) => {
     if (!user) return { error: new Error('User not logged in') };
     
     if (editingRecipe) {
-      // Update
       const optimisticUpdated = { ...editingRecipe, ...recipeData };
       setRecipes(prev => prev.map(r => r.id === optimisticUpdated.id ? optimisticUpdated : r));
       closeAddRecipe();
       
-      const { error } = await supabase.from('recipes').update(recipeData).eq('id', optimisticUpdated.id);
-      return { error };
+      try {
+        const { error } = await supabase.from('recipes').update(recipeData).eq('id', optimisticUpdated.id);
+        return { error };
+      } catch (err) {
+        return { error: null }; // Saved locally offline
+      }
     } else {
-      // Insert
       const newId = generateUUID(); 
       const optimisticRecipe = { ...recipeData, id: newId, user_id: user.id, is_favorite: false, created_at: new Date().toISOString() };
       setRecipes(prev => [optimisticRecipe, ...prev]);
       closeAddRecipe();
       
-      const { error, data: savedData } = await supabase.from('recipes').insert([{ ...recipeData, id: newId, user_id: user.id }]).select();
-      if (error) {
-        setRecipes(prev => prev.filter(r => r.id !== newId));
+      try {
+        const { error, data: savedData } = await supabase.from('recipes').insert([{ ...recipeData, id: newId, user_id: user.id }]).select();
+        return { error, data: savedData };
+      } catch (err) {
+        return { error: null, data: [optimisticRecipe] };
       }
-      return { error, data: savedData };
     }
   };
 
@@ -106,11 +155,15 @@ export const RecipeProvider = ({ children }) => {
     const originalRecipes = [...recipes];
     setRecipes(prev => prev.filter(r => r.id !== id));
     
-    const { error } = await supabase.from('recipes').delete().eq('id', id);
-    if (error) {
-      setRecipes(originalRecipes);
+    try {
+      const { error } = await supabase.from('recipes').delete().eq('id', id);
+      if (error) {
+        setRecipes(originalRecipes);
+      }
+      return { error };
+    } catch (e) {
+      return { error: null };
     }
-    return { error };
   };
 
   const toggleFavorite = async (id) => {
@@ -118,8 +171,12 @@ export const RecipeProvider = ({ children }) => {
     if (!recipe) return;
 
     setRecipes(prev => prev.map(r => r.id === id ? { ...r, is_favorite: !r.is_favorite } : r));
-    const { error } = await supabase.from('recipes').update({ is_favorite: !recipe.is_favorite }).eq('id', id);
-    return { error };
+    try {
+      const { error } = await supabase.from('recipes').update({ is_favorite: !recipe.is_favorite }).eq('id', id);
+      return { error };
+    } catch (e) {
+      return { error: null };
+    }
   };
 
   return (
@@ -127,6 +184,7 @@ export const RecipeProvider = ({ children }) => {
       recipes, 
       setRecipes,
       loading, 
+      isOffline,
       fetchRecipes, 
       addModalVisible, 
       openAddRecipe, 
@@ -142,3 +200,4 @@ export const RecipeProvider = ({ children }) => {
 };
 
 export const useRecipes = () => useContext(RecipeContext);
+

@@ -15,10 +15,10 @@ export const themeColors = {
     background: '#F4F7F5',
     surface: '#FFFFFF',
     text: '#1A2F26',
-    textSecondary: '#4A5D53',
-    textMuted: '#8E9C95',
-    border: '#DDE2DF',
-    borderLight: '#F0F2F1',
+    textSecondary: '#334155',
+    textMuted: '#475569',
+    border: '#CBD5E1',
+    borderLight: '#E2E8F0',
     card: '#FFFFFF',
   },
   dark: {
@@ -27,10 +27,10 @@ export const themeColors = {
     primaryHover: '#00C77A',
     primaryLight: '#00E58F20',
     background: '#1D1F24', // Very dark gray/charcoal
-    surface: '#262931', // Slightly lighter charoal for panels
+    surface: '#262931', // Panel surface
     text: '#FFFFFF', // Clean white
-    textSecondary: '#A0A4B0',
-    textMuted: '#686D7B',
+    textSecondary: '#CBD5E1',
+    textMuted: '#94A3B8',
     border: '#353945',
     borderLight: '#2C303A',
     card: '#262931',

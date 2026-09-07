@@ -21,7 +21,12 @@ export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggle
         {/* Image Area */}
         <View style={[styles.imageContainer, { backgroundColor: colors.borderLight }]}>
           {recipe.image ? (
-            <Image source={{ uri: recipe.image }} style={styles.image} />
+            <Image 
+              source={{ uri: recipe.image }} 
+              style={styles.image} 
+              accessibilityLabel={`Photo of ${recipe.title}`}
+              alt={`Photo of ${recipe.title}`}
+            />
           ) : (
             <View style={[styles.imagePlaceholder, { backgroundColor: colors.primary + '15' }]}>
               <Ionicons 
@@ -47,6 +52,8 @@ export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggle
                   recipe.is_favorite && { backgroundColor: colors.primary }
                 ]} 
                 onPress={onToggleFavorite}
+                accessibilityLabel={recipe.is_favorite ? `Remove ${recipe.title} from favorites` : `Add ${recipe.title} to favorites`}
+                accessibilityRole="button"
               >
                 <Ionicons 
                   name={recipe.is_favorite ? "heart" : "heart-outline"} 
@@ -58,6 +65,8 @@ export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggle
             <TouchableOpacity 
               style={[styles.actionBtn, { backgroundColor: colors.surface + 'CC' }]} 
               onPress={onEdit}
+              accessibilityLabel={`Edit recipe ${recipe.title}`}
+              accessibilityRole="button"
             >
               <Ionicons name="pencil" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
@@ -65,6 +74,8 @@ export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggle
             <TouchableOpacity 
               style={[styles.actionBtn, { backgroundColor: colors.surface + 'CC' }]} 
               onPress={onDelete}
+              accessibilityLabel={`Delete recipe ${recipe.title}`}
+              accessibilityRole="button"
             >
               <Ionicons name="trash" size={16} color={colors.error} />
             </TouchableOpacity>

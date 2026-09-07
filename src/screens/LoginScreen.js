@@ -173,11 +173,27 @@ export default function LoginScreen() {
             style={styles.linkButton} 
             onPress={() => navigation.navigate('Signup')}
             disabled={isLoading}
+            accessibilityLabel="Don't have an account? Sign Up"
+            accessibilityRole="button"
           >
             <Text style={[styles.linkText, { color: colors.primary }]}>
               Don't have an account? <Text style={[styles.linkTextBold, { color: colors.primary }]}>Sign Up</Text>
             </Text>
           </TouchableOpacity>
+
+          <View style={styles.legalFooter}>
+            <TouchableOpacity onPress={() => navigation.navigate('Terms')} accessibilityRole="link">
+              <Text style={[styles.legalFooterLink, { color: colors.textSecondary }]}>Terms</Text>
+            </TouchableOpacity>
+            <Text style={{ color: colors.textMuted }}>•</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Privacy')} accessibilityRole="link">
+              <Text style={[styles.legalFooterLink, { color: colors.textSecondary }]}>Privacy</Text>
+            </TouchableOpacity>
+            <Text style={{ color: colors.textMuted }}>•</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('CookiePolicy')} accessibilityRole="link">
+              <Text style={[styles.legalFooterLink, { color: colors.textSecondary }]}>Cookies</Text>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       </ScrollView>
 
@@ -301,7 +317,19 @@ const styles = StyleSheet.create({
   },
   linkButton: {
     alignItems: 'center',
-    paddingBottom: 40,
+    paddingBottom: 16,
+  },
+  legalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+    paddingBottom: 32,
+  },
+  legalFooterLink: {
+    fontSize: 13,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
   linkText: {
     fontSize: 16,

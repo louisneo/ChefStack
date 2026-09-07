@@ -35,6 +35,7 @@ export default function DashboardScreen({ navigation, route }) {
   const { 
     recipes, 
     loading, 
+    isOffline,
     fetchRecipes, 
     openAddRecipe, 
     deleteRecipe, 
@@ -126,6 +127,13 @@ export default function DashboardScreen({ navigation, route }) {
           }
           ListHeaderComponent={
             <>
+              {isOffline && (
+                <View style={styles.offlineBanner}>
+                  <Ionicons name="cloud-offline-outline" size={18} color="#FFFFFF" />
+                  <Text style={styles.offlineBannerText}>Offline Mode - Serving cached recipes</Text>
+                </View>
+              )}
+
               <View style={styles.titleContainer}>
                 <Text style={[styles.title, { color: colors.text }]}>
                   {isFavoritesView ? 'My Favorites' : 'Kitchen Stack'}
@@ -303,6 +311,22 @@ export default function DashboardScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  offlineBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#334155',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    gap: 8,
+  },
+  offlineBannerText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
   webDesktopPadding: {
     flex: 1,

@@ -22,6 +22,9 @@ import HelpScreen from '../screens/HelpScreen';
 import AboutScreen from '../screens/AboutScreen';
 import AISearchScreen from '../screens/AISearchScreen';
 
+import TermsScreen from '../screens/TermsScreen';
+import CookiePolicyScreen from '../screens/CookiePolicyScreen';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -93,7 +96,6 @@ function BottomTabNavigator() {
         options={({ navigation }) => ({
           tabBarLabel: () => null,
           tabBarButton: (props) => {
-            // Remove the default onPress, href, and onClick to prevent web page reloads
             const { onPress, href, onClick, ...restProps } = props;
             return (
               <TouchableOpacity
@@ -151,6 +153,8 @@ const linking = {
       },
       Notifications: 'notifications',
       Privacy: 'privacy',
+      Terms: 'terms',
+      CookiePolicy: 'cookies',
       Help: 'help',
       About: 'about',
       Login: 'login',
@@ -167,13 +171,6 @@ export default function AppNavigator() {
     return <SplashScreen />;
   }
 
-  const handleGlobalSaveRecipe = async (recipeData) => {
-    // This is a minimal bridge - we can improve this later with a dedicated service
-    if (!user) return;
-    const { error } = await supabase.from('recipes').insert([{ ...recipeData, user_id: user.id }]);
-    return { error };
-  };
-
   return (
     <NavigationContainer linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -189,6 +186,8 @@ export default function AppNavigator() {
             </Stack.Screen>
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="Privacy" component={PrivacyScreen} />
+            <Stack.Screen name="Terms" component={TermsScreen} />
+            <Stack.Screen name="CookiePolicy" component={CookiePolicyScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="About" component={AboutScreen} />
           </>
@@ -196,6 +195,9 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="Terms" component={TermsScreen} />
+            <Stack.Screen name="Privacy" component={PrivacyScreen} />
+            <Stack.Screen name="CookiePolicy" component={CookiePolicyScreen} />
           </>
         )}
       </Stack.Navigator>

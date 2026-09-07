@@ -8,8 +8,13 @@ export default function Header() {
   return (
     <View style={[styles.container, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
       <View style={styles.innerContainer}>
-        <View style={styles.logoContainer}>
-          <Image source={require('../../assets/chefstack_logo.png')} style={{ width: 32, height: 32 }} />
+        <View style={styles.logoContainer} accessibilityRole="header">
+          <Image 
+            source={require('../../assets/chefstack_logo.png')} 
+            style={{ width: 32, height: 32 }} 
+            accessibilityLabel="ChefStack App Logo"
+            alt="ChefStack App Logo"
+          />
           <Text style={[styles.logoText, { color: colors.text }]}>ChefStack</Text>
         </View>
       </View>

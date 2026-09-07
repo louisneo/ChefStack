@@ -5,6 +5,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 import { ThemeProvider } from './src/context/ThemeContext';
+import CookieConsentModal from './src/components/CookieConsentModal';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <AppNavigator />
+          <CookieConsentModal />
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>

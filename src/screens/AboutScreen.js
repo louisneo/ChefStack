@@ -61,18 +61,41 @@ export default function AboutScreen() {
           </Animated.View>
 
           <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.section}>
-            <Text style={styles.sectionTitle}>Credits</Text>
-            <Text style={styles.creditText}>Developed with ❤️ by the ChefStack Team</Text>
-            <Text style={styles.copyrightText}>© 2024 ChefStack. All rights reserved.</Text>
+            <Text style={styles.sectionTitle}>Credits & Licensing</Text>
+            <Text style={styles.creditText}>Built with React Native & Expo. AI powered by Google Gemini API.</Text>
+            <Text style={styles.copyrightText}>© 2026 ChefStack. All rights reserved.</Text>
           </Animated.View>
 
           <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.legalSection}>
-            {['Terms of Service', 'Privacy Policy', 'Licenses'].map((label, i) => (
-              <TouchableOpacity key={i} style={styles.legalItem}>
-                <Text style={styles.legalLabel}>{label}</Text>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
-            ))}
+            <TouchableOpacity 
+              style={styles.legalItem} 
+              onPress={() => navigation.navigate('Terms')}
+              accessibilityLabel="View Terms of Service"
+              accessibilityRole="button"
+            >
+              <Text style={styles.legalLabel}>Terms of Service</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.legalItem} 
+              onPress={() => navigation.navigate('Privacy')}
+              accessibilityLabel="View Privacy Policy"
+              accessibilityRole="button"
+            >
+              <Text style={styles.legalLabel}>Privacy Policy</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.legalItem} 
+              onPress={() => navigation.navigate('CookiePolicy')}
+              accessibilityLabel="View Cookie & Storage Policy"
+              accessibilityRole="button"
+            >
+              <Text style={styles.legalLabel}>Cookie & Storage Policy</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
           </Animated.View>
         </View>
       </ScrollView>

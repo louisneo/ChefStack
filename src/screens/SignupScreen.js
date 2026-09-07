@@ -188,18 +188,35 @@ export default function SignupScreen() {
             />
           </View>
 
-          <TouchableOpacity 
-            style={styles.checkboxContainer} 
-            onPress={() => setAgreed(!agreed)}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.checkbox, { backgroundColor: colors.surface, borderColor: colors.borderLight }, agreed && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity 
+              style={[styles.checkbox, { backgroundColor: colors.surface, borderColor: colors.borderLight }, agreed && { backgroundColor: colors.primary, borderColor: colors.primary }]}
+              onPress={() => setAgreed(!agreed)}
+              accessibilityLabel={agreed ? "Agreed to terms" : "Agree to terms"}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: agreed }}
+            >
               {agreed && <Ionicons name="checkmark" size={16} color={colors.surface} />}
-            </View>
+            </TouchableOpacity>
             <Text style={[styles.checkboxText, { color: colors.textSecondary }]}>
-              I agree to the <Text style={[styles.linkTextBold, { color: colors.primary }]}>Terms & Conditions</Text> and <Text style={[styles.linkTextBold, { color: colors.primary }]}>Privacy Policy</Text>
+              I agree to the{' '}
+              <Text 
+                style={[styles.linkTextBold, { color: colors.primary }]} 
+                onPress={() => navigation.navigate('Terms')}
+                accessibilityRole="link"
+              >
+                Terms & Conditions
+              </Text>
+              {' '}and{' '}
+              <Text 
+                style={[styles.linkTextBold, { color: colors.primary }]} 
+                onPress={() => navigation.navigate('Privacy')}
+                accessibilityRole="link"
+              >
+                Privacy Policy
+              </Text>
             </Text>
-          </TouchableOpacity>
+          </View>
 
           {errorMsg ? (
             <Animated.View entering={FadeInDown} style={{ backgroundColor: colors.error + '20', padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: colors.error + '40' }}>
