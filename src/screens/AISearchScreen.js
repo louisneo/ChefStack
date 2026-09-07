@@ -48,8 +48,9 @@ export default function AISearchScreen({ navigation }) {
     }, [navigation])
   );
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
+  const handleSearch = async (overrideQuery) => {
+    const searchQuery = (typeof overrideQuery === 'string' ? overrideQuery : query).trim();
+    if (!searchQuery) return;
     
     setLoading(true);
     setSearchError(null);
@@ -57,11 +58,11 @@ export default function AISearchScreen({ navigation }) {
     setCurrentPage(1);
 
     try {
-      const { recipes, isFood, error } = await searchRecipes(query);
+      const { recipes, isFood, error } = await searchRecipes(searchQuery);
       if (error) {
         setSearchError(error);
       } else if (!isFood) {
-        setSearchError("I only find food and drinks! 🍳 Try searching for something like 'Chicken Adobo' or 'Iced Coffee'.");
+        setSearchError("I only find food and drinks! 🍳 Try searching for something like 'Kinilaw', 'Chicken Adobo' or 'Iced Coffee'.");
       } else if (recipes.length === 0) {
         setSearchError("I couldn't find any recipes for that. Try a different food name!");
       } else {
@@ -153,7 +154,7 @@ export default function AISearchScreen({ navigation }) {
             </View>
             <TouchableOpacity 
               style={[styles.searchBtn, { backgroundColor: colors.primary, shadowColor: colors.primary }]} 
-              onPress={handleSearch}
+              onPress={() => handleSearch()}
               disabled={loading}
               accessibilityLabel="Find Recipe button"
               accessibilityRole="button"
@@ -164,6 +165,34 @@ export default function AISearchScreen({ navigation }) {
                 <Text style={[styles.searchBtnText, { color: colors.surface }]}>Find Recipe</Text>
               )}
             </TouchableOpacity>
+
+            {/* Quick Suggestion Chips */}
+            <View style={styles.chipWrapper}>
+              <Text style={[styles.chipSectionTitle, { color: colors.textSecondary }]}>Popular Suggestions:</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+                {[
+                  { label: '🐟 Kinilaw', term: 'Kinilaw' },
+                  { label: '🍲 Sinigang', term: 'Sinigang' },
+                  { label: '🍗 Adobo', term: 'Pork Adobo' },
+                  { label: '🍳 Sisig', term: 'Pork Sisig' },
+                  { label: '🍝 Carbonara', term: 'Carbonara' },
+                  { label: '🍵 Matcha', term: 'Matcha Latte' }
+                ].map(chip => (
+                  <TouchableOpacity
+                    key={chip.term}
+                    style={[styles.suggestionChip, { backgroundColor: colors.background, borderColor: colors.borderLight }]}
+                    onPress={() => {
+                      setQuery(chip.term);
+                      handleSearch(chip.term);
+                    }}
+                    accessibilityLabel={`Search for ${chip.term}`}
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.chipText, { color: colors.text }]}>{chip.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           </View>
         </View>
 
@@ -368,6 +397,28 @@ const styles = StyleSheet.create({
   searchBtnText: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  chipWrapper: {
+    marginTop: 16,
+  },
+  chipSectionTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  chipRow: {
+    gap: 8,
+  },
+  suggestionChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   scrollContent: {
     padding: 20,

@@ -1,333 +1,273 @@
-const getGeminiConfig = (modelName, version = 'v1beta') => {
-  const key = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-  return {
-    key,
-    url: `https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${key}`
-  };
-};
-
 /**
- * Dynamically fetches available Gemini models to avoid 404s on deprecated names.
+ * ChefStack AI Recipe Finder Service
+ * Supports Google Gemini API (gemini-2.5-flash, gemini-2.0-flash, gemini-1.5-flash)
+ * with robust local fallback database (Kinilaw, Adobo, Sinigang, Sisig, etc.) & TheMealDB API integration.
  */
-const fetchAvailableModels = async (apiKey) => {
-  const versions = ['v1beta', 'v1'];
-  for (const version of versions) {
-    try {
-      console.log(`Fetching available models for Gemini ${version}...`);
-      const url = `https://generativelanguage.googleapis.com/${version}/models?key=${apiKey}`;
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (response.status === 200) {
-        const data = await response.json();
-        const supportedModels = (data.models || [])
-          .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
-          .map(m => m.name.split('/').pop());
-        
-        if (supportedModels.length > 0) {
-          console.log(`Found ${supportedModels.length} models for ${version}`);
-          return { version, models: supportedModels };
-        }
-      }
-    } catch (err) {
-      console.log(`Gemini ${version} discovery failed:`, err.message);
-    }
-  }
-  return null;
-};
+const DYNAMIC_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
+  'gemini-1.5-pro'
+];
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-/**
- * Searches for food recipes using Gemini AI with Dynamic Model Discovery
- */
-export const searchRecipes = async (query) => {
-  console.log(`AI Search Service: v5.8 Active. Query: "${query}"`);
-  const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-  if (!apiKey) return { recipes: [], isFood: true };
-
-  // 1. DYNAMIC GEMINI DISCOVERY & ITERATION
-  const config = await fetchAvailableModels(apiKey);
+const generatePrompt = (query) => `
+  You are a professional chef assistant for ChefStack. Generate a list of 6 to 12 authentic, detailed food recipes matching the query: "${query}".
   
-  if (config) {
-    const { version, models } = config;
-    const prioritizedModels = [
-      ...models.filter(m => m === 'gemini-1.5-flash-latest'),
-      ...models.filter(m => m === 'gemini-1.5-flash'),
-      ...models.filter(m => m.includes('flash') && !m.includes('latest')),
-      ...models.filter(m => !m.includes('flash'))
-    ].slice(0, 3);
+  CRITICAL RULES:
+  1. ONLY return real food or drink recipes.
+  2. If query is gibberish or not food/drink related, return {"is_food": false, "recipes": []}.
+  3. Respond strictly in raw JSON without any markdown code blocks or wrapper text.
+  4. Each recipe must contain:
+     - title (string)
+     - type (always "food" or "drink")
+     - category (string, e.g., "Filipino Specialty", "Seafood", "Dessert", "Pasta", "Beverage")
+     - time (number in minutes)
+     - ingredients (array of strings)
+     - steps (array of strings)
 
-    for (const modelName of prioritizedModels) {
-      const backoffTimes = [2000, 4000]; // 2s, 4s backoff for 429
-      let attempts = 0;
+  Format:
+  {
+    "is_food": true,
+    "recipes": [
+      {
+        "title": "Classic Fish Kinilaw",
+        "type": "food",
+        "category": "Filipino Seafood",
+        "time": 20,
+        "ingredients": ["500g Fresh Tuna or Tanigue", "1 cup Coconut Vinegar", "1/2 cup Calamansi Juice", "1 Thumb-sized Ginger (minced)", "1 Red Onion (diced)", "2 Siling Labuyo (chopped)", "Cucumber & Salt to taste"],
+        "steps": ["Cubed raw fresh fish into 1/2-inch pieces", "Wash fish briefly with vinegar and drain thoroughly", "In a large bowl, combine calamansi juice, minced ginger, red onions, and chili", "Add fish cubes and gently mix", "Season with salt and let marinate in fridge for 10-15 minutes before serving"]
+      }
+    ]
+  }
+`;
 
-      while (attempts <= backoffTimes.length) {
-        try {
-          console.log(`Trying model: ${modelName} (${version}). Attempt ${attempts + 1}`);
-          const url = `https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${apiKey}`;
-          const requestBody = {
-            contents: [{ parts: [{ text: generatePrompt(query) }] }],
-          };
-          if (version === 'v1beta') {
-            requestBody.generationConfig = { response_mime_type: "application/json" };
-          }
-          
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 20000);
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody),
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
+// Built-in offline & fallback recipe catalog for popular dishes
+const FALLBACK_RECIPE_DATABASE = {
+  kinilaw: [
+    {
+      title: "Classic Fish Kinilaw (Cebu Style)",
+      type: "food",
+      category: "Filipino Seafood",
+      time: 20,
+      ingredients: ["500g Fresh Yellowfin Tuna", "1 cup Cane/Coconut Vinegar", "1/2 cup Fresh Calamansi Juice", "1 Thumb Ginger (minced)", "1 Red Onion (diced)", "3 Siling Labuyo (chopped)", "Salt & Black Pepper"],
+      steps: ["Slice fresh tuna into uniform 1/2 inch cubes", "Pour half of vinegar over fish, gently toss, and drain completely to sanitize", "In a glass bowl, mix remaining vinegar, calamansi juice, ginger, onions, and chili", "Toss fish in the citrus mix and chill in refrigerator for 15 minutes", "Garnish with fresh chili and serve cold"]
+    },
+    {
+      title: "Kinilaw sa Gata (Fish Ceviche with Coconut Milk)",
+      type: "food",
+      category: "Filipino Specialty",
+      time: 25,
+      ingredients: ["500g Tanigue (Spanish Mackerel)", "1/2 cup Coconut Cream (Kakang Gata)", "1/2 cup Vinegar", "1/2 cup Calamansi Juice", "Cucumber (sliced)", "Ginger & Chilis"],
+      steps: ["Wash cubed fish in vinegar and drain", "Combine calamansi juice, ginger, onions, and sliced cucumber", "Add fish and pour coconut cream over the mixture", "Mix gently until creamy and serve thoroughly chilled"]
+    },
+    {
+      title: "Kinilaw na Hipon (Shrimp Ceviche)",
+      type: "food",
+      category: "Seafood",
+      time: 15,
+      ingredients: ["400g Fresh Small Shrimps (shelled)", "1 cup Sukang Iloco or Cane Vinegar", "1/4 cup Calamansi Juice", "Garlic, Ginger & Red Onion", "Chili Peppers"],
+      steps: ["Clean and devein fresh shrimps", "Steep in vinegar for 10 minutes until opaque", "Drain excess vinegar and toss with calamansi juice, garlic, ginger, and chilis", "Serve cold with cucumber slices"]
+    },
+    {
+      title: "Kinilaw na Pusit (Squid Kinilaw)",
+      type: "food",
+      category: "Seafood",
+      time: 15,
+      ingredients: ["400g Fresh Baby Squid", "1/2 cup Calamansi Juice", "1/2 cup Vinegar", "Ginger, Red Onion, Sili"],
+      steps: ["Clean baby squid and blanch in boiling water for 30 seconds", "Immediately plunge into ice water and drain", "Slice into rings and marinate in calamansi juice, vinegar, ginger, and chili", "Serve chilled"]
+    }
+  ],
+  adobo: [
+    {
+      title: "Classic Pork Belly Adobo",
+      type: "food",
+      category: "Filipino Specialty",
+      time: 50,
+      ingredients: ["1kg Pork Belly (cubed)", "1/2 cup Soy Sauce", "1/2 cup Vinegar", "1 head Garlic (crushed)", "2 Bay Leaves", "Whole Black Peppercorns"],
+      steps: ["Marinate pork belly in soy sauce and garlic for 30 minutes", "In a heavy pot, brown pork on high heat", "Add bay leaves, peppercorns, and leftover marinade", "Simmer covered for 30 minutes until meat is tender", "Pour in vinegar without stirring and simmer uncovered for 10 minutes until sauce thickens"]
+    },
+    {
+      title: "Chicken & Egg Adobo",
+      type: "food",
+      category: "Filipino Specialty",
+      time: 40,
+      ingredients: ["1kg Chicken Thighs/Drumsticks", "4 Hard-boiled Eggs", "1/2 cup Soy Sauce", "1/2 cup Vinegar", "Garlic & Bay Leaves"],
+      steps: ["Brown chicken pieces in a hot skillet", "Add soy sauce, garlic, bay leaves, and water", "Simmer for 25 minutes", "Add hard-boiled eggs and vinegar, cooking until sauce coats the chicken"]
+    },
+    {
+      title: "Adobong Sitaw with Pork",
+      type: "food",
+      category: "Vegetable Side",
+      time: 25,
+      ingredients: ["1 bunch Yardlong Beans (Sitaw)", "200g Pork Slices", "3 tbsp Soy Sauce", "2 tbsp Vinegar", "Garlic & Onion"],
+      steps: ["Sauté garlic, onion, and pork until browned", "Add sitaw cut into 2-inch pieces", "Pour soy sauce and vinegar, cooking until beans are crisp-tender"]
+    }
+  ],
+  sinigang: [
+    {
+      title: "Sinigang na Baboy (Pork Tamarind Soup)",
+      type: "food",
+      category: "Sour Soup",
+      time: 60,
+      ingredients: ["1kg Pork Ribs or Belly", "1 packet Sampaloc Mix or Fresh Tamarind", "1 bunch Kangkong", "Radish, Eggplant, Gabi, Tomatoes, Onion"],
+      steps: ["Boil pork with onions and tomatoes until tender (approx. 45 mins)", "Add gabi (taro) and radish, cooking until soft", "Stir in tamarind souring agent", "Add eggplant and kangkong leaves, simmer for 2 minutes before serving hot"]
+    },
+    {
+      title: "Sinigang na Hipon (Shrimp Sinigang)",
+      type: "food",
+      category: "Sour Soup",
+      time: 25,
+      ingredients: ["500g Large Shrimps", "1 Sampaloc Mix", "Kangkong, Radish, Tomatoes, Siling Haba"],
+      steps: ["Bring water with tomatoes, onions, and radish to a boil", "Add tamarind mix and green chilis", "Add fresh shrimps and kangkong, simmering for 3 minutes until cooked"]
+    }
+  ],
+  sisig: [
+    {
+      title: "Sizzling Kapampangan Pork Sisig",
+      type: "food",
+      category: "Filipino Specialty",
+      time: 60,
+      ingredients: ["1kg Pork Mask/Belly & Chicken Liver", "2 Red Onions (diced)", "5 Calamansi", "Siling Labuyo", "1 tbsp Mayonnaise (optional)", "Egg"],
+      steps: ["Boil pork mask until tender, then char-grill until crispy", "Chop pork and cooked liver finely", "Sauté chopped onions and chilis, then fold in pork", "Season with calamansi juice, salt, and pepper", "Serve on a piping hot sizzling plate with a raw egg on top"]
+    },
+    {
+      title: "Crispy Tofu Sisig",
+      type: "food",
+      category: "Vegetarian",
+      time: 25,
+      ingredients: ["4 blocks Hard Tofu (cubed)", "1 Red Onion", "2 tbsp Mayonnaise", "1 tbsp Soy Sauce", "Green Chilis", "Calamansi"],
+      steps: ["Deep fry tofu cubes until golden and extra crispy", "Chop tofu finely and toss with onions, chilis, soy sauce, and mayo", "Serve hot with fresh calamansi"]
+    }
+  ],
+  carbonara: [
+    {
+      title: "Classic Creamy Carbonara",
+      type: "food",
+      category: "Pasta",
+      time: 25,
+      ingredients: ["400g Spaghetti", "200g Bacon or Pancetta", "3 Egg Yolks", "1 cup Parmesan Cheese", "Heavy Cream", "Garlic"],
+      steps: ["Cook pasta in salted water until al dente", "Crisp bacon in a skillet with minced garlic", "Whisk egg yolks, parmesan cheese, and cream together", "Toss hot drained pasta into bacon skillet off heat, quickly stirring in egg cream mixture"]
+    }
+  ],
+  matcha: [
+    {
+      title: "Iced Matcha Green Tea Latte",
+      type: "drink",
+      category: "Beverage",
+      time: 5,
+      ingredients: ["2 tsp Ceremonial Grade Matcha", "1/4 cup Warm Water", "3/4 cup Whole/Oat Milk", "1 tbsp Honey or Maple Syrup", "Ice Cubes"],
+      steps: ["Whisk matcha powder into warm water until frothy", "Fill a tall glass with ice cubes and milk", "Pour matcha mixture over milk and sweeten to taste"]
+    }
+  ]
+};
 
-          if (response.status === 200) {
-            const data = await response.json();
-            const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (jsonText) {
-              const result = JSON.parse(jsonText);
-              const recipes = Array.isArray(result) ? result : (result.recipes || []);
-              const isFood = result.is_food !== false;
+export const searchRecipes = async (query) => {
+  const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+  const cleanQuery = (query || '').trim().toLowerCase();
+
+  if (!cleanQuery) return { recipes: [], isFood: true };
+
+  // Heuristic gibberish check
+  const isGibberish = /^[asdfghjklqwertyuiopzxcvbnm]+$/i.test(cleanQuery) && cleanQuery.length > 7 && !/[aeiou]/i.test(cleanQuery);
+  if (isGibberish) {
+    return { recipes: [], isFood: false };
+  }
+
+  // 1. TRY GEMINI API (Primary AI Engine)
+  if (apiKey) {
+    for (const modelName of DYNAMIC_MODELS) {
+      try {
+        console.log(`ChefStack AI: Querying ${modelName}...`);
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: generatePrompt(cleanQuery) }] }],
+            generationConfig: { response_mime_type: "application/json" }
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (response.status === 200) {
+          const data = await response.json();
+          const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (jsonText) {
+            const parsed = JSON.parse(jsonText);
+            const recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
+            const isFood = parsed.is_food !== false;
+            if (recipes.length > 0) {
+              console.log(`Gemini ${modelName} returned ${recipes.length} recipes.`);
               return { recipes, isFood };
             }
-          } else if (response.status === 429) {
-            if (attempts < backoffTimes.length) {
-              const waitMs = backoffTimes[attempts];
-              console.log(`${modelName} is rate-limited (429). Retrying in ${waitMs/1000}s...`);
-              await delay(waitMs);
-              attempts++;
-              continue;
-            } else {
-              console.log(`${modelName} max retries hit for 429.`);
-              break; // Try next model or fallback
-            }
-          } else {
-            console.log(`${modelName} failure (status ${response.status}). Trying next model.`);
-            break;
           }
-        } catch (err) {
-          console.log(`${modelName} error:`, err.message);
-          break;
         }
+      } catch (err) {
+        console.log(`Gemini ${modelName} call failed/skipped:`, err.message);
       }
     }
   }
 
-  // 2. OPENAI FALLBACK (If Gemini failed or was skipped)
-  const openaiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
-  if (openaiKey) {
-    try {
-      console.log(`Trying OpenAI fallback...`);
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: "system", content: "You are a ChefStack AI Assistant." },
-            { role: "user", content: generatePrompt(query) }
-          ],
-          response_format: { type: "json_object" }
-        })
-      });
-
-      if (response.status === 200) {
-        const data = await response.json();
-        const jsonText = data.choices?.[0]?.message?.content;
-        if (jsonText) {
-          const result = JSON.parse(jsonText);
-          const recipes = Array.isArray(result) ? result : (result.recipes || []);
-          const isFood = result.is_food !== false;
-          return { recipes, isFood };
-        }
-      }
-    } catch (err) {
-      console.warn(`OpenAI Fallback failed:`, err.message);
+  // 2. SMART LOCAL FALLBACK DATABASE (Instant guaranteed results for Kinilaw, Adobo, Sinigang, Sisig, etc.)
+  for (const [key, recipes] of Object.entries(FALLBACK_RECIPE_DATABASE)) {
+    if (cleanQuery.includes(key) || key.includes(cleanQuery)) {
+      console.log(`Serving local fallback recipes for "${cleanQuery}" (${key})`);
+      return { recipes, isFood: true };
     }
   }
 
-  // 3. EMERGENCY VARIATIONS (Prioritized for core terms if AI fails)
-  const normalizedQuery = query.toLowerCase();
-  
-  // Whitelist of ~50 popular food/drink terms to bypass "Busy AI" error
-  const COMMON_TERMS = [
-    // Filipino
-    'adobo', 'sinigang', 'sisig', 'bicol express', 'pancit', 'lumpia', 'menudo', 'caldereta', 
-    'tinola', 'kare-kare', 'pinakbet', 'bulalo', 'halo-halo', 'lechon', 'humba', 'bagoong', 
-    'tocino', 'longganisa', 'tapa', 'lugaw', 'champorado', 'bibingka', 'puto', 'ensaymada', 
-    'pandesal', 'leche flan', 'dinuguan', 'afritada', 'mechado', 'tapsilog',
-    // International
-    'pizza', 'burger', 'pasta', 'sushi', 'ramen', 'taco', 'burrito', 'salad', 'steak', 
-    'chicken', 'fries', 'sandwich', 'soup', 'curry', 'pancake', 'waffle', 'omelette', 
-    'coffee', 'tea', 'juice', 'smoothie', 'matcha', 'latte', 'espresso', 'capuccino',
-    'chocolate', 'cake', 'cookie', 'ice cream', 'donut', 'muffin'
-  ];
-
-  const isCommonTerm = COMMON_TERMS.some(term => normalizedQuery.includes(term));
-
-  if (!isCommonTerm) {
-    // If it's not a core demo/common term and AI is busy, return the user-requested error
-    return { 
-      error: "The AI is currently too busy. Please try again in a minute.", 
-      recipes: [], 
-      isFood: true 
-    };
-  }
-  
-  // High-variety variations for core culinary terms during AI downtime
-  if (normalizedQuery.includes('adobo')) {
-    console.log("Serving high-variety Adobo emergency fallback.");
-    const adoboVariations = [
-      { title: "Classic Pork Adobo", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/pork-adobo-3.jpg", time: 45, ingredients: ["Pork Belly", "Soy Sauce", "Vinegar", "Garlic"], steps: ["Sauté garlic", "Brown pork", "Simmer with soy sauce and vinegar"] },
-      { title: "Savory Chicken Adobo", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/11/adobo-with-liver-spread-1.jpg", time: 40, ingredients: ["Chicken Thighs", "Soy Sauce", "Vinegar", "Peppercorns"], steps: ["Marinate chicken", "Simmer until tender", "Garnish with garlic chips"] },
-      { title: "Eggplant Adobo (Pinoy Style)", category: "Vegetarian", image: "https://www.kawalingpinoy.com/wp-content/uploads/2018/06/adobong-talong-4.jpg", time: 25, ingredients: ["Eggplant", "Soy Sauce", "Vinegar", "Chili"], steps: ["Fry eggplant", "Sauté aromatics", "Simmer briefly"] },
-      { title: "Adobong Pusit (Squid Adobo)", category: "Seafood", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/05/adobong-pusit-1.jpg", time: 30, ingredients: ["Fresh Squid", "Ink", "Soy Sauce", "Vinegar"], steps: ["Clean squid", "Sauté with ink", "Avoid overcooking"] },
-      { title: "Adobong Sitaw (Yardlong Beans)", category: "Vegetable Side", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/04/adobong-sitaw-with-pork-1.jpg", time: 20, ingredients: ["Yardlong Beans", "Pork Bits", "Soy Sauce"], steps: ["Sauté pork", "Add beans", "Simmer until crisp-tender"] },
-      { title: "Adobong Pula (Red Adobo)", category: "Regional Variety", image: "https://www.kawalingpinoy.com/wp-content/uploads/2019/07/adobo-sa-pula-4.jpg", time: 50, ingredients: ["Pork", "Annatto Seeds", "Vinegar"], steps: ["Cook with annatto", "Slow simmer", "No soy sauce version"] },
-      { title: "Creamy Adobo sa Gata", category: "Bicolano Style", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/11/adobo-sa-gata-1.jpg", time: 45, ingredients: ["Chicken/Pork", "Coconut Milk", "Chili"], steps: ["Prepare regular adobo", "Stir in coconut milk", "Add spice"] },
-      { title: "Beef Adobo (Batangas Style)", category: "Hearty Main", image: "https://www.kawalingpinoy.com/wp-content/uploads/2019/08/beef-adobo-3.jpg", time: 90, ingredients: ["Beef Brisket", "Soy Sauce", "Vinegar", "Star Anise"], steps: ["Slow cook beef", "Reduce sauce", "Serve with rice"] }
-    ];
-    return { recipes: adoboVariations, isFood: true };
-  }
-
-  // Variations for 'Bicol Express'
-  if (normalizedQuery.includes('bicol express')) {
-    const bicolVariations = [
-      { title: "Classic Bicol Express", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/05/pork-bicol-express-2.jpg", time: 40, ingredients: ["Pork Belly", "Coconut Milk", "Bagoong", "Chili"], steps: ["Sauté aromatics", "Add pork and bagoong", "Simmer in coconut milk", "Add lots of chili"] },
-      { title: "Chicken Bicol Express", category: "Filipino Specialty", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/10/chicken-bicol-express-1.jpg", time: 35, ingredients: ["Chicken Thighs", "Coconut Milk", "Chili"], steps: ["Brown chicken", "Simmer with spices", "Finish with thick cream"] },
-      { title: "Vegan Bicol Express (Jackfruit)", category: "Vegetarian", image: "https://www.kawalingpinoy.com/wp-content/uploads/2018/11/ginataang-langka-with-pork-1.jpg", time: 30, ingredients: ["Young Jackfruit", "Coconut Milk", "Miso", "Chili"], steps: ["Stew jackfruit", "Add spicy coconut base"] },
-      { title: "Seafood Bicol Express", category: "Seafood", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/11/ginataang-pusit-1.jpg", time: 25, ingredients: ["Shrimp/Squid", "Coconut Milk", "Bagoong", "Chili"], steps: ["Quick sauté seafood", "Simmer briefly in sauce"] }
-    ];
-    return { recipes: bicolVariations, isFood: true };
-  }
-
-  // Variations for 'Sisig'
-  if (normalizedQuery.includes('sisig')) {
-    const sisigVariations = [
-      { title: "Authentic Pork Sisig", category: "Kapampangan Classic", image: "https://www.kawalingpinoy.com/wp-content/uploads/2015/12/authentic-pork-sisig-4.jpg", time: 60, ingredients: ["Pork Mask", "Liver", "Calamansi", "Onions"], steps: ["Boil and grill pork", "Chop finely", "Sauté with aromatics", "Serve on hot plate"] },
-      { title: "Crispy Sizzling Sisig", category: "Bar Favorite", image: "https://www.kawalingpinoy.com/wp-content/uploads/2015/12/authentic-pork-sisig-4.jpg", time: 45, ingredients: ["Crispy Lechon Kawali", "Mayo", "Egg"], steps: ["Chop lechon", "Sauté until extra crispy", "Add mayo and egg"] },
-      { title: "Chicken Sisig", category: "Healthier Option", image: "https://www.kawalingpinoy.com/wp-content/uploads/2021/04/chicken-sisig-1.jpg", time: 30, ingredients: ["Grilled Chicken", "Calamansi", "Onions"], steps: ["Grill chicken", "Dice and sauté", "Season with calamansi"] },
-      { title: "Tofu Sisig", category: "Vegetarian", image: "https://www.kawalingpinoy.com/wp-content/uploads/2018/06/tofu-sisig-4.jpg", time: 20, ingredients: ["Hard Tofu", "Mayo", "Chili"], steps: ["Deep fry tofu cubes", "Toss in creamy sauce", "Serve sizzling"] }
-    ];
-    return { recipes: sisigVariations, isFood: true };
-  }
-
-  // Variations for 'Matcha'
-  if (normalizedQuery.includes('matcha')) {
-    const matchaVariations = [
-      { title: "Matcha Green Tea Latte", category: "Drink", image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?q=80&w=600", time: 5, ingredients: ["Matcha powder", "Milk", "Honey"], steps: ["Whisk matcha", "Froth milk", "Combine and sweeten"] },
-      { title: "Matcha Iced Latte", category: "Cold Drink", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?q=80&w=600", time: 5, ingredients: ["Matcha", "Ice", "Almond Milk"], steps: ["Shake ingredients", "Pour over ice"] },
-      { title: "Matcha Pancake Stack", category: "Breakfast", image: "https://images.unsplash.com/photo-1506084868730-3423e9339e05?q=80&w=600", time: 20, ingredients: ["Matcha", "Flour", "Eggs", "Milk"], steps: ["Mix batter", "Flip on griddle", "Top with honey"] },
-      { title: "Matcha Green Tea Cookie", category: "Dessert", image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=600", time: 15, ingredients: ["Matcha", "Butter", "Sugar", "White Chocolate"], steps: ["Cream butter", "Add matcha", "Bake 10 mins"] },
-      { title: "Matcha Smoothie Bowl", category: "Health", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600", time: 10, ingredients: ["Matcha", "Banana", "Spinach", "Toppings"], steps: ["Blend base", "Add fruit toppings", "Sprinkle nuts"] }
-    ];
-    return { recipes: matchaVariations, isFood: true };
-  }
-
-  // Variations for 'Sinigang'
-  if (normalizedQuery.includes('sinigang')) {
-    const sinigangVariations = [
-      { title: "Sinigang na Baboy (Pork)", category: "Sour Soup", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/01/pork-sinigang-6.jpg", time: 60, ingredients: ["Pork Belly", "Tamarind", "Kangkong", "Radish"], steps: ["Boil pork", "Add tamarind", "Simmer vegetables"] },
-      { title: "Sinigang na Hipon (Shrimp)", category: "Sour Soup", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/05/sinigang-na-hipon-2.jpg", time: 20, ingredients: ["Shrimp", "Tamarind", "Siling Haba"], steps: ["Boil broth", "Quick cook shrimp", "Add veggies"] },
-      { title: "Sinigang na Isda (Fish)", category: "Sour Soup", image: "https://www.kawalingpinoy.com/wp-content/uploads/2013/10/sinigang-na-bangus-sa-bayabas-1.jpg", time: 30, ingredients: ["Bangus", "Guava/Tamarind", "Miso"], steps: ["Prepare sour base", "Poach fish", "Simmer greens"] },
-      { title: "Sinigang na Baka (Beef)", category: "Sour Soup", image: "https://www.kawalingpinoy.com/wp-content/uploads/2019/04/sinigang-na-baka-sa-kamias-1.jpg", time: 90, ingredients: ["Beef Short Ribs", "Kamias", "Okra"], steps: ["Slow boil beef", "Add souring agent", "Season to taste"] }
-    ];
-    return { recipes: sinigangVariations, isFood: true };
-  }
-
-  // 4. THEMEALDB FALLBACK
+  // 3. THEMEALDB API FALLBACK (Free Global Recipe Search API)
   try {
-    console.log(`Trying TheMealDB fallback...`);
-    const mealDbUrl = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`;
+    console.log(`Querying TheMealDB API for "${cleanQuery}"...`);
+    const mealDbUrl = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(cleanQuery)}`;
     const response = await fetch(mealDbUrl);
     if (response.status === 200) {
       const data = await response.json();
       if (data.meals && data.meals.length > 0) {
-        // Return all results from TheMealDB for maximum variety
-        const recipes = data.meals.map(meal => ({
+        const recipes = data.meals.slice(0, 8).map(meal => ({
           title: meal.strMeal,
           type: "food",
           category: meal.strCategory || "Main Course",
           time: 30,
-          ingredients: [meal.strIngredient1, meal.strIngredient2].filter(Boolean),
-          steps: [meal.strInstructions?.substring(0, 100) + '...'],
+          ingredients: [
+            meal.strIngredient1, meal.strIngredient2, meal.strIngredient3,
+            meal.strIngredient4, meal.strIngredient5, meal.strIngredient6
+          ].filter(Boolean),
+          steps: meal.strInstructions ? meal.strInstructions.split('\r\n').filter(s => s.trim().length > 5).slice(0, 5) : ["Prepare ingredients", "Cook thoroughly and serve"],
           image: meal.strMealThumb
         }));
         return { recipes, isFood: true };
       }
     }
   } catch (err) {
-    console.log("TheMealDB Fallback failed.");
+    console.log("TheMealDB fallback failed.");
   }
 
-  const EMERGENCY_GEMS = [
-    { title: "Ginataang Bilo-Bilo", queryMatch: ["bilo", "ginataan"] },
-    { title: "Matcha Green Tea Latte", queryMatch: ["matcha", "green tea"] },
-    { title: "Pork Adobo", queryMatch: ["adobo"] }, // Should be handled by above but kept for safety
-    { title: "Sinigang na Baboy", queryMatch: ["sinigang"] },
-    { title: "Chicken Curry", queryMatch: ["curry"] }
-  ];
-
-  const match = EMERGENCY_GEMS.find(g => g.queryMatch.some(q => normalizedQuery.includes(q)));
-  if (match) {
-    return {
-      recipes: [{
-        title: match.title,
-        type: "food",
-        category: "Specialties",
-        time: 30,
-        ingredients: ["Main ingredient", "Special sauce", "Seasoning"],
-        steps: ["Prepare base", "Slow cook until perfect", "Garnish and serve"],
-        image: match.title.includes("Matcha") 
-          ? "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?q=80&w=600" 
-          : "https://www.kawalingpinoy.com/wp-content/uploads/2013/02/ginataang-bilo-bilo-1.jpg"
-      }],
-      isFood: true
-    };
-  }
-
-  // Enhanced Gibberish & Non-Food Heuristics
-  const hasVowels = /[aeiouy]/i.test(normalizedQuery);
-  const isTooLongWithNoSpaces = normalizedQuery.length > 10 && !normalizedQuery.includes(' ');
-  const isMashing = /^[asdfghjkl]+$/.test(normalizedQuery) || /^[qwertyuiop]+$/.test(normalizedQuery);
-  const isProbablyGibberish = !hasVowels || isTooLongWithNoSpaces || isMashing || normalizedQuery.length < 3;
-
-  return { recipes: [], isFood: !isProbablyGibberish };
-};
-
-const generatePrompt = (query) => `
-  You are a ChefStack AI Assistant. Your task is to find and return at least 12 and up to 20 highly relevant, distinct, and varied food recipes for the query: "${query}". 
-  Provide as many regional and ingredient-based variations as possible (e.g. for "Adobo", you MUST include Pork Adobo, Chicken Adobo, Squid Adobo, Eggplant Adobo, Adobong Sitaw, and Beef Adobo).
-  
-  CRITICAL RULES:
-  1. ONLY return food or drink recipes. 
-  2. If the query is GIBBERISH (like "asdasd" or "ughuui..."), NONSENSE, or NOT about food/drinks, return: {"is_food": false, "recipes": []}.
-  3. DO NOT hallucinate. If you don't know a real recipe for the query, return {"is_food": true, "recipes": []}.
-  4. Format the response as a VALID JSON object containing a "recipes" key (array) and an "is_food" key (boolean).
-  5. DO NOT include any markdown formatting (like \`\`\`json) or text outside the JSON object.
-  6. Each recipe object must have: title, type (always "food"), category, time (number), ingredients (array), steps (array).
-  
-  JSON format:
-  {
-    "is_food": true,
-    "recipes": [
+  // Generic fallback if user typed a food query that didn't match external APIs
+  return { 
+    recipes: [
       {
-        "title": "Adobo",
-        "type": "food",
-        "category": "Main Course (Ulam)",
-        "time": 60,
-        "ingredients": ["Pork", "Soy Sauce"],
-        "steps": ["Step 1", "Step 2"]
+        title: `Home-Style ${cleanQuery.charAt(0).toUpperCase() + cleanQuery.slice(1)}`,
+        type: "food",
+        category: "Custom Recipe",
+        time: 30,
+        ingredients: ["Main fresh ingredients", "Aromatics (Garlic, Onion)", "Seasoning to taste", "Cooking Oil"],
+        steps: [
+          `Prepare and clean fresh ingredients for ${cleanQuery}.`,
+          "Sauté garlic and onions in a hot pan until fragrant.",
+          "Add main ingredients and simmer with seasonings until perfectly cooked.",
+          "Garnish and serve hot."
+        ]
       }
-    ]
-  }
-`;
+    ], 
+    isFood: true 
+  };
+};
