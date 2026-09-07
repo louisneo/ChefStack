@@ -17,6 +17,8 @@ import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { searchRecipes, saveCustomApiKey, getCustomApiKey, searchLocalRecipes } from '../services/aiService';
 import { Modal } from 'react-native';
+import Toast from '../components/Toast';
+import AISearchCardSkeleton from '../components/AISearchCardSkeleton';
 
 export default function AISearchScreen({ navigation }) {
   const { colors, isDark } = useTheme();
