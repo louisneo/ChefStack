@@ -70,15 +70,36 @@ export default function AISearchScreen({ navigation }) {
     
     setLoading(true);
     setSearchError(null);
+    setIsOfflineSearch(false);
     setNeedsApiKey(false);
     setResults([]);
     setCurrentPage(1);
 
+    const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+    if (!isOnline) {
+      const localMatches = searchLocalRecipes(storedRecipes, searchQuery);
+      setIsOfflineSearch(true);
+      if (localMatches.length > 0) {
+        setResults(localMatches);
+      } else {
+        setSearchError("Offline Mode: No matching recipes found in your saved local index.");
+      }
+      setLoading(false);
+      return;
+    }
+
     try {
       const { recipes, isFood, error, needsApiKey: reqKey } = await searchRecipes(searchQuery);
       if (error) {
-        setSearchError(error);
-        if (reqKey) setNeedsApiKey(true);
+        const localMatches = searchLocalRecipes(storedRecipes, searchQuery);
+        if (localMatches.length > 0) {
+          setIsOfflineSearch(true);
+          setResults(localMatches);
+        } else {
+          setSearchError(error);
+          if (reqKey) setNeedsApiKey(true);
+        }
       } else if (!isFood) {
         setSearchError("I only find food and drinks! 🍳 Try searching for something like 'Kinilaw', 'Chicken Adobo' or 'Iced Coffee'.");
       } else if (recipes.length === 0) {
@@ -87,8 +108,13 @@ export default function AISearchScreen({ navigation }) {
         setResults(recipes);
       }
     } catch (error) {
-      console.error('Search Screen Error:', error);
-      setSearchError('Something went wrong while talking to the AI. Please try again.');
+      const localMatches = searchLocalRecipes(storedRecipes, searchQuery);
+      if (localMatches.length > 0) {
+        setIsOfflineSearch(true);
+        setResults(localMatches);
+      } else {
+        setSearchError('Something went wrong while talking to the AI. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -226,6 +252,15 @@ export default function AISearchScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {isOfflineSearch && results.length > 0 && (
+            <Animated.View entering={FadeIn} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, padding: 12, borderRadius: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.borderLight, gap: 10 }}>
+              <Ionicons name="wifi-outline" size={20} color={colors.primary} />
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary, flex: 1 }}>
+                Offline Mode: Displaying matching recipes from your local index.
+              </Text>
+            </Animated.View>
+          )}
+
           {searchError && !loading && (
             <Animated.View entering={FadeIn} style={[styles.errorCard, { backgroundColor: colors.error + '10', borderColor: colors.error + '30' }]}>
               <Ionicons name="information-circle-outline" size={32} color={colors.error} />

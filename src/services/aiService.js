@@ -148,3 +148,91 @@ export const saveCustomApiKey = async (key) => {
 export const getCustomApiKey = async () => {
   return await AsyncStorage.getItem(CUSTOM_KEY_STORAGE).catch(() => null);
 };
+
+// Static offline substitutions dictionary fallback
+import offlineSubstitutions from '../data/substitutions.json';
+
+/**
+ * Finds ingredient substitutes dynamically via Gemini AI when online,
+ * or falls back to static substitutions JSON when offline.
+ */
+export const findSubstitutes = async (ingredient) => {
+  const query = (ingredient || '').trim().toLowerCase();
+  if (!query) return { substitutes: [], isOffline: false };
+
+  const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+  // Offline Fallback
+  if (!isOnline) {
+    let matchedKey = Object.keys(offlineSubstitutions).find(k => query.includes(k) || k.includes(query));
+    const substitutes = matchedKey ? offlineSubstitutions[matchedKey] : [
+      `Try equal parts of a similar ingredient (e.g. oil for butter, milk + acid for buttermilk).`
+    ];
+    return { substitutes, isOffline: true, matchedKey: matchedKey || query };
+  }
+
+  // Online Gemini Query
+  let apiKey = await AsyncStorage.getItem(CUSTOM_KEY_STORAGE).catch(() => null);
+  if (!apiKey || !apiKey.trim()) {
+    apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+  }
+
+  if (!apiKey || !apiKey.trim()) {
+    let matchedKey = Object.keys(offlineSubstitutions).find(k => query.includes(k) || k.includes(query));
+    return {
+      substitutes: matchedKey ? offlineSubstitutions[matchedKey] : ["No API Key available. Use equal ratio culinary substitutes."],
+      isOffline: true
+    };
+  }
+
+  const prompt = `List 3 to 5 culinary substitutes for "${ingredient}". Return strictly valid JSON array of strings, e.g. ["1 cup milk + 1 tbsp lemon juice", "1 cup plain yogurt"].`;
+
+  for (const model of GEMINI_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { response_mime_type: "application/json" }
+        })
+      });
+
+      if (response.status === 200) {
+        const data = await response.json();
+        const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (jsonText) {
+          let clean = jsonText.trim().replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+          const parsed = JSON.parse(clean);
+          const substitutes = Array.isArray(parsed) ? parsed : (parsed.substitutes || []);
+          return { substitutes, isOffline: false };
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Fallback to static JSON if Gemini call fails
+  let matchedKey = Object.keys(offlineSubstitutions).find(k => query.includes(k) || k.includes(query));
+  return {
+    substitutes: matchedKey ? offlineSubstitutions[matchedKey] : ["Fallback: Use equal ratio culinary substitutes."],
+    isOffline: true
+  };
+};
+
+/**
+ * Performs a rule-based local search against stored recipes when offline.
+ */
+export const searchLocalRecipes = (recipes, query) => {
+  if (!query || !query.trim()) return [];
+  const q = query.toLowerCase().trim();
+  
+  return recipes.filter(recipe => {
+    const titleMatch = recipe.title?.toLowerCase().includes(q);
+    const categoryMatch = recipe.category?.toLowerCase().includes(q);
+    const typeMatch = recipe.type?.toLowerCase().includes(q);
+    const ingredientMatch = recipe.ingredients?.some(i => i.toLowerCase().includes(q));
+    return titleMatch || categoryMatch || typeMatch || ingredientMatch;
+  });
+};
+
