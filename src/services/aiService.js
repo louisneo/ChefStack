@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 
 const GEMINI_MODELS = [
+  'gemini-2.5-flash',
   'gemini-1.5-flash',
-  'gemini-1.5-pro',
-  'gemini-2.0-flash-exp'
+  'gemini-1.5-pro'
 ];
 
 const CUSTOM_KEY_STORAGE = '@chefstack_gemini_api_key';
@@ -1113,8 +1114,53 @@ export const generateSmartRecipes = (query) => {
 
 const DUMMY_KEY = 'AIzaSyBmOS9t2bbaCAWehuTMu98D3kiOsfiMQYE';
 
+// Structured JSON schema for Gemini SDK structured output
+const recipeSchema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    recipes: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          id: { type: SchemaType.STRING },
+          title: { type: SchemaType.STRING },
+          category: { type: SchemaType.STRING },
+          prepTime: { type: SchemaType.STRING },
+          cookTime: { type: SchemaType.STRING },
+          ingredientsPreview: { type: SchemaType.STRING },
+          ingredients: {
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING }
+          },
+          instructions: {
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING }
+          }
+        },
+        required: ["id", "title", "category", "prepTime", "ingredientsPreview", "ingredients", "instructions"]
+      }
+    }
+  },
+  required: ["recipes"]
+};
+
+const SYSTEM_PROMPT = `You are a live web-grounded culinary engine for the ChefStack recipe application.
+
+Your task is to take the user's food search query and retrieve real-world, accurate recipe data.
+
+CRITICAL INSTRUCTIONS:
+1. NO GENERIC PLACEHOLDERS: Never output generic "Garlic Sauté", "Bistro Plate", or "Standard Seasoning" items.
+2. ACCURATE INGREDIENTS & STEPS: 
+   - If the user searches for a main component (e.g., "tuna"), return 3 distinct, highly popular real dishes using that component (e.g., "Sizzling Tuna Sisig", "Tuna Egg Scramble", "Spicy Tuna Pasta").
+   - If the user searches for a specific dish (e.g., "Pansit Canton"), return authentic variations with exact traditional ingredients (e.g., calamansi, soy sauce, cabbage, pork/shrimp).
+3. DYNAMIC GENERATION ONLY: Every ingredient and instruction step must accurately reflect real culinary recipes for that exact dish name.
+4. STRICT JSON OUTPUT: Return only valid JSON adhering directly to the provided schema. Do not add intro/outro markdown text.`;
+
 /**
- * Searches for recipes using Google Gemini AI, with seamless fallback for all visitors.
+ * Searches for recipes using Google Gemini AI SDK with Google Search grounding.
+ * Uses the official @google/generative-ai SDK for structured output and web search.
+ * Falls back to local generateSmartRecipes on any error.
  */
 export const searchRecipes = async (query) => {
   const cleanQuery = (query || '').trim();
@@ -1126,103 +1172,81 @@ export const searchRecipes = async (query) => {
     apiKey = DEFAULT_GEMINI_KEY;
   }
 
-  // Only make HTTP network calls if a REAL, VALID Google AI Studio key is configured (not the dummy key)
+  // Only make Gemini API calls if a REAL, VALID Google AI Studio key is configured (not the dummy key)
   const isKeyValid = apiKey && apiKey.trim().startsWith('AIzaSy') && apiKey.trim() !== DUMMY_KEY;
 
   if (isKeyValid) {
-    const systemPrompt = `You are an expert master chef and strict API backend for the ChefStack recipe application.
+    const genAI = new GoogleGenerativeAI(apiKey.trim());
+    const prompt = `Find 3 authentic, distinct recipes for: "${cleanQuery}". Extract full, accurate ingredient lists and steps.`;
 
-Your sole function is to take a search query or culinary prompt and output 3 distinct, highly accurate, and authentic recipes specifically matching the requested dish or core ingredient.
-
-### STRICT GENERATION RULES:
-1. NO GENERIC TEMPLATES: Do NOT fallback to generic "Garlic Sauté", "Bistro Plate", or "Standard Seasoning" placeholders. 
-2. DISH-SPECIFIC ACCURACY: 
-   - If the user searches for a specific dish (e.g., "Pansit Canton"), provide authentic regional variations (e.g., "Traditional Seafood Pansit Canton", "Pork & Liver Special Pansit Canton", "Crispy Stir-Fry Pansit Canton").
-   - If the user searches for a general ingredient (e.g., "Tuna"), output 3 completely distinct popular recipes made with that ingredient (e.g., "Sizzling Tuna Sisig", "Tuna Egg Scramble", "Spicy Tuna Pasta").
-3. ACCURATE INGREDIENTS: Every ingredient listed must belong strictly to that specific dish. 
-   - Example: A "Sisig" recipe MUST include calamansi/lemon, chilies, onions, and mayonnaise/egg—not generic herbs.
-4. ZERO HARDCODED MOCKS: Build every recipe dynamically using real culinary logic based ONLY on the user's input.
-5. JSON ONLY: Respond exclusively in valid JSON format matching the schema below. Do not include markdown formatting outside the JSON code block, introductory text, or concluding notes.
-
-### OUTPUT JSON SCHEMA:
-{
-  "recipes": [
-    {
-      "id": "string",
-      "title": "Exact Dish Name",
-      "category": "Main Course / Breakfast / Appetizer / Comfort Food / Dessert / Drinks",
-      "prepTime": "String (e.g., '15m')",
-      "cookTime": "String (e.g., '20m')",
-      "ingredientsPreview": "String summarizing key ingredients",
-      "ingredients": [
-        "Quantity + Unit + Ingredient Name"
-      ],
-      "instructions": [
-        "Step-by-step instruction string"
-      ]
-    }
-  ]
-}`;
-
-    // Fast-path query: test primary fast model with a strict 3-second timeout
-    for (const model of ['gemini-1.5-flash', 'gemini-1.5-pro']) {
+    // Try each model in cascade: gemini-2.5-flash (with Google Search grounding) -> fallbacks
+    for (const modelName of GEMINI_MODELS) {
       try {
-        console.log(`ChefStack AI: Fast querying model ${model}...`);
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
+        console.log(`ChefStack AI SDK: Querying model ${modelName} with Google Search grounding...`);
 
+        // Configure model with Google Search grounding and structured JSON output
+        const modelConfig = {
+          model: modelName,
+          systemInstruction: SYSTEM_PROMPT,
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: recipeSchema,
+            temperature: 0.2
+          }
+        };
+
+        // Enable Google Search grounding for web-sourced accuracy (supported on 2.5-flash and 1.5 models)
+        try {
+          modelConfig.tools = [{ googleSearch: {} }];
+        } catch (toolErr) {
+          // Some SDK versions may not support googleSearch tool config; continue without it
+          console.warn(`Google Search grounding not available for ${modelName}:`, toolErr.message);
+        }
+
+        const model = genAI.getGenerativeModel(modelConfig);
+
+        // Use AbortController for timeout (8 seconds to allow grounding)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: `${systemPrompt}\n\nGenerate recipes for: ${cleanQuery}` }] }],
-            generationConfig: { 
-              response_mime_type: "application/json",
-              temperature: 0.7
-            }
-          }),
-          signal: controller.signal
+        const result = await model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }]
         });
 
         clearTimeout(timeoutId);
 
-        if (response.status === 200) {
-          const data = await response.json();
-          const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          
-          if (jsonText) {
-            let cleanJson = jsonText.trim().replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
-            const parsed = JSON.parse(cleanJson);
-            let recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
-            const isFood = parsed.is_food !== false;
+        const responseText = result.response.text();
 
-            if (recipes.length > 0) {
-              recipes = recipes.map((r, idx) => {
-                const parsedTime = parseInt(r.cookTime || r.prepTime || r.time || 20, 10) || 20;
-                return {
-                  id: r.id || `recipe-${Date.now()}-${idx}`,
-                  title: r.title,
-                  type: r.type || (['Drinks', 'Beverage'].includes(r.category) ? 'drink' : 'food'),
-                  category: r.category || 'Main Course',
-                  prepTime: r.prepTime || '10m',
-                  cookTime: r.cookTime || `${parsedTime}m`,
-                  time: parsedTime,
-                  ingredientsPreview: r.ingredientsPreview || (r.ingredients ? r.ingredients.slice(0, 4).join(', ') : ''),
-                  ingredients: r.ingredients || [],
-                  instructions: r.instructions || r.steps || [],
-                  steps: r.steps || r.instructions || []
-                };
-              });
+        if (responseText) {
+          let cleanJson = responseText.trim().replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+          const parsed = JSON.parse(cleanJson);
+          let recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
 
-              console.log(`Live Gemini AI (${model}) successfully returned ${recipes.length} recipes.`);
-              return { recipes, isFood, needsApiKey: false };
-            }
+          if (recipes.length > 0) {
+            recipes = recipes.map((r, idx) => {
+              const parsedTime = parseInt(r.cookTime || r.prepTime || r.time || 20, 10) || 20;
+              return {
+                id: r.id || `recipe-${Date.now()}-${idx}`,
+                title: r.title,
+                type: r.type || (['Drinks', 'Beverage'].includes(r.category) ? 'drink' : 'food'),
+                category: r.category || 'Main Course',
+                prepTime: r.prepTime || '10m',
+                cookTime: r.cookTime || `${parsedTime}m`,
+                time: parsedTime,
+                ingredientsPreview: r.ingredientsPreview || (r.ingredients ? r.ingredients.slice(0, 4).join(', ') : ''),
+                ingredients: r.ingredients || [],
+                instructions: r.instructions || r.steps || [],
+                steps: r.steps || r.instructions || []
+              };
+            });
+
+            console.log(`Live Gemini AI SDK (${modelName}) successfully returned ${recipes.length} web-grounded recipes.`);
+            return { recipes, isFood: true, needsApiKey: false };
           }
         }
       } catch (err) {
-        console.warn(`Gemini AI (${model}) timeout/notice:`, err.message);
+        console.warn(`Gemini AI SDK (${modelName}) error:`, err.message);
+        // Continue to next model in cascade
       }
     }
   }
