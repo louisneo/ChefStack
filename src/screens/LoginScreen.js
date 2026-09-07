@@ -62,10 +62,14 @@ export default function LoginScreen() {
           setErrorMsg('Server is currently busy. Please wait a few minutes.');
         } else if (error.message?.includes('Invalid login credentials')) {
           setErrorMsg('The email you entered is not registered, or the password is incorrect. Please try again.');
+        } else if (error.message?.includes('Failed to fetch') || error.message?.includes('Network')) {
+          setErrorMsg('Unable to connect to online server. Would you like to enter Offline Mode?');
         } else {
           setErrorMsg(error.message);
         }
       }
+    } catch (err) {
+      setErrorMsg('Unable to connect to online server. Would you like to enter Offline Mode?');
     } finally {
       setTimeout(() => setIsLoading(false), 1000);
     }
@@ -144,8 +148,20 @@ export default function LoginScreen() {
           </View>
 
           {errorMsg ? (
-            <Animated.View entering={FadeInDown} style={{ backgroundColor: colors.error + '20', padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: colors.error + '40' }}>
-              <Text style={{ color: colors.error, fontSize: 14, textAlign: 'center', fontWeight: 'bold' }}>{errorMsg}</Text>
+            <Animated.View entering={FadeInDown} style={{ backgroundColor: colors.error + '20', padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: colors.error + '40', alignItems: 'center' }}>
+              <Text style={{ color: colors.error, fontSize: 14, textAlign: 'center', fontWeight: 'bold', marginBottom: errorMsg.includes('Offline') || errorMsg.includes('fetch') || errorMsg.includes('connect') ? 10 : 0 }}>
+                {errorMsg}
+              </Text>
+              {(errorMsg.includes('Offline') || errorMsg.includes('fetch') || errorMsg.includes('connect')) && (
+                <TouchableOpacity 
+                  style={{ backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 8, marginTop: 4 }}
+                  onPress={handleGuestLogin}
+                  accessibilityLabel="Continue in Offline Mode button"
+                  accessibilityRole="button"
+                >
+                  <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 13 }}>Continue in Offline Mode</Text>
+                </TouchableOpacity>
+              )}
             </Animated.View>
           ) : null}
 

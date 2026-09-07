@@ -3,7 +3,10 @@ import { supabase } from '../lib/supabase';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const AuthContext = createContext(null);
+const OFFLINE_USER_KEY = '@chefstack_offline_user';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -14,20 +17,27 @@ export function AuthProvider({ children }) {
 
     const initializeAuth = async () => {
       try {
-        // Enforce a minimum 2.5 second delay so the splash screen animation is visible
-        const [authResponse] = await Promise.all([
-          supabase.auth.getSession(),
-          new Promise(resolve => setTimeout(resolve, 2500))
+        const [authResponse, cachedOfflineUser] = await Promise.all([
+          supabase.auth.getSession().catch(() => null),
+          AsyncStorage.getItem(OFFLINE_USER_KEY).catch(() => null),
+          new Promise(resolve => setTimeout(resolve, 2000))
         ]);
         
-        const { data, error } = authResponse;
-        
         if (mounted) {
-          if (error) console.error('Supabase getSession error:', error.message);
-          setUser(data?.session?.user ?? null);
+          if (authResponse?.data?.session?.user) {
+            setUser(authResponse.data.session.user);
+          } else if (cachedOfflineUser) {
+            setUser(JSON.parse(cachedOfflineUser));
+          } else {
+            setUser(null);
+          }
         }
       } catch (err) {
         console.error('Auth init error:', err);
+        const cachedOfflineUser = await AsyncStorage.getItem(OFFLINE_USER_KEY).catch(() => null);
+        if (mounted && cachedOfflineUser) {
+          setUser(JSON.parse(cachedOfflineUser));
+        }
       } finally {
         if (mounted) setLoading(false);
       }
@@ -35,15 +45,30 @@ export function AuthProvider({ children }) {
 
     initializeAuth();
 
-    // Fallback timer just in case Supabase hangs
     const timer = setTimeout(() => {
       if (mounted && loading) setLoading(false);
     }, 3000);
 
     let subscription;
     try {
-      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (mounted) setUser(session?.user ?? null);
+      const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        if (mounted) {
+          if (session?.user) {
+            setUser(session.user);
+            await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(session.user)).catch(() => {});
+          } else {
+            const cached = await AsyncStorage.getItem(OFFLINE_USER_KEY).catch(() => null);
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              if (!parsed.is_offline_guest) {
+                setUser(null);
+                await AsyncStorage.removeItem(OFFLINE_USER_KEY).catch(() => {});
+              }
+            } else {
+              setUser(null);
+            }
+          }
+        }
       });
       subscription = data?.subscription;
     } catch (err) {
@@ -58,14 +83,20 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    return { data, error };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (data?.user) {
+        await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(data.user)).catch(() => {});
+      }
+      return { data, error };
+    } catch (err) {
+      return { data: null, error: { message: 'Network connection failed. Please check internet connection.' } };
+    }
   };
 
   const signUp = async (email, password, fullName) => {
     console.log('AuthProvider: Beginning signUp for', email);
     try {
-      // Race the signup against a 10s timeout
       const signupPromise = supabase.auth.signUp({
         email,
         password,
@@ -83,43 +114,50 @@ export function AuthProvider({ children }) {
       const { data, error } = await Promise.race([signupPromise, timeoutPromise]);
 
       if (error) {
-        console.error('AuthProvider: Supabase signUp error:', error);
         return { data: null, error };
       }
 
-      // Supabase enables "Email Enumeration Protection" by default. 
-      // This means it will secretly pretend a signup succeeded even if the email exists!
       if (data?.user && data.user.identities && data.user.identities.length === 0) {
-        console.warn('AuthProvider: Email already registered (Enumeration Protection detected)');
         return { error: { message: 'This email is already registered. Please sign in instead.' } };
       }
 
-      console.log('AuthProvider: signUp successful for', data?.user?.id);
       return { data, error: null };
     } catch (err) {
-      console.error('AuthProvider: signUp exception:', err);
       return { data: null, error: err };
     }
   };
 
   const signInAsGuest = async () => {
-    console.log('AuthProvider: Beginning Anonymous Sign-in');
+    console.log('AuthProvider: Beginning Guest Sign-in');
     try {
       const { data, error } = await supabase.auth.signInAnonymously();
-      if (error) {
-        console.error('AuthProvider: Anonymous sign-in error:', error);
-        return { data: null, error };
+      if (!error && data?.user) {
+        await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(data.user)).catch(() => {});
+        return { data, error: null };
       }
-      console.log('AuthProvider: Anonymous sign-in successful:', data?.user?.id);
-      return { data, error: null };
     } catch (err) {
-      console.error('AuthProvider: Anonymous sign-in exception:', err);
-      return { data: null, error: err };
+      console.log('Online guest login unavailable, switching to offline guest mode');
     }
+
+    // Offline / Fallback local guest account
+    const offlineGuestUser = {
+      id: 'guest-offline-' + Date.now(),
+      email: 'guest@chefstack.local',
+      is_anonymous: true,
+      is_offline_guest: true,
+      user_metadata: { full_name: 'Guest Chef' }
+    };
+    await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(offlineGuestUser)).catch(() => {});
+    setUser(offlineGuestUser);
+    return { data: { user: offlineGuestUser }, error: null };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {}
+    await AsyncStorage.removeItem(OFFLINE_USER_KEY).catch(() => {});
+    setUser(null);
   };
 
   const resetPassword = async (email) => {
