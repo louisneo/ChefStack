@@ -757,102 +757,355 @@ export const generateSmartRecipes = (query) => {
     ];
   }
 
-  // 12. DYNAMIC GENERIC RECIPE CREATOR FOR CUSTOM FOOD NAMES
+  // 12. ADIDAS (FILIPINO CHICKEN FEET / STREET FOOD)
+  if (lowerQ.includes('adidas') || lowerQ.includes('chicken feet') || lowerQ.includes('chicken foot') || lowerQ.includes('isaw') || lowerQ.includes('kwek')) {
+    return [
+      {
+        id: `recipe-adidas-1`,
+        title: `Inihaw na Adidas (Filipino Street-Style Grilled Chicken Feet)`,
+        type: 'food',
+        category: 'Appetizer',
+        prepTime: '20m',
+        cookTime: '25m',
+        time: 45,
+        ingredientsPreview: `500g Cleaned Chicken Feet, 1/4 cup Banana Ketchup, 3 tbsp Soy Sauce, 1 tbsp Brown Sugar, 2 Calamansi, Garlic`,
+        ingredients: [
+          '500g Cleaned Chicken Feet (claws removed & boiled tender)',
+          '1/4 cup Banana Ketchup',
+          '3 tbsp Soy Sauce',
+          '1 tbsp Brown Sugar',
+          '2 fresh Calamansi (juiced)',
+          '4 cloves Garlic (minced)',
+          '1/2 tsp Ground Black Pepper'
+        ],
+        instructions: [
+          'Boil cleaned chicken feet with garlic, salt, and black pepper for 25-30 minutes until soft and tender. Drain well.',
+          'In a bowl, mix banana ketchup, soy sauce, brown sugar, calamansi juice, and minced garlic to make the sweet-savory glaze.',
+          'Skewer 3-4 chicken feet onto bamboo sticks.',
+          'Grill over hot charcoal for 8-10 minutes, brushing generously with glaze continuously until caramelized and charred.',
+          'Serve piping hot with spiced vinegar dipping sauce.'
+        ],
+        steps: [
+          'Boil cleaned chicken feet with garlic, salt, and black pepper for 25-30 minutes until soft and tender. Drain well.',
+          'In a bowl, mix banana ketchup, soy sauce, brown sugar, calamansi juice, and minced garlic to make the sweet-savory glaze.',
+          'Skewer 3-4 chicken feet onto bamboo sticks.',
+          'Grill over hot charcoal for 8-10 minutes, brushing generously with glaze continuously until caramelized and charred.',
+          'Serve piping hot with spiced vinegar dipping sauce.'
+        ]
+      },
+      {
+        id: `recipe-adidas-2`,
+        title: `Spicy Adobong Adidas (Braised Chicken Feet)`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '15m',
+        cookTime: '30m',
+        time: 45,
+        ingredientsPreview: `500g Chicken Feet, 1/3 cup Soy Sauce, 1/4 cup Cane Vinegar, 6 cloves Garlic, Bay Leaves, Siling Labuyo`,
+        ingredients: [
+          '500g Chicken Feet (cleaned & pre-boiled)',
+          '1/3 cup Soy Sauce',
+          '1/4 cup Cane Vinegar',
+          '6 cloves Garlic (crushed)',
+          '3 dried Bay Leaves',
+          '1 tsp Whole Black Peppercorns',
+          '3 Siling Labuyo (Birdseye Chilies, chopped)',
+          '1 tbsp Cooking Oil'
+        ],
+        instructions: [
+          'Heat oil in a heavy pot and sauté crushed garlic until light golden.',
+          'Add chicken feet, soy sauce, bay leaves, peppercorns, and chopped chilies. Simmer for 5 minutes.',
+          'Pour in 1 cup water, cover and simmer for 25 minutes until chicken feet are melt-in-your-mouth tender.',
+          'Pour in cane vinegar and let simmer uncovered for 10 minutes without stirring.',
+          'Reduce sauce until thick and glossy. Serve with hot steamed rice.'
+        ],
+        steps: [
+          'Heat oil in a heavy pot and sauté crushed garlic until light golden.',
+          'Add chicken feet, soy sauce, bay leaves, peppercorns, and chopped chilies. Simmer for 5 minutes.',
+          'Pour in 1 cup water, cover and simmer for 25 minutes until chicken feet are melt-in-your-mouth tender.',
+          'Pour in cane vinegar and let simmer uncovered for 10 minutes without stirring.',
+          'Reduce sauce until thick and glossy. Serve with hot steamed rice.'
+        ]
+      },
+      {
+        id: `recipe-adidas-3`,
+        title: `Crispy Deep-Fried Adidas with Spiced Vinegar`,
+        type: 'food',
+        category: 'Appetizer',
+        prepTime: '15m',
+        cookTime: '15m',
+        time: 30,
+        ingredientsPreview: `500g Boiled Chicken Feet, 3/4 cup Seasoned Cornstarch, 1 Egg, 1/2 tsp Garlic Powder, Oil, Spicy Dip`,
+        ingredients: [
+          '500g Chicken Feet (boiled tender & thoroughly dried)',
+          '3/4 cup Cornstarch',
+          '1 Egg (beaten)',
+          '1 tsp Garlic Powder & Paprika',
+          '1/2 tsp Salt & Pepper',
+          'Oil for deep frying',
+          'Spiced Cane Vinegar with Onion & Chili for dipping'
+        ],
+        instructions: [
+          'Pat boiled chicken feet completely dry with paper towels to avoid oil splatter.',
+          'Toss chicken feet in beaten egg, then coat thoroughly in cornstarch seasoned with garlic powder, paprika, salt, and pepper.',
+          'Heat oil in a deep fryer or deep skillet to 350°F (175°C).',
+          'Fry chicken feet in batches for 5-6 minutes until golden brown and super crispy.',
+          'Drain on paper towels and serve immediately with spiced vinegar dip.'
+        ],
+        steps: [
+          'Pat boiled chicken feet completely dry with paper towels to avoid oil splatter.',
+          'Toss chicken feet in beaten egg, then coat thoroughly in cornstarch seasoned with garlic powder, paprika, salt, and pepper.',
+          'Heat oil in a deep fryer or deep skillet to 350°F (175°C).',
+          'Fry chicken feet in batches for 5-6 minutes until golden brown and super crispy.',
+          'Drain on paper towels and serve immediately with spiced vinegar dip.'
+        ]
+      }
+    ];
+  }
+
+  // 13. SPINACH, KANGKONG & LEAFY GREENS
+  if (lowerQ.includes('spinach') || lowerQ.includes('kangkong') || lowerQ.includes('kale') || lowerQ.includes('greens') || lowerQ.includes('lettuce')) {
+    return [
+      {
+        id: `recipe-spinach-1`,
+        title: `Garlic Butter Sautéed ${titleQuery}`,
+        type: 'food',
+        category: 'Side Dish',
+        prepTime: '5m',
+        cookTime: '5m',
+        time: 10,
+        ingredientsPreview: `400g Fresh ${titleQuery} Leaves, 3 tbsp Unsalted Butter, 6 cloves Garlic (minced), Parmesan, Salt & Pepper`,
+        ingredients: [
+          `400g Fresh ${titleQuery} Leaves (washed & trimmed)`,
+          '3 tbsp Unsalted Butter',
+          '6 cloves Garlic (minced)',
+          '2 tbsp Grated Parmesan Cheese',
+          '1/4 tsp Sea Salt & Freshly Cracked Black Pepper',
+          '1 tsp Lemon Juice'
+        ],
+        instructions: [
+          'Melt butter in a wide skillet over medium heat.',
+          'Add minced garlic and sauté for 1-2 minutes until golden and fragrant.',
+          `Toss in fresh ${q} leaves in batches, turning with tongs as they wilt rapidly.`,
+          'Cook for just 2-3 minutes until bright green and tender.',
+          'Season with sea salt, black pepper, grated parmesan cheese, and a squeeze of fresh lemon juice before serving.'
+        ],
+        steps: [
+          'Melt butter in a wide skillet over medium heat.',
+          'Add minced garlic and sauté for 1-2 minutes until golden and fragrant.',
+          `Toss in fresh ${q} leaves in batches, turning with tongs as they wilt rapidly.`,
+          'Cook for just 2-3 minutes until bright green and tender.',
+          'Season with sea salt, black pepper, grated parmesan cheese, and a squeeze of fresh lemon juice before serving.'
+        ]
+      },
+      {
+        id: `recipe-spinach-2`,
+        title: `Crispy Fried ${titleQuery} Leaves (Kangkong Crisps)`,
+        type: 'food',
+        category: 'Appetizer',
+        prepTime: '10m',
+        cookTime: '10m',
+        time: 20,
+        ingredientsPreview: `300g Fresh ${titleQuery} Leaves, 1/2 cup Cornstarch, 1 Egg, Ice Water, Garlic Powder, Mayo Dip`,
+        ingredients: [
+          `300g Fresh ${titleQuery} Leaves (washed & thoroughly dried)`,
+          '1/2 cup Cornstarch',
+          '1/4 cup All-Purpose Flour',
+          '1 Egg (beaten)',
+          '1/2 cup Ice-cold Water',
+          '1/2 tsp Garlic Powder & Salt',
+          'Oil for deep frying',
+          'Garlic Mayonnaise or Sweet Chili Dip'
+        ],
+        instructions: [
+          'Whisk cornstarch, flour, egg, ice-cold water, garlic powder, and salt into a smooth thin batter.',
+          'Heat deep oil to 350°F (175°C).',
+          `Dip individual dry ${q} leaves into batter, letting excess drip off.`,
+          'Fry leaves in small batches for 1-2 minutes until pale golden and crispy.',
+          'Drain on paper towels and serve crispy with garlic mayonnaise dip.'
+        ],
+        steps: [
+          'Whisk cornstarch, flour, egg, ice-cold water, garlic powder, and salt into a smooth thin batter.',
+          'Heat deep oil to 350°F (175°C).',
+          `Dip individual dry ${q} leaves into batter, letting excess drip off.`,
+          'Fry leaves in small batches for 1-2 minutes until pale golden and crispy.',
+          'Drain on paper towels and serve crispy with garlic mayonnaise dip.'
+        ]
+      },
+      {
+        id: `recipe-spinach-3`,
+        title: `Creamy ${titleQuery} & Garlic Dip`,
+        type: 'food',
+        category: 'Side Dish',
+        prepTime: '10m',
+        cookTime: '10m',
+        time: 20,
+        ingredientsPreview: `300g Cooked ${titleQuery}, 1/2 cup Cream Cheese, 1/4 cup Heavy Cream, Mozzarella, Garlic, Toast`,
+        ingredients: [
+          `300g Fresh ${titleQuery} (blanched & chopped)`,
+          '1/2 cup Cream Cheese (softened)',
+          '1/4 cup Sour Cream or Heavy Cream',
+          '1/2 cup Shredded Mozzarella & Parmesan',
+          '3 cloves Garlic (minced)',
+          'Toasted Baguette slices for serving'
+        ],
+        instructions: [
+          `Squeeze all excess moisture from blanched ${q} and chop coarsely.`,
+          'In a bowl, mix cream cheese, sour cream, minced garlic, half the mozzarella, and chopped greens.',
+          'Transfer mixture to a baking dish and top with remaining mozzarella and parmesan.',
+          'Bake at 375°F (190°C) for 15 minutes until bubbly and golden brown on top.',
+          'Serve warm with toasted baguette slices.'
+        ],
+        steps: [
+          `Squeeze all excess moisture from blanched ${q} and chop coarsely.`,
+          'In a bowl, mix cream cheese, sour cream, minced garlic, half the mozzarella, and chopped greens.',
+          'Transfer mixture to a baking dish and top with remaining mozzarella and parmesan.',
+          'Bake at 375°F (190°C) for 15 minutes until bubbly and golden brown on top.',
+          'Serve warm with toasted baguette slices.'
+        ]
+      }
+    ];
+  }
+
+  // 14. DYNAMIC VEGETABLE & GENERAL INGREDIENT RECIPE DISPATCHER
+  const isVeg = lowerQ.includes('veg') || lowerQ.includes('broccoli') || lowerQ.includes('mushroom') || 
+                lowerQ.includes('cabbage') || lowerQ.includes('carrot') || lowerQ.includes('corn') || 
+                lowerQ.includes('potato') || lowerQ.includes('squash') || lowerQ.includes('bean');
+
+  if (isVeg) {
+    return [
+      {
+        id: `recipe-veg-1`,
+        title: `Garlic Butter Stir-Fried ${titleQuery}`,
+        type: 'food',
+        category: 'Side Dish',
+        prepTime: '10m',
+        cookTime: '10m',
+        time: 20,
+        ingredientsPreview: `400g Fresh ${titleQuery}, 3 tbsp Unsalted Butter, 5 cloves Garlic (minced), 1 tbsp Oyster Sauce, Sesame Oil`,
+        ingredients: [
+          `400g Cleaned & Cut ${titleQuery}`,
+          '3 tbsp Unsalted Butter',
+          '5 cloves Garlic (minced)',
+          '1 tbsp Oyster Sauce',
+          '1 tsp Pure Sesame Oil',
+          '1/4 tsp Salt & Cracked Black Pepper'
+        ],
+        instructions: [
+          `Blanch or wash prepped ${q} in warm salted water for 2 minutes, then drain well.`,
+          'Melt butter in a hot wok over medium-high heat and sauté minced garlic until golden.',
+          `Toss in ${q} and stir-fry vigorously for 3-4 minutes until tender crisp.`,
+          'Drizzle with oyster sauce and sesame oil, tossing to coat evenly.',
+          'Transfer to a platter and serve warm.'
+        ],
+        steps: [
+          `Blanch or wash prepped ${q} in warm salted water for 2 minutes, then drain well.`,
+          'Melt butter in a hot wok over medium-high heat and sauté minced garlic until golden.',
+          `Toss in ${q} and stir-fry vigorously for 3-4 minutes until tender crisp.`,
+          'Drizzle with oyster sauce and sesame oil, tossing to coat evenly.',
+          'Transfer to a platter and serve warm.'
+        ]
+      },
+      {
+        id: `recipe-veg-2`,
+        title: `Ginataang ${titleQuery} (Vegetable Coconut Curry)`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '10m',
+        cookTime: '20m',
+        time: 30,
+        ingredientsPreview: `400g Fresh ${titleQuery}, 1.5 cups Coconut Milk (Gata), 150g Tofu or Pork, Garlic, Onion, Green Chili`,
+        ingredients: [
+          `400g Chopped ${titleQuery}`,
+          '1.5 cups Coconut Milk',
+          '150g Fried Tofu Cubes',
+          '4 cloves Garlic (minced)',
+          '1 Onion (chopped)',
+          '1 tbsp Fish Sauce or Soy Sauce',
+          '2 Green Chilies'
+        ],
+        instructions: [
+          'Sauté garlic and onions in a pot until translucent.',
+          'Pour in coconut milk and bring to a gentle simmer over medium-low heat for 5 minutes.',
+          `Add prepped ${q} and fried tofu cubes, simmering until vegetables are soft and coconut sauce thickens.`,
+          'Season with fish sauce and add green chilies for a mild spicy kick.',
+          'Serve warm over garlic rice.'
+        ],
+        steps: [
+          'Sauté garlic and onions in a pot until translucent.',
+          'Pour in coconut milk and bring to a gentle simmer over medium-low heat for 5 minutes.',
+          `Add prepped ${q} and fried tofu cubes, simmering until vegetables are soft and coconut sauce thickens.`,
+          'Season with fish sauce and add green chilies for a mild spicy kick.',
+          'Serve warm over garlic rice.'
+        ]
+      }
+    ];
+  }
+
+  // 15. DYNAMIC AUTHENTIC RECIPE DISPATCHER FOR ANY OTHER SPECIFIC FOOD QUERY
   return [
     {
       id: `recipe-custom-1`,
-      title: `Authentic Home-Style ${titleQuery}`,
+      title: `Chef's Special Pan-Seared ${titleQuery} Delicacy`,
       type: 'food',
       category: 'Main Course',
       prepTime: '15m',
       cookTime: '20m',
       time: 35,
-      ingredientsPreview: `500g Fresh ${titleQuery}, 1 tbsp Soy Sauce, 4 cloves Garlic, 1/2 cup Onions, Cooking Oil, Black Pepper`,
+      ingredientsPreview: `500g Prepped ${titleQuery}, 2 tbsp Olive Oil or Butter, 4 cloves Garlic, Fresh Herbs, Lemon Juice`,
       ingredients: [
-        `500g Fresh ${titleQuery}`,
-        '1 tbsp Soy Sauce or Oyster Seasoning',
+        `500g Freshly Prepared ${titleQuery}`,
+        '2 tbsp Extra Virgin Olive Oil or Butter',
         '4 cloves Garlic (minced)',
-        '1/2 cup Yellow Onions (chopped)',
-        '2 tbsp Cooking Oil',
-        '1/2 tsp Freshly Ground Black Pepper & Sea Salt'
+        '1/4 cup Fresh Parsley or Green Onions (chopped)',
+        '1 tbsp Fresh Lemon Juice or Seasoning',
+        '1/2 tsp Sea Salt & Cracked Black Pepper'
       ],
       instructions: [
-        'Prep all fresh ingredients neatly on your cutting board.',
-        'Heat cooking oil in a wide skillet over medium-high heat.',
-        'Sauté minced garlic and chopped onions until soft and fragrant.',
-        `Add prepped ${q} into the pan and sear for 6-8 minutes until tender and cooked through.`,
-        'Season with soy sauce, black pepper, and fresh herbs, then serve warm with rice.'
+        `Clean and trim ${q} thoroughly into uniform cooking pieces.`,
+        'Heat olive oil or butter in a wide skillet over medium-high heat.',
+        'Sauté minced garlic for 1 minute until fragrant, then add prepped item.',
+        `Sear ${q} for 6-8 minutes until perfectly caramelized and cooked through.`,
+        'Finish with a drizzle of fresh lemon juice and chopped parsley before serving.'
       ],
       steps: [
-        'Prep all fresh ingredients neatly on your cutting board.',
-        'Heat cooking oil in a wide skillet over medium-high heat.',
-        'Sauté minced garlic and chopped onions until soft and fragrant.',
-        `Add prepped ${q} into the pan and sear for 6-8 minutes until tender and cooked through.`,
-        'Season with soy sauce, black pepper, and fresh herbs, then serve warm with rice.'
+        `Clean and trim ${q} thoroughly into uniform cooking pieces.`,
+        'Heat olive oil or butter in a wide skillet over medium-high heat.',
+        'Sauté minced garlic for 1 minute until fragrant, then add prepped item.',
+        `Sear ${q} for 6-8 minutes until perfectly caramelized and cooked through.`,
+        'Finish with a drizzle of fresh lemon juice and chopped parsley before serving.'
       ]
     },
     {
       id: `recipe-custom-2`,
-      title: `Crispy Golden Fried ${titleQuery}`,
+      title: `Crispy Battered ${titleQuery} Bites`,
       type: 'food',
       category: 'Appetizer',
       prepTime: '10m',
       cookTime: '10m',
       time: 20,
-      ingredientsPreview: `400g Prepped ${titleQuery}, 1/2 cup Cornstarch, 1 Beaten Egg, Garlic Powder, Dipping Sauce`,
+      ingredientsPreview: `400g Seasoned ${titleQuery}, 1/2 cup Cornstarch, 1 Egg, Garlic Powder, Dipping Sauce`,
       ingredients: [
-        `400g Prepped ${titleQuery}`,
-        '1/2 cup All-Purpose Flour or Cornstarch',
+        `400g Cut ${titleQuery}`,
+        '1/2 cup Cornstarch or Seasoned Flour',
         '1 Egg (beaten)',
-        '1/2 tsp Garlic Powder, Paprika & Salt',
-        'Oil for deep frying',
-        'Sweet Chili or Dip of choice'
+        '1/2 tsp Garlic Powder & Smoked Paprika',
+        'Oil for frying',
+        'Dipping Sauce of choice'
       ],
       instructions: [
-        `Season prepped ${q} with garlic powder, paprika, and salt.`,
-        'Dip pieces in beaten egg, then dredge thoroughly in seasoned flour or cornstarch.',
-        'Heat oil in a skillet to 350°F (175°C).',
-        'Fry in batches for 4-5 minutes until golden brown and super crispy.',
-        'Drain on paper towels and serve warm with dipping sauce.'
+        `Season ${q} with garlic powder, paprika, and salt.`,
+        'Dip pieces in beaten egg, then coat thoroughly in cornstarch.',
+        'Heat deep oil to 350°F (175°C).',
+        'Fry in batches for 4-5 minutes until golden brown and crispy.',
+        'Drain on paper towels and serve hot with dipping sauce.'
       ],
       steps: [
-        `Season prepped ${q} with garlic powder, paprika, and salt.`,
-        'Dip pieces in beaten egg, then dredge thoroughly in seasoned flour or cornstarch.',
-        'Heat oil in a skillet to 350°F (175°C).',
-        'Fry in batches for 4-5 minutes until golden brown and super crispy.',
-        'Drain on paper towels and serve warm with dipping sauce.'
-      ]
-    },
-    {
-      id: `recipe-custom-3`,
-      title: `Sizzling ${titleQuery} & Garlic Hash`,
-      type: 'food',
-      category: 'Comfort Food',
-      prepTime: '10m',
-      cookTime: '15m',
-      time: 25,
-      ingredientsPreview: `300g Sliced ${titleQuery}, 1 Potato (diced), 5 cloves Garlic, Soy Sauce, Calamansi, 1 Egg`,
-      ingredients: [
-        `300g Sliced ${titleQuery}`,
-        '1 Large Potato (diced and fried crisp)',
-        '5 cloves Garlic (minced)',
-        '1/2 cup Red Onions (diced)',
-        '1 tbsp Soy Sauce & 1 tsp Calamansi Juice',
-        '1 Fresh Egg'
-      ],
-      instructions: [
-        'Preheat a sizzling skillet over medium-high heat.',
-        `Sauté minced garlic, red onions, and sliced ${q} until browned.`,
-        'Toss in crispy fried potato cubes and season with soy sauce and calamansi.',
-        'Crack a fresh egg in the center while sizzling.',
-        'Serve hot alongside warm garlic fried rice.'
-      ],
-      steps: [
-        'Preheat a sizzling skillet over medium-high heat.',
-        `Sauté minced garlic, red onions, and sliced ${q} until browned.`,
-        'Toss in crispy fried potato cubes and season with soy sauce and calamansi.',
-        'Crack a fresh egg in the center while sizzling.',
-        'Serve hot alongside warm garlic fried rice.'
+        `Season ${q} with garlic powder, paprika, and salt.`,
+        'Dip pieces in beaten egg, then coat thoroughly in cornstarch.',
+        'Heat deep oil to 350°F (175°C).',
+        'Fry in batches for 4-5 minutes until golden brown and crispy.',
+        'Drain on paper towels and serve hot with dipping sauce.'
       ]
     }
   ];
