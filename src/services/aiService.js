@@ -9,7 +9,7 @@ const GEMINI_MODELS = [
 const CUSTOM_KEY_STORAGE = '@chefstack_gemini_api_key';
 const DEFAULT_GEMINI_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'AIzaSyBmOS9t2bbaCAWehuTMu98D3kiOsfiMQYE';
 
-// Smart Dynamic Culinary Recipe Generator Fallback (Returns 3-6 authentic, accurate recipes per food category)
+// Smart Dynamic Culinary Recipe Generator Fallback (Returns authentic, accurate recipes per food category)
 export const generateSmartRecipes = (query) => {
   const q = (query || 'Delight').trim();
   const titleQuery = q.charAt(0).toUpperCase() + q.slice(1);
@@ -122,7 +122,351 @@ export const generateSmartRecipes = (query) => {
     ];
   }
 
-  // 2. SIOMAI, DUMPLINGS, DIM SUM, WONTONS
+  // 2. CORNED BEEF
+  if (lowerQ.includes('corned beef') || lowerQ.includes('cornbeef')) {
+    return [
+      {
+        id: `recipe-cornedbeef-1`,
+        title: `Filipino Corned Beef Guisado with Diced Potatoes`,
+        type: 'food',
+        category: 'Breakfast',
+        prepTime: '5m',
+        cookTime: '10m',
+        time: 15,
+        ingredientsPreview: `1 can (340g) Premium Corned Beef, 1 Large Potato (diced), 1/2 cup Minced Onions, 4 cloves Garlic, Cooking Oil`,
+        ingredients: [
+          '1 can (340g) Premium Canned Corned Beef',
+          '1 Large Russet Potato (peeled and finely diced)',
+          '1/2 cup Yellow Onion (chopped)',
+          '4 cloves Garlic (minced)',
+          '2 tbsp Cooking Oil',
+          '1/2 tsp Coarsely Ground Black Pepper'
+        ],
+        instructions: [
+          'Heat cooking oil in a skillet over medium heat and deep fry diced potatoes until golden and crispy. Remove and set aside.',
+          'In the same skillet, sauté minced garlic and chopped onions until soft and translucent.',
+          'Add canned corned beef, breaking up any large chunks with a spatula.',
+          'Stir-fry for 4-5 minutes until the corned beef is heated through and slightly crisp at the edges.',
+          'Toss in fried potato cubes and season with black pepper. Serve hot over garlic fried rice.'
+        ],
+        steps: [
+          'Heat cooking oil in a skillet over medium heat and deep fry diced potatoes until golden and crispy. Remove and set aside.',
+          'In the same skillet, sauté minced garlic and chopped onions until soft and translucent.',
+          'Add canned corned beef, breaking up any large chunks with a spatula.',
+          'Stir-fry for 4-5 minutes until the corned beef is heated through and slightly crisp at the edges.',
+          'Toss in fried potato cubes and season with black pepper. Serve hot over garlic fried rice.'
+        ]
+      },
+      {
+        id: `recipe-cornedbeef-2`,
+        title: `Sizzling Corned Beef Sisig`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '5m',
+        cookTime: '10m',
+        time: 15,
+        ingredientsPreview: `1 can Corned Beef, 1/2 cup Red Onions, 2 Green Chilies, 2 tbsp Mayonnaise, 1 Calamansi, 1 Egg`,
+        ingredients: [
+          '1 can (340g) Chunky Corned Beef',
+          '1/2 cup Red Onions (diced)',
+          '2 Green Chilies (Siling Haba, sliced)',
+          '2 tbsp Mayonnaise',
+          '1 tbsp Liquid Seasoning or Soy Sauce',
+          '1 Fresh Calamansi or Lemon',
+          '1 Fresh Egg'
+        ],
+        instructions: [
+          'Preheat a heavy cast iron sizzling plate over high heat.',
+          'Sauté red onions and green chilies in a pan until fragrant.',
+          'Add corned beef and cook until slightly toasted and dry.',
+          'Stir in mayonnaise, liquid seasoning, and calamansi juice, tossing rapidly.',
+          'Transfer to the sizzling plate, crack a raw egg on top, and serve immediately.'
+        ],
+        steps: [
+          'Preheat a heavy cast iron sizzling plate over high heat.',
+          'Sauté red onions and green chilies in a pan until fragrant.',
+          'Add corned beef and cook until slightly toasted and dry.',
+          'Stir in mayonnaise, liquid seasoning, and calamansi juice, tossing rapidly.',
+          'Transfer to the sizzling plate, crack a raw egg on top, and serve immediately.'
+        ]
+      },
+      {
+        id: `recipe-cornedbeef-3`,
+        title: `Crispy Corned Beef & Potato Hash`,
+        type: 'food',
+        category: 'Breakfast',
+        prepTime: '10m',
+        cookTime: '15m',
+        time: 25,
+        ingredientsPreview: `Corned Beef, 2 Boiled Potatoes (mashed), 1 Egg, 1/4 cup Breadcrumbs, Butter`,
+        ingredients: [
+          '1 can Corned Beef (drained)',
+          '2 Boiled Potatoes (mashed coarsely)',
+          '1/2 cup Chopped Yellow Onions',
+          '1 Large Egg',
+          '1/4 cup Breadcrumbs',
+          '2 tbsp Butter for searing'
+        ],
+        instructions: [
+          'In a bowl, mix corned beef, mashed potatoes, chopped onions, egg, and breadcrumbs.',
+          'Form mixture into compact 1-inch thick patties.',
+          'Melt butter in a non-stick pan over medium heat.',
+          'Sear patties for 4-5 minutes per side until a brown crispy crust forms.',
+          'Serve with sunny-side-up eggs and toasted bread.'
+        ],
+        steps: [
+          'In a bowl, mix corned beef, mashed potatoes, chopped onions, egg, and breadcrumbs.',
+          'Form mixture into compact 1-inch thick patties.',
+          'Melt butter in a non-stick pan over medium heat.',
+          'Sear patties for 4-5 minutes per side until a brown crispy crust forms.',
+          'Serve with sunny-side-up eggs and toasted bread.'
+        ]
+      }
+    ];
+  }
+
+  // 3. TOFU / TOKWA
+  if (lowerQ.includes('tofu') || lowerQ.includes('tokwa') || lowerQ.includes('mapo')) {
+    return [
+      {
+        id: `recipe-tofu-1`,
+        title: `Crispy Tokwa't Baboy (Tofu & Pork)`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '15m',
+        cookTime: '20m',
+        time: 35,
+        ingredientsPreview: `400g Firm Tofu, 200g Pork Belly, 1/2 cup Cane Vinegar, 1/4 cup Soy Sauce, 1 Red Onion, Green Chilies`,
+        ingredients: [
+          '400g Extra Firm Tofu (cubed)',
+          '200g Pork Belly (boiled until tender, then sliced)',
+          '1/2 cup Cane Vinegar',
+          '1/4 cup Soy Sauce',
+          '1 Red Onion (diced)',
+          '2 Green Chilies (sliced)',
+          '1 tbsp Sugar & Pinch of Black Pepper',
+          'Oil for deep frying'
+        ],
+        instructions: [
+          'Deep fry firm tofu cubes in hot oil until golden brown and super crispy. Drain on paper towels.',
+          'In a bowl, combine cane vinegar, soy sauce, diced red onion, sliced green chilies, sugar, and black pepper.',
+          'Toss crispy fried tofu and sliced pork belly together in a serving dish.',
+          'Pour the tangy vinegar-soy dressing over top and serve immediately.'
+        ],
+        steps: [
+          'Deep fry firm tofu cubes in hot oil until golden brown and super crispy. Drain on paper towels.',
+          'In a bowl, combine cane vinegar, soy sauce, diced red onion, sliced green chilies, sugar, and black pepper.',
+          'Toss crispy fried tofu and sliced pork belly together in a serving dish.',
+          'Pour the tangy vinegar-soy dressing over top and serve immediately.'
+        ]
+      },
+      {
+        id: `recipe-tofu-2`,
+        title: `Authentic Spicy Mapo Tofu`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '10m',
+        cookTime: '15m',
+        time: 25,
+        ingredientsPreview: `400g Soft Tofu, 150g Ground Pork, 2 tbsp Chili Bean Paste (Doubanjiang), Garlic, Sichuan Peppercorns`,
+        ingredients: [
+          '400g Soft Silken Tofu (cubed)',
+          '150g Ground Pork or Beef',
+          '2 tbsp Spicy Chili Bean Paste (Doubanjiang)',
+          '3 cloves Garlic & 1 tbsp Ginger (minced)',
+          '1 tsp Ground Sichuan Peppercorns',
+          '1 cup Chicken Broth & 1 tbsp Cornstarch slurry',
+          'Green Onions for garnish'
+        ],
+        instructions: [
+          'Heat oil in a wok and brown ground pork over medium heat.',
+          'Add minced garlic, ginger, and spicy chili bean paste, stirring until oil turns red and fragrant.',
+          'Pour in chicken broth and bring to a simmer.',
+          'Gently slide in soft tofu cubes and cook for 3 minutes without breaking tofu.',
+          'Stir in cornstarch slurry to thicken sauce. Sprinkle with Sichuan peppercorns and green onions.'
+        ],
+        steps: [
+          'Heat oil in a wok and brown ground pork over medium heat.',
+          'Add minced garlic, ginger, and spicy chili bean paste, stirring until oil turns red and fragrant.',
+          'Pour in chicken broth and bring to a simmer.',
+          'Gently slide in soft tofu cubes and cook for 3 minutes without breaking tofu.',
+          'Stir in cornstarch slurry to thicken sauce. Sprinkle with Sichuan peppercorns and green onions.'
+        ]
+      },
+      {
+        id: `recipe-tofu-3`,
+        title: `Sizzling Garlic Butter Tofu Sisig`,
+        type: 'food',
+        category: 'Comfort Food',
+        prepTime: '10m',
+        cookTime: '10m',
+        time: 20,
+        ingredientsPreview: `400g Crispy Fried Tofu, 2 tbsp Butter, 5 cloves Garlic, 1 tbsp Oyster Sauce, Mayonnaise, Green Chilies`,
+        ingredients: [
+          '400g Firm Tofu (cubed and deep-fried crisp)',
+          '2 tbsp Butter',
+          '5 cloves Garlic (minced)',
+          '1 Red Onion (diced)',
+          '2 Green Chilies & 1 Siling Labuyo',
+          '2 tbsp Mayonnaise & 1 tbsp Oyster Sauce',
+          '1 Fresh Calamansi'
+        ],
+        instructions: [
+          'Chop fried tofu into small sisig-sized bits.',
+          'Melt butter in a skillet and sauté minced garlic, red onion, and chilies.',
+          'Add chopped crispy tofu, tossing with oyster sauce and calamansi juice.',
+          'Fold in mayonnaise until creamy.',
+          'Serve sizzling hot on a cast iron skillet with garlic rice.'
+        ],
+        steps: [
+          'Chop fried tofu into small sisig-sized bits.',
+          'Melt butter in a skillet and sauté minced garlic, red onion, and chilies.',
+          'Add chopped crispy tofu, tossing with oyster sauce and calamansi juice.',
+          'Fold in mayonnaise until creamy.',
+          'Serve sizzling hot on a cast iron skillet with garlic rice.'
+        ]
+      }
+    ];
+  }
+
+  // 4. MEATLOAF / LUNCHEON MEAT / SPAM
+  if (lowerQ.includes('meat loaf') || lowerQ.includes('meatloaf') || lowerQ.includes('luncheon') || lowerQ.includes('spam')) {
+    return [
+      {
+        id: `recipe-meatloaf-1`,
+        title: `Classic Baked Sweet Glazed Meatloaf`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '15m',
+        cookTime: '45m',
+        time: 60,
+        ingredientsPreview: `500g Ground Beef & Pork, 1/2 cup Breadcrumbs, 1 Egg, 1/2 cup Onions, Milk, Glaze: Ketchup, Brown Sugar, Mustard`,
+        ingredients: [
+          '500g Lean Ground Beef or Pork',
+          '1/2 cup Italian Breadcrumbs',
+          '1 Large Egg',
+          '1/2 cup Yellow Onion (finely chopped)',
+          '1/4 cup Whole Milk',
+          '1/2 tsp Garlic Powder, Salt & Pepper',
+          'Glaze: 1/2 cup Ketchup, 2 tbsp Brown Sugar, 1 tbsp Yellow Mustard'
+        ],
+        instructions: [
+          'Preheat oven to 375°F (190°C). Line a loaf pan with parchment paper.',
+          'In a large bowl, combine ground meat, breadcrumbs, egg, chopped onion, milk, garlic powder, salt, and pepper. Mix gently until combined.',
+          'Press meat mixture evenly into the loaf pan.',
+          'Whisk ketchup, brown sugar, and mustard to make glaze, then spread half over top of meatloaf.',
+          'Bake for 45 minutes, brushing with remaining glaze halfway through, until internal temperature reaches 160°F (70°C).'
+        ],
+        steps: [
+          'Preheat oven to 375°F (190°C). Line a loaf pan with parchment paper.',
+          'In a large bowl, combine ground meat, breadcrumbs, egg, chopped onion, milk, garlic powder, salt, and pepper. Mix gently until combined.',
+          'Press meat mixture evenly into the loaf pan.',
+          'Whisk ketchup, brown sugar, and mustard to make glaze, then spread half over top of meatloaf.',
+          'Bake for 45 minutes, brushing with remaining glaze halfway through, until internal temperature reaches 160°F (70°C).'
+        ]
+      },
+      {
+        id: `recipe-meatloaf-2`,
+        title: `Sizzling Meatloaf & Egg Skillet`,
+        type: 'food',
+        category: 'Quick Meal',
+        prepTime: '5m',
+        cookTime: '10m',
+        time: 15,
+        ingredientsPreview: `300g Sliced Meatloaf or Luncheon Meat, 4 cloves Garlic, Onions, 2 Eggs, Soy Sauce, Calamansi`,
+        ingredients: [
+          '300g Sliced Meatloaf or Luncheon Meat (cubed)',
+          '4 cloves Garlic (minced)',
+          '1/2 cup Red Onion (chopped)',
+          '2 Green Chilies',
+          '1 tbsp Soy Sauce & 1 tsp Calamansi Juice',
+          '2 Fresh Eggs'
+        ],
+        instructions: [
+          'Pan-fry sliced meatloaf cubes in a hot skillet until edges turn brown and crispy.',
+          'Sauté minced garlic, onions, and green chilies alongside the meatloaf.',
+          'Drizzle with soy sauce and calamansi juice.',
+          'Push meatloaf to the sides, crack eggs in center, and cook to desired yolk firmness.',
+          'Serve sizzling hot with rice.'
+        ],
+        steps: [
+          'Pan-fry sliced meatloaf cubes in a hot skillet until edges turn brown and crispy.',
+          'Sauté minced garlic, onions, and green chilies alongside the meatloaf.',
+          'Drizzle with soy sauce and calamansi juice.',
+          'Push meatloaf to the sides, crack eggs in center, and cook to desired yolk firmness.',
+          'Serve sizzling hot with rice.'
+        ]
+      },
+      {
+        id: `recipe-meatloaf-3`,
+        title: `Crispy Panko Fried Meatloaf Batons`,
+        type: 'food',
+        category: 'Appetizer',
+        prepTime: '10m',
+        cookTime: '10m',
+        time: 20,
+        ingredientsPreview: `300g Meatloaf, 1/2 cup Flour, 1 Egg, 1/2 cup Panko Breadcrumbs, Oil for frying, Sweet Chili Dip`,
+        ingredients: [
+          '300g Thick Sliced Meatloaf (cut into 1-inch batons)',
+          '1/2 cup All-Purpose Flour',
+          '1 Egg (beaten)',
+          '1 cup Japanese Panko Breadcrumbs',
+          'Oil for deep frying',
+          'Sweet Chili or BBQ dipping sauce'
+        ],
+        instructions: [
+          'Dredge meatloaf sticks in flour, dip in beaten egg, and coat thoroughly with panko breadcrumbs.',
+          'Heat oil in a deep skillet to 350°F (175°C).',
+          'Fry meatloaf batons in batches for 3-4 minutes until golden brown and extra crunchy.',
+          'Drain on paper towels and serve with sweet chili dipping sauce.'
+        ],
+        steps: [
+          'Dredge meatloaf sticks in flour, dip in beaten egg, and coat thoroughly with panko breadcrumbs.',
+          'Heat oil in a deep skillet to 350°F (175°C).',
+          'Fry meatloaf batons in batches for 3-4 minutes until golden brown and extra crunchy.',
+          'Drain on paper towels and serve with sweet chili dipping sauce.'
+        ]
+      }
+    ];
+  }
+
+  // 5. EGGPLANT / TALONG
+  if (lowerQ.includes('talong') || lowerQ.includes('eggplant')) {
+    return [
+      {
+        id: `recipe-talong-1`,
+        title: `Authentic Tortang Talong (Filipino Eggplant Omelette)`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '10m',
+        cookTime: '15m',
+        time: 25,
+        ingredientsPreview: `2 Long Chinese Eggplants (charred & peeled), 2 Eggs, Salt & Pepper, Cooking Oil`,
+        ingredients: [
+          '2 Long Chinese Eggplants (stems intact)',
+          '2 Large Eggs (beaten with salt & pepper)',
+          '1/2 tsp Sea Salt & Black Pepper',
+          '3 tbsp Cooking Oil for frying'
+        ],
+        instructions: [
+          'Grill eggplants over open flame or broiler until skin is charred and flesh is tender.',
+          'Let cool slightly, then peel off charred skin carefully while leaving stem attached.',
+          'Flatten eggplant flesh gently with a fork.',
+          'Dip flattened eggplant into beaten eggs, coating completely.',
+          'Fry in hot oil for 3-4 minutes per side until golden brown. Serve hot with banana ketchup.'
+        ],
+        steps: [
+          'Grill eggplants over open flame or broiler until skin is charred and flesh is tender.',
+          'Let cool slightly, then peel off charred skin carefully while leaving stem attached.',
+          'Flatten eggplant flesh gently with a fork.',
+          'Dip flattened eggplant into beaten eggs, coating completely.',
+          'Fry in hot oil for 3-4 minutes per side until golden brown. Serve hot with banana ketchup.'
+        ]
+      }
+    ];
+  }
+
+  // 6. SIOMAI & DUMPLINGS
   if (lowerQ.includes('siomai') || lowerQ.includes('shumai') || lowerQ.includes('dumpling') || lowerQ.includes('dim sum') || lowerQ.includes('wonton') || lowerQ.includes('gyoza')) {
     return [
       {
@@ -159,69 +503,11 @@ export const generateSmartRecipes = (query) => {
           'Steam over boiling water for 15-18 minutes until fully cooked.',
           'Serve piping hot with soy sauce, calamansi, and chili garlic oil.'
         ]
-      },
-      {
-        id: `recipe-siomai-2`,
-        title: `Crispy Deep-Fried Pork Siomai`,
-        type: 'food',
-        category: 'Appetizer',
-        prepTime: '15m',
-        cookTime: '10m',
-        time: 10,
-        ingredientsPreview: `20 Freshly Wrapped Pork Siomai, Vegetable Oil, Sweet Chili Sauce, Calamansi`,
-        ingredients: [
-          '20 Freshly Wrapped or Steamed Pork Siomai',
-          '2 cups Vegetable Oil for deep frying',
-          '1/4 cup Sweet Chili Sauce',
-          '2 Fresh Calamansi or Lemon wedges'
-        ],
-        instructions: [
-          'Heat vegetable oil in a deep pan to 350°F (175°C).',
-          'Carefully drop siomai into hot oil in batches.',
-          'Fry for 4-5 minutes until wrappers turn deep golden brown and crispy.',
-          'Drain on paper towels and serve with sweet chili sauce and calamansi.'
-        ],
-        steps: [
-          'Heat vegetable oil in a deep pan to 350°F (175°C).',
-          'Carefully drop siomai into hot oil in batches.',
-          'Fry for 4-5 minutes until wrappers turn deep golden brown and crispy.',
-          'Drain on paper towels and serve with sweet chili sauce and calamansi.'
-        ]
-      },
-      {
-        id: `recipe-siomai-3`,
-        title: `Chili Garlic Siomai Rice Bowl`,
-        type: 'food',
-        category: 'Comfort Food',
-        prepTime: '5m',
-        cookTime: '10m',
-        time: 10,
-        ingredientsPreview: `8 Steamed Siomai, 2 tbsp Chili Garlic Oil, 1 tbsp Soy Sauce, 1 cup Garlic Fried Rice, Fried Garlic Chips`,
-        ingredients: [
-          '8 Steamed Pork or Beef Siomai',
-          '2 tbsp Housemade Chili Garlic Oil',
-          '1 tbsp Toyo (Soy Sauce)',
-          '1 Fresh Calamansi',
-          '1.5 cups Hot Garlic Fried Rice (Sinangag)',
-          '2 tbsp Toasted Garlic Chips'
-        ],
-        instructions: [
-          'Scoop steaming hot garlic fried rice into a serving bowl.',
-          'Top neatly with steamed siomai.',
-          'Drizzle generously with chili garlic oil, soy sauce, and calamansi juice.',
-          'Garnish with toasted garlic chips and serve immediately.'
-        ],
-        steps: [
-          'Scoop steaming hot garlic fried rice into a serving bowl.',
-          'Top neatly with steamed siomai.',
-          'Drizzle generously with chili garlic oil, soy sauce, and calamansi juice.',
-          'Garnish with toasted garlic chips and serve immediately.'
-        ]
       }
     ];
   }
 
-  // 3. PANSIT, PANCIT, CANTON, BIHON, NOODLES
+  // 7. PANSIT & NOODLES
   if (lowerQ.includes('pansit') || lowerQ.includes('pancit') || lowerQ.includes('canton') || lowerQ.includes('bihon') || lowerQ.includes('noodle')) {
     return [
       {
@@ -261,82 +547,11 @@ export const generateSmartRecipes = (query) => {
           'Submerge dried canton noodles into boiling broth. Toss continuously until noodles absorb liquid and soften.',
           'Transfer to a platter, top with reserved vegetables and shrimp, and serve with calamansi.'
         ]
-      },
-      {
-        id: `recipe-pansit-2`,
-        title: `Special Pansit Bihon Guisado`,
-        type: 'food',
-        category: 'Main Course',
-        prepTime: '15m',
-        cookTime: '15m',
-        time: 15,
-        ingredientsPreview: `250g Rice Vermicelli (Bihon), Shredded Chicken, Cabbage, Green Beans, Soy Sauce, Chicken Broth`,
-        ingredients: [
-          '250g Rice Vermicelli (Bihon noodles, soaked in water for 10m)',
-          '150g Cooked Shredded Chicken Breast',
-          '1 cup Cabbage (sliced)',
-          '1/2 cup Green Beans (sliced diagonally)',
-          '1/2 cup Carrots (julienned)',
-          '1/4 cup Soy Sauce',
-          '2 cups Chicken Broth',
-          'Fresh Calamansi'
-        ],
-        instructions: [
-          'Sauté garlic and onions in a large wok until translucent.',
-          'Add shredded chicken, carrots, and green beans, cooking for 3 minutes.',
-          'Pour in soy sauce and chicken broth, bringing to a simmer.',
-          'Add drained bihon noodles and toss continuously until noodles absorb broth completely.',
-          'Stir in shredded cabbage during the last minute of cooking.',
-          'Serve warm garnished with calamansi halves.'
-        ],
-        steps: [
-          'Sauté garlic and onions in a large wok until translucent.',
-          'Add shredded chicken, carrots, and green beans, cooking for 3 minutes.',
-          'Pour in soy sauce and chicken broth, bringing to a simmer.',
-          'Add drained bihon noodles and toss continuously until noodles absorb broth completely.',
-          'Stir in shredded cabbage during the last minute of cooking.',
-          'Serve warm garnished with calamansi halves.'
-        ]
-      },
-      {
-        id: `recipe-pansit-3`,
-        title: `Pansit Palabok Supreme`,
-        type: 'food',
-        category: 'Comfort Food',
-        prepTime: '20m',
-        cookTime: '20m',
-        time: 20,
-        ingredientsPreview: `200g Cornstarch Rice Noodles, Annatto Shrimp Sauce, Chicharon Crumbles, Hard-Boiled Eggs, Tinapa Flakes`,
-        ingredients: [
-          '200g Thick Rice Noodles (Palabok noodles)',
-          '1 cup Shrimp Stock',
-          '2 tbsp Annatto Water (for rich orange color)',
-          '2 tbsp Ground Pork',
-          '2 tbsp Cornstarch (slurry)',
-          '1/2 cup Crushed Chicharon (pork rinds)',
-          '2 Hard-Boiled Eggs (sliced)',
-          '1/4 cup Smoked Fish (Tinapa flakes)',
-          'Chopped Green Onions & Calamansi'
-        ],
-        instructions: [
-          'Boil palabok noodles according to package instructions until tender, then drain and set on a platter.',
-          'In a saucepan, simmer ground pork, shrimp stock, and annatto water.',
-          'Thicken sauce with cornstarch slurry, stirring until glossy and rich.',
-          'Pour hot orange sauce over cooked noodles.',
-          'Top generously with crushed chicharon, tinapa flakes, sliced hard-boiled eggs, and green onions.'
-        ],
-        steps: [
-          'Boil palabok noodles according to package instructions until tender, then drain and set on a platter.',
-          'In a saucepan, simmer ground pork, shrimp stock, and annatto water.',
-          'Thicken sauce with cornstarch slurry, stirring until glossy and rich.',
-          'Pour hot orange sauce over cooked noodles.',
-          'Top generously with crushed chicharon, tinapa flakes, sliced hard-boiled eggs, and green onions.'
-        ]
       }
     ];
   }
 
-  // 4. BEVERAGES, DRINKS, COFFEE, TEA, SMOOTHIES, JUICES
+  // 8. BEVERAGES, DRINKS, COFFEE, TEA, SMOOTHIES, JUICES
   const isDrink = lowerQ.includes('drink') || lowerQ.includes('beverage') || lowerQ.includes('coffee') || 
                   lowerQ.includes('tea') || lowerQ.includes('latte') || lowerQ.includes('espresso') || 
                   lowerQ.includes('juice') || lowerQ.includes('smoothie') || lowerQ.includes('shake') || 
@@ -374,65 +589,11 @@ export const generateSmartRecipes = (query) => {
           'Fill a tall serving glass with ice cubes.',
           'Pour drink over ice and garnish with fresh mint leaves.'
         ]
-      },
-      {
-        id: `recipe-drink-2`,
-        title: `Hot ${titleQuery} Gourmet Latte`,
-        type: 'drink',
-        category: 'Drinks',
-        prepTime: '3m',
-        cookTime: '5m',
-        time: 8,
-        ingredientsPreview: `${titleQuery} Concentrate, Steamed Whole Milk, Caramel Syrup, Whipped Cream`,
-        ingredients: [
-          `1/2 cup Brewed ${titleQuery} base or concentrate`,
-          '1 cup Whole Milk or Oat Milk',
-          '1 tbsp Caramel or Vanilla Syrup',
-          'Whipped Cream & Cinnamon powder'
-        ],
-        instructions: [
-          `Prepare hot ${q} concentrate in a ceramic coffee mug.`,
-          'Steam or froth whole milk until creamy and velvet soft.',
-          'Pour frothed milk gently over concentrate and stir in syrup.',
-          'Top with a mountain of whipped cream and a sprinkle of cinnamon.'
-        ],
-        steps: [
-          `Prepare hot ${q} concentrate in a ceramic coffee mug.`,
-          'Steam or froth whole milk until creamy and velvet soft.',
-          'Pour frothed milk gently over concentrate and stir in syrup.',
-          'Top with a mountain of whipped cream and a sprinkle of cinnamon.'
-        ]
-      },
-      {
-        id: `recipe-drink-3`,
-        title: `Creamy ${titleQuery} Smoothie Shake`,
-        type: 'drink',
-        category: 'Drinks',
-        prepTime: '5m',
-        cookTime: '0m',
-        time: 5,
-        ingredientsPreview: `Frozen ${titleQuery}, Greek Yogurt, Almond Milk, Chia Seeds, Honey`,
-        ingredients: [
-          `1 cup ${titleQuery} (frozen)`,
-          '1/2 cup Greek Yogurt',
-          '1/2 cup Almond Milk or Oat Milk',
-          '1 tbsp Chia Seeds or Honey'
-        ],
-        instructions: [
-          `Place frozen ${q}, Greek yogurt, almond milk, and honey into a high-speed blender.`,
-          'Blend on high speed for 60 seconds until silky smooth.',
-          'Pour into a tall smoothie cup and serve immediately with a straw.'
-        ],
-        steps: [
-          `Place frozen ${q}, Greek yogurt, almond milk, and honey into a high-speed blender.`,
-          'Blend on high speed for 60 seconds until silky smooth.',
-          'Pour into a tall smoothie cup and serve immediately with a straw.'
-        ]
       }
     ];
   }
 
-  // 5. TUNA & FISH DISHES
+  // 9. TUNA & FISH DISHES
   if (lowerQ.includes('tuna') || lowerQ.includes('fish') || lowerQ.includes('salmon')) {
     return [
       {
@@ -447,37 +608,11 @@ export const generateSmartRecipes = (query) => {
         ingredients: ['1 can (180g) Flaked Tuna in Oil (drained)', '2 Eggs', '1/2 cup Chopped Red Onions', '2 Siling Haba (Green Chili, sliced)', '2 tbsp Mayonnaise', '1 tbsp Soy Sauce', '1 Calamansi or Lemon'],
         instructions: ['Sauté red onions and sliced green chilies in a hot skillet until fragrant.', 'Add drained flaked tuna and stir-fry for 3-4 minutes until slightly crispy.', 'Season with soy sauce and calamansi juice.', 'Mix in mayonnaise and crack a fresh egg on top.', 'Serve sizzling hot with warm rice.'],
         steps: ['Sauté red onions and sliced green chilies in a hot skillet until fragrant.', 'Add drained flaked tuna and stir-fry for 3-4 minutes until slightly crispy.', 'Season with soy sauce and calamansi juice.', 'Mix in mayonnaise and crack a fresh egg on top.', 'Serve sizzling hot with warm rice.']
-      },
-      {
-        id: `recipe-tuna-2`,
-        title: `Tuna & Cheese Omelette`,
-        type: 'food',
-        category: 'Breakfast',
-        prepTime: '5m',
-        cookTime: '5m',
-        time: 10,
-        ingredientsPreview: `3 Eggs, 1/2 cup Flaked Tuna, Cheddar Cheese, Butter, Tomatoes, Black Pepper`,
-        ingredients: ['3 Large Eggs', '1/2 cup Flaked Tuna', '1/4 cup Shredded Cheddar Cheese', '1 tbsp Butter', '1 tbsp Chopped Tomatoes', 'Salt & Black Pepper'],
-        instructions: ['Whisk eggs with a pinch of salt and black pepper in a bowl.', 'Melt butter in a non-stick skillet over medium-low heat.', 'Pour beaten eggs into the pan and cook until edges set.', 'Add flaked tuna, tomatoes, and shredded cheese on one half.', 'Fold over and cook for 1 minute until cheese is gooey and melted.'],
-        steps: ['Whisk eggs with a pinch of salt and black pepper in a bowl.', 'Melt butter in a non-stick skillet over medium-low heat.', 'Pour beaten eggs into the pan and cook until edges set.', 'Add flaked tuna, tomatoes, and shredded cheese on one half.', 'Fold over and cook for 1 minute until cheese is gooey and melted.']
-      },
-      {
-        id: `recipe-tuna-3`,
-        title: `Creamy Spicy Tuna Pasta`,
-        type: 'food',
-        category: 'Main Course',
-        prepTime: '10m',
-        cookTime: '12m',
-        time: 20,
-        ingredientsPreview: `200g Penne Pasta, 1 can Tuna, 1/2 cup Heavy Cream, Garlic, Chili Flakes, Parmesan Cheese`,
-        ingredients: ['200g Penne Pasta', '1 can Flaked Tuna in Olive Oil', '1/2 cup Heavy Cream', '3 cloves Garlic (minced)', '1/2 tsp Chili Flakes', '1/4 cup Grated Parmesan'],
-        instructions: ['Boil penne pasta in salted water until al dente.', 'Sauté minced garlic and chili flakes in olive oil from tuna can.', 'Add flaked tuna and heavy cream, bringing to a simmer for 3 minutes.', 'Toss pasta into creamy tuna sauce and sprinkle with grated parmesan cheese.'],
-        steps: ['Boil penne pasta in salted water until al dente.', 'Sauté minced garlic and chili flakes in olive oil from tuna can.', 'Add flaked tuna and heavy cream, bringing to a simmer for 3 minutes.', 'Toss pasta into creamy tuna sauce and sprinkle with grated parmesan cheese.']
       }
     ];
   }
 
-  // 6. FILIPINO DISHES (MENUDO, ADOBO, SINIGANG, SISIG, KINILAW)
+  // 10. FILIPINO TRADITIONAL DISHES (MENUDO, ADOBO, SINIGANG, SISIG)
   if (lowerQ.includes('menudo')) {
     return [
       {
@@ -550,99 +685,174 @@ export const generateSmartRecipes = (query) => {
     ];
   }
 
-  // 7. DYNAMIC DISH VARIATION FALLBACK FOR ANY QUERY
+  // 11. DYNAMIC INGREDIENT MATCHING & AUTHENTIC RECIPE DISPATCHER FOR ANY USER QUERY
+  let isBeef = lowerQ.includes('beef') || lowerQ.includes('steak');
+  let isChicken = lowerQ.includes('chicken') || lowerQ.includes('wing') || lowerQ.includes('poultry');
+  let isPork = lowerQ.includes('pork') || lowerQ.includes('pig') || lowerQ.includes('bacon');
+
+  if (isBeef) {
+    return [
+      {
+        id: `recipe-beef-1`,
+        title: `Authentic Bistek Tagalog (${titleQuery} Beef Steak)`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '15m',
+        cookTime: '20m',
+        time: 35,
+        ingredientsPreview: `500g Beef Sirloin (thinly sliced), Soy Sauce, Calamansi Juice, Large Onion Rings, Garlic, Black Pepper`,
+        ingredients: ['500g Beef Sirloin (thinly sliced)', '1/3 cup Soy Sauce', '1/4 cup Calamansi or Lemon Juice', '2 Large White Onions (cut into rings)', '4 cloves Garlic (minced)', '1/2 tsp Ground Black Pepper', '2 tbsp Cooking Oil'],
+        instructions: ['Marinate sliced beef in soy sauce, calamansi juice, and black pepper for 30 minutes.', 'Heat oil in a skillet and pan-fry onion rings for 2 minutes until translucent. Remove onion rings.', 'In the same pan, sear beef slices in single layers for 1-2 minutes per side.', 'Pour remaining marinade into the pan and simmer for 5 minutes until beef is tender.', 'Top with fried onion rings and serve hot with steamed rice.'],
+        steps: ['Marinate sliced beef in soy sauce, calamansi juice, and black pepper for 30 minutes.', 'Heat oil in a skillet and pan-fry onion rings for 2 minutes until translucent. Remove onion rings.', 'In the same pan, sear beef slices in single layers for 1-2 minutes per side.', 'Pour remaining marinade into the pan and simmer for 5 minutes until beef is tender.', 'Top with fried onion rings and serve hot with steamed rice.']
+      },
+      {
+        id: `recipe-beef-2`,
+        title: `Rich ${titleQuery} Caldereta Stew`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '20m',
+        cookTime: '40m',
+        time: 60,
+        ingredientsPreview: `500g Beef Chuck, Tomato Sauce, Liver Spread, Potatoes, Carrots, Bell Peppers, Cheese`,
+        ingredients: ['500g Beef Chuck (cubed)', '1 cup Tomato Sauce', '1/2 cup Liver Spread', '1 Large Potato & 1 Carrot (cubed)', '1 Red Bell Pepper (sliced)', '1/2 cup Shredded Cheese', 'Garlic & Onion'],
+        instructions: ['Sauté garlic and onions, then brown beef cubes.', 'Pour in tomato sauce and beef broth, simmering covered for 45 minutes until beef is tender.', 'Stir in liver spread, potatoes, and carrots, cooking for 10 minutes.', 'Add bell peppers and shredded cheese, stirring until sauce is thick and creamy.'],
+        steps: ['Sauté garlic and onions, then brown beef cubes.', 'Pour in tomato sauce and beef broth, simmering covered for 45 minutes until beef is tender.', 'Stir in liver spread, potatoes, and carrots, cooking for 10 minutes.', 'Add bell peppers and shredded cheese, stirring until sauce is thick and creamy.']
+      }
+    ];
+  }
+
+  if (isChicken) {
+    return [
+      {
+        id: `recipe-chicken-1`,
+        title: `Crispy Honey Garlic ${titleQuery}`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '15m',
+        cookTime: '20m',
+        time: 35,
+        ingredientsPreview: `500g Chicken Cutlets, Cornstarch Coating, Honey Garlic Glaze, Sesame Seeds`,
+        ingredients: ['500g Chicken Cutlets', '1/2 cup Cornstarch', '1 Egg', '4 tbsp Honey', '4 cloves Garlic (minced)', '2 tbsp Soy Sauce', '1 tbsp Sesame Oil', 'Oil for frying'],
+        instructions: ['Coat chicken cutlets in egg and cornstarch.', 'Deep fry in hot oil for 6-8 minutes until golden and extra crispy.', 'In a separate skillet, simmer minced garlic, honey, soy sauce, and sesame oil for 2 minutes.', 'Toss crispy chicken into honey garlic glaze and sprinkle with sesame seeds.'],
+        steps: ['Coat chicken cutlets in egg and cornstarch.', 'Deep fry in hot oil for 6-8 minutes until golden and extra crispy.', 'In a separate skillet, simmer minced garlic, honey, soy sauce, and sesame oil for 2 minutes.', 'Toss crispy chicken into honey garlic glaze and sprinkle with sesame seeds.']
+      }
+    ];
+  }
+
+  if (isPork) {
+    return [
+      {
+        id: `recipe-pork-1`,
+        title: `Crispy Sweet & Sour ${titleQuery}`,
+        type: 'food',
+        category: 'Main Course',
+        prepTime: '15m',
+        cookTime: '20m',
+        time: 35,
+        ingredientsPreview: `500g Pork Shoulder (cubed), Pineapple Chunks, Bell Peppers, Ketchup, Rice Vinegar, Sugar`,
+        ingredients: ['500g Pork Shoulder (cubed)', '1/2 cup Cornstarch', '1 cup Pineapple Chunks in Juice', '1 Red & Green Bell Pepper', '3 tbsp Ketchup', '2 tbsp Rice Vinegar', '2 tbsp Sugar'],
+        instructions: ['Coat pork cubes in cornstarch and deep fry until crispy and golden brown.', 'Sauté bell peppers and pineapple chunks in a skillet for 2 minutes.', 'Add ketchup, rice vinegar, pineapple juice, and sugar, simmering until sauce thickens.', 'Toss crispy fried pork into sweet and sour sauce and serve hot.'],
+        steps: ['Coat pork cubes in cornstarch and deep fry until crispy and golden brown.', 'Sauté bell peppers and pineapple chunks in a skillet for 2 minutes.', 'Add ketchup, rice vinegar, pineapple juice, and sugar, simmering until sauce thickens.', 'Toss crispy fried pork into sweet and sour sauce and serve hot.']
+      }
+    ];
+  }
+
+  // 12. DYNAMIC GENERIC RECIPE CREATOR FOR CUSTOM FOOD NAMES
   return [
     {
-      id: `recipe-gen-1`,
-      title: `Traditional ${titleQuery} Special`,
+      id: `recipe-custom-1`,
+      title: `Authentic Home-Style ${titleQuery}`,
       type: 'food',
       category: 'Main Course',
       prepTime: '15m',
       cookTime: '20m',
-      time: 20,
-      ingredientsPreview: `500g Fresh ${titleQuery}, Soy Sauce, Garlic, Chopped Onions, Cooking Oil, Salt & Black Pepper`,
+      time: 35,
+      ingredientsPreview: `500g Fresh ${titleQuery}, 1 tbsp Soy Sauce, 4 cloves Garlic, 1/2 cup Onions, Cooking Oil, Black Pepper`,
       ingredients: [
         `500g Fresh ${titleQuery}`,
-        '1 tbsp Soy Sauce or Seasoning',
+        '1 tbsp Soy Sauce or Oyster Seasoning',
         '4 cloves Garlic (minced)',
-        '1/2 cup Chopped Red Onions',
-        '1 tbsp Cooking Oil',
-        'Salt & Freshly Ground Black Pepper to taste'
+        '1/2 cup Yellow Onions (chopped)',
+        '2 tbsp Cooking Oil',
+        '1/2 tsp Freshly Ground Black Pepper & Sea Salt'
       ],
       instructions: [
-        'Heat cooking oil in a wide pan or wok over medium-high heat.',
-        'Sauté minced garlic and red onions until aromatic and soft.',
-        `Add prepped ${q} into the pan and sear for 6-8 minutes until tender and well cooked.`,
-        'Season generously with soy sauce, black pepper, and fresh herbs.',
-        'Serve hot alongside warm steamed rice.'
+        'Prep all fresh ingredients neatly on your cutting board.',
+        'Heat cooking oil in a wide skillet over medium-high heat.',
+        'Sauté minced garlic and chopped onions until soft and fragrant.',
+        `Add prepped ${q} into the pan and sear for 6-8 minutes until tender and cooked through.`,
+        'Season with soy sauce, black pepper, and fresh herbs, then serve warm with rice.'
       ],
       steps: [
-        'Heat cooking oil in a wide pan or wok over medium-high heat.',
-        'Sauté minced garlic and red onions until aromatic and soft.',
-        `Add prepped ${q} into the pan and sear for 6-8 minutes until tender and well cooked.`,
-        'Season generously with soy sauce, black pepper, and fresh herbs.',
-        'Serve hot alongside warm steamed rice.'
+        'Prep all fresh ingredients neatly on your cutting board.',
+        'Heat cooking oil in a wide skillet over medium-high heat.',
+        'Sauté minced garlic and chopped onions until soft and fragrant.',
+        `Add prepped ${q} into the pan and sear for 6-8 minutes until tender and cooked through.`,
+        'Season with soy sauce, black pepper, and fresh herbs, then serve warm with rice.'
       ]
     },
     {
-      id: `recipe-gen-2`,
-      title: `Sizzling ${titleQuery} Skillet`,
-      type: 'food',
-      category: 'Quick Meal',
-      prepTime: '10m',
-      cookTime: '15m',
-      time: 15,
-      ingredientsPreview: `Sliced ${titleQuery}, Soy Sauce, Calamansi Juice, Green Chilies, Red Onions, Egg`,
-      ingredients: [
-        `400g Sliced ${titleQuery}`,
-        '2 tbsp Soy Sauce or Teriyaki',
-        '1 Fresh Calamansi or Lemon juice',
-        '2 Green Chilies (sliced)',
-        '1/2 cup Chopped Red Onions',
-        '1 tbsp Mayonnaise or 1 Egg'
-      ],
-      instructions: [
-        'Prep all ingredients and heat a heavy cast iron skillet until smoking hot.',
-        `Sauté sliced ${q} with onions and chilies for 4-5 minutes until caramelized.`,
-        'Season with calamansi juice and soy sauce, tossing quickly.',
-        'Top with a dollop of mayonnaise or crack a fresh egg on top while sizzling, then serve.'
-      ],
-      steps: [
-        'Prep all ingredients and heat a heavy cast iron skillet until smoking hot.',
-        `Sauté sliced ${q} with onions and chilies for 4-5 minutes until caramelized.`,
-        'Season with calamansi juice and soy sauce, tossing quickly.',
-        'Top with a dollop of mayonnaise or crack a fresh egg on top while sizzling, then serve.'
-      ]
-    },
-    {
-      id: `recipe-gen-3`,
-      title: `Crispy Fried ${titleQuery}`,
+      id: `recipe-custom-2`,
+      title: `Crispy Golden Fried ${titleQuery}`,
       type: 'food',
       category: 'Appetizer',
-      prepTime: '15m',
+      prepTime: '10m',
       cookTime: '10m',
-      time: 15,
-      ingredientsPreview: `Prepped ${titleQuery}, Cornstarch or Seasoned Flour, 1 Beaten Egg, Garlic Powder, Dipping Sauce`,
+      time: 20,
+      ingredientsPreview: `400g Prepped ${titleQuery}, 1/2 cup Cornstarch, 1 Beaten Egg, Garlic Powder, Dipping Sauce`,
       ingredients: [
-        `500g Prepped ${titleQuery}`,
-        '1/2 cup Cornstarch or Seasoned Flour',
-        '1 Beaten Egg',
-        '1 tsp Garlic Powder & Salt',
-        'Oil for frying'
+        `400g Prepped ${titleQuery}`,
+        '1/2 cup All-Purpose Flour or Cornstarch',
+        '1 Egg (beaten)',
+        '1/2 tsp Garlic Powder, Paprika & Salt',
+        'Oil for deep frying',
+        'Sweet Chili or Dip of choice'
       ],
       instructions: [
-        'Pat ingredients dry and season with garlic powder and salt.',
-        'Dip in beaten egg, then dredge thoroughly in cornstarch or flour.',
-        'Heat 1 inch of cooking oil in a deep skillet to 350°F (175°C).',
-        'Deep fry in batches for 4-5 minutes until golden brown and crispy.',
-        'Drain on paper towels and serve hot with sweet chili or vinegar garlic dipping sauce.'
+        `Season prepped ${q} with garlic powder, paprika, and salt.`,
+        'Dip pieces in beaten egg, then dredge thoroughly in seasoned flour or cornstarch.',
+        'Heat oil in a skillet to 350°F (175°C).',
+        'Fry in batches for 4-5 minutes until golden brown and super crispy.',
+        'Drain on paper towels and serve warm with dipping sauce.'
       ],
       steps: [
-        'Pat ingredients dry and season with garlic powder and salt.',
-        'Dip in beaten egg, then dredge thoroughly in cornstarch or flour.',
-        'Heat 1 inch of cooking oil in a deep skillet to 350°F (175°C).',
-        'Deep fry in batches for 4-5 minutes until golden brown and crispy.',
-        'Drain on paper towels and serve hot with sweet chili or vinegar garlic dipping sauce.'
+        `Season prepped ${q} with garlic powder, paprika, and salt.`,
+        'Dip pieces in beaten egg, then dredge thoroughly in seasoned flour or cornstarch.',
+        'Heat oil in a skillet to 350°F (175°C).',
+        'Fry in batches for 4-5 minutes until golden brown and super crispy.',
+        'Drain on paper towels and serve warm with dipping sauce.'
+      ]
+    },
+    {
+      id: `recipe-custom-3`,
+      title: `Sizzling ${titleQuery} & Garlic Hash`,
+      type: 'food',
+      category: 'Comfort Food',
+      prepTime: '10m',
+      cookTime: '15m',
+      time: 25,
+      ingredientsPreview: `300g Sliced ${titleQuery}, 1 Potato (diced), 5 cloves Garlic, Soy Sauce, Calamansi, 1 Egg`,
+      ingredients: [
+        `300g Sliced ${titleQuery}`,
+        '1 Large Potato (diced and fried crisp)',
+        '5 cloves Garlic (minced)',
+        '1/2 cup Red Onions (diced)',
+        '1 tbsp Soy Sauce & 1 tsp Calamansi Juice',
+        '1 Fresh Egg'
+      ],
+      instructions: [
+        'Preheat a sizzling skillet over medium-high heat.',
+        `Sauté minced garlic, red onions, and sliced ${q} until browned.`,
+        'Toss in crispy fried potato cubes and season with soy sauce and calamansi.',
+        'Crack a fresh egg in the center while sizzling.',
+        'Serve hot alongside warm garlic fried rice.'
+      ],
+      steps: [
+        'Preheat a sizzling skillet over medium-high heat.',
+        `Sauté minced garlic, red onions, and sliced ${q} until browned.`,
+        'Toss in crispy fried potato cubes and season with soy sauce and calamansi.',
+        'Crack a fresh egg in the center while sizzling.',
+        'Serve hot alongside warm garlic fried rice.'
       ]
     }
   ];
