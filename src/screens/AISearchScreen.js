@@ -14,11 +14,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useRecipes } from '../context/RecipeContext';
 import { Ionicons } from '@expo/vector-icons';
-import { searchRecipes } from '../services/aiService';
-import { useAuth } from '../context/AuthContext';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
-import Toast from '../components/Toast';
-import AISearchCardSkeleton from '../components/AISearchCardSkeleton';
+import { searchRecipes, saveCustomApiKey, getCustomApiKey } from '../services/aiService';
+import { Modal } from 'react-native';
 
 export default function AISearchScreen({ navigation }) {
   const { colors, isDark } = useTheme();
@@ -29,11 +26,20 @@ export default function AISearchScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [searchError, setSearchError] = useState(null);
+  const [needsApiKey, setNeedsApiKey] = useState(false);
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [inputApiKey, setInputApiKey] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const [importing, setImporting] = useState(null);
 
   const toastRef = React.useRef(null);
+
+  React.useEffect(() => {
+    getCustomApiKey().then(k => {
+      if (k) setInputApiKey(k);
+    });
+  }, []);
 
   // Handle Android Hardware Back Button to return to Home Tab
   useFocusEffect(
@@ -48,19 +54,30 @@ export default function AISearchScreen({ navigation }) {
     }, [navigation])
   );
 
+  const handleSaveKey = async () => {
+    await saveCustomApiKey(inputApiKey);
+    setShowKeyModal(false);
+    toastRef.current?.show('API Key saved! Try searching now.', 'success');
+    if (query.trim()) {
+      handleSearch(query);
+    }
+  };
+
   const handleSearch = async (overrideQuery) => {
     const searchQuery = (typeof overrideQuery === 'string' ? overrideQuery : query).trim();
     if (!searchQuery) return;
     
     setLoading(true);
     setSearchError(null);
+    setNeedsApiKey(false);
     setResults([]);
     setCurrentPage(1);
 
     try {
-      const { recipes, isFood, error } = await searchRecipes(searchQuery);
+      const { recipes, isFood, error, needsApiKey: reqKey } = await searchRecipes(searchQuery);
       if (error) {
         setSearchError(error);
+        if (reqKey) setNeedsApiKey(true);
       } else if (!isFood) {
         setSearchError("I only find food and drinks! 🍳 Try searching for something like 'Kinilaw', 'Chicken Adobo' or 'Iced Coffee'.");
       } else if (recipes.length === 0) {
@@ -121,7 +138,14 @@ export default function AISearchScreen({ navigation }) {
           <View style={styles.titleContainer}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>AI Recipe Finder</Text>
           </View>
-          <View style={{ width: 44 }} />
+          <TouchableOpacity 
+            onPress={() => setShowKeyModal(true)} 
+            style={styles.headerBtn}
+            accessibilityLabel="Configure Gemini API Key"
+            accessibilityRole="button"
+          >
+            <Ionicons name="key-outline" size={24} color={colors.primary} />
+          </TouchableOpacity>
         </View>
 
         {/* Search Section */}
@@ -141,7 +165,7 @@ export default function AISearchScreen({ navigation }) {
                 placeholder="Search any food recipe..."
                 value={query}
                 onChangeText={setQuery}
-                onSubmitEditing={handleSearch}
+                onSubmitEditing={() => handleSearch()}
                 placeholderTextColor={colors.textMuted}
                 underlineColorAndroid="transparent"
                 accessibilityLabel="Search food recipe input"
@@ -205,6 +229,14 @@ export default function AISearchScreen({ navigation }) {
             <Animated.View entering={FadeIn} style={[styles.errorCard, { backgroundColor: colors.error + '10', borderColor: colors.error + '30' }]}>
               <Ionicons name="information-circle-outline" size={32} color={colors.error} />
               <Text style={[styles.errorText, { color: colors.text }]}>{searchError}</Text>
+              {needsApiKey && (
+                <TouchableOpacity 
+                  style={{ backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 12, marginTop: 10 }}
+                  onPress={() => setShowKeyModal(true)}
+                >
+                  <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 14 }}>Enter Gemini API Key</Text>
+                </TouchableOpacity>
+              )}
             </Animated.View>
           )}
 
@@ -297,6 +329,47 @@ export default function AISearchScreen({ navigation }) {
         </ScrollView>
 
         <Toast ref={toastRef} />
+
+        {/* API Key Modal */}
+        <Modal visible={showKeyModal} transparent animationType="fade">
+          <View style={styles.keyModalOverlay}>
+            <View style={[styles.keyModalContent, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+              <View style={styles.keyModalHeader}>
+                <Ionicons name="sparkles" size={28} color={colors.primary} />
+                <Text style={[styles.keyModalTitle, { color: colors.text }]}>Configure Gemini AI Key</Text>
+              </View>
+              
+              <Text style={[styles.keyModalDesc, { color: colors.textSecondary }]}>
+                ChefStack uses live Google Gemini AI to search and generate recipes. Enter your free Gemini API key from Google AI Studio.
+              </Text>
+
+              <TextInput
+                style={[styles.keyInput, { backgroundColor: colors.background, borderColor: colors.borderLight, color: colors.text }]}
+                placeholder="Paste AIzaSy... API key here"
+                placeholderTextColor={colors.textMuted}
+                value={inputApiKey}
+                onChangeText={setInputApiKey}
+                autoCapitalize="none"
+              />
+
+              <View style={styles.keyModalButtons}>
+                <TouchableOpacity 
+                  style={[styles.keyBtn, { backgroundColor: colors.borderLight }]}
+                  onPress={() => setShowKeyModal(false)}
+                >
+                  <Text style={[styles.keyBtnText, { color: colors.text }]}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.keyBtn, { backgroundColor: colors.primary }]}
+                  onPress={handleSaveKey}
+                >
+                  <Text style={[styles.keyBtnText, { color: '#FFFFFF', fontWeight: 'bold' }]}>Save Key</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
     </View>
   );
@@ -554,5 +627,55 @@ const styles = StyleSheet.create({
   pageText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  keyModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  keyModalContent: {
+    width: '100%',
+    maxWidth: 450,
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1.5,
+  },
+  keyModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+  },
+  keyModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  keyModalDesc: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  keyInput: {
+    borderWidth: 1.5,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    marginBottom: 20,
+  },
+  keyModalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'flex-end',
+  },
+  keyBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  keyBtnText: {
+    fontSize: 14,
   }
 });
