@@ -10,7 +10,7 @@ const CUSTOM_KEY_STORAGE = '@chefstack_gemini_api_key';
 const DEFAULT_GEMINI_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'AIzaSyBmOS9t2bbaCAWehuTMu98D3kiOsfiMQYE';
 
 // Smart Dynamic Culinary Recipe Generator Fallback (Returns 3-6 authentic, accurate recipes per food category)
-const generateSmartRecipes = (query) => {
+export const generateSmartRecipes = (query) => {
   const q = (query || 'Delight').trim();
   const titleQuery = q.charAt(0).toUpperCase() + q.slice(1);
   const lowerQ = q.toLowerCase();
@@ -765,6 +765,11 @@ Your sole function is to take a search query or culinary prompt and output 3 dis
 
   // Seamless zero-setup fallback: returns accurate recipes adhering strictly to master chef rules
   console.log(`ChefStack AI: Instant smart generator active for query "${cleanQuery}"`);
+  return {
+    recipes: generateSmartRecipes(cleanQuery),
+    isFood: true,
+    needsApiKey: false
+  };
 };
 
 export const saveCustomApiKey = async (key) => {

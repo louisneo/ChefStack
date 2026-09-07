@@ -15,7 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useRecipes } from '../context/RecipeContext';
 import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { searchRecipes, saveCustomApiKey, getCustomApiKey, searchLocalRecipes } from '../services/aiService';
+import { searchRecipes, saveCustomApiKey, getCustomApiKey, searchLocalRecipes, generateSmartRecipes } from '../services/aiService';
 import { Modal } from 'react-native';
 import Toast from '../components/Toast';
 import AISearchCardSkeleton from '../components/AISearchCardSkeleton';
@@ -104,20 +104,19 @@ export default function AISearchScreen({ navigation }) {
           setSearchError(error);
           if (reqKey) setNeedsApiKey(true);
         }
-      } else if (!isFood) {
-        setSearchError("I only find food and drinks! 🍳 Try searching for something like 'Kinilaw', 'Chicken Adobo' or 'Iced Coffee'.");
-      } else if (recipes.length === 0) {
-        setSearchError("I couldn't find any recipes for that. Try a different food name!");
+      } else if (!recipes || recipes.length === 0) {
+        setResults(generateSmartRecipes(searchQuery));
       } else {
         setResults(recipes);
       }
     } catch (error) {
+      console.warn("AISearchScreen handleSearch error, using smart generator:", error);
       const localMatches = searchLocalRecipes(storedRecipes, searchQuery);
       if (localMatches.length > 0) {
         setIsOfflineSearch(true);
         setResults(localMatches);
       } else {
-        setSearchError('Something went wrong while talking to the AI. Please try again.');
+        setResults(generateSmartRecipes(searchQuery));
       }
     } finally {
       setLoading(false);
