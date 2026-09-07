@@ -6,6 +6,7 @@ const GEMINI_MODELS = [
   'gemini-2.0-flash-exp'
 ];
 
+const CUSTOM_KEY_STORAGE = '@chefstack_gemini_api_key';
 const DEFAULT_GEMINI_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'AIzaSyBmOS9t2bbaCAWehuTMu98D3kiOsfiMQYE';
 
 // Smart Dynamic Culinary Recipe Generator Fallback
