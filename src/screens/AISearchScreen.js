@@ -13,6 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useRecipes } from '../context/RecipeContext';
+import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { searchRecipes, saveCustomApiKey, getCustomApiKey } from '../services/aiService';
 import { Modal } from 'react-native';
