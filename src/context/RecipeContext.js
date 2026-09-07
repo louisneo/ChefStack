@@ -54,6 +54,11 @@ export const RecipeProvider = ({ children }) => {
     loadCachedRecipes(user.id);
     fetchRecipes();
 
+    // Skip Realtime WebSocket connection for offline guests or unresolvable endpoints
+    if (user.is_offline_guest || isOffline || !process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('placeholder') || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('gnzzjmxewwtidpnoxspe')) {
+      return;
+    }
+
     // Setup Supabase Realtime Subscription
     try {
       const channel = supabase.channel('schema-db-changes')
