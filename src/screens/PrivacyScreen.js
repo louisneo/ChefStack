@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    justify.content: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
   },
