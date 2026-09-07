@@ -437,20 +437,39 @@ export const searchRecipes = async (query) => {
   const isKeyValid = apiKey && apiKey.trim().startsWith('AIzaSy');
 
   if (isKeyValid) {
-    const prompt = `
-      You are an expert AI culinary chef. Generate a comprehensive list of 6 to 12 authentic, detailed food or drink recipes for: "${cleanQuery}".
-      
-      STRICT REQUIREMENTS:
-      1. ONLY return food or drink recipes matching the query. If the query is not food/drink related or is gibberish, return {"is_food": false, "recipes": []}.
-      2. Format the response strictly as valid JSON with NO markdown blocks (\`\`\`json) or extra text.
-      3. Each recipe object in the "recipes" array must have:
-         - title (string)
-         - type ("food" or "drink")
-         - category (string)
-         - time (number in minutes)
-         - ingredients (array of strings)
-         - steps (array of strings)
-    `;
+    const systemPrompt = `You are an expert master chef and strict API backend for the ChefStack recipe application.
+
+Your sole function is to take a search query or culinary prompt and output 3 distinct, highly accurate, and authentic recipes specifically matching the requested dish or core ingredient.
+
+### STRICT GENERATION RULES:
+1. NO GENERIC TEMPLATES: Do NOT fallback to generic "Garlic Sauté", "Bistro Plate", or "Standard Seasoning" placeholders. 
+2. DISH-SPECIFIC ACCURACY: 
+   - If the user searches for a specific dish (e.g., "Pansit Canton"), provide authentic regional variations (e.g., "Traditional Seafood Pansit Canton", "Pork & Liver Special Pansit Canton", "Crispy Stir-Fry Pansit Canton").
+   - If the user searches for a general ingredient (e.g., "Tuna"), output 3 completely distinct popular recipes made with that ingredient (e.g., "Sizzling Tuna Sisig", "Tuna Egg Scramble", "Spicy Tuna Pasta").
+3. ACCURATE INGREDIENTS: Every ingredient listed must belong strictly to that specific dish. 
+   - Example: A "Sisig" recipe MUST include calamansi/lemon, chilies, onions, and mayonnaise/egg—not generic herbs.
+4. ZERO HARDCODED MOCKS: Build every recipe dynamically using real culinary logic based ONLY on the user's input.
+5. JSON ONLY: Respond exclusively in valid JSON format matching the schema below. Do not include markdown formatting outside the JSON code block, introductory text, or concluding notes.
+
+### OUTPUT JSON SCHEMA:
+{
+  "recipes": [
+    {
+      "id": "string",
+      "title": "Exact Dish Name",
+      "category": "Main Course / Breakfast / Appetizer / Comfort Food / Dessert / Drinks",
+      "prepTime": "String (e.g., '15m')",
+      "cookTime": "String (e.g., '20m')",
+      "ingredientsPreview": "String summarizing key ingredients",
+      "ingredients": [
+        "Quantity + Unit + Ingredient Name"
+      ],
+      "instructions": [
+        "Step-by-step instruction string"
+      ]
+    }
+  ]
+}`;
 
     for (const model of GEMINI_MODELS) {
       try {
@@ -464,8 +483,11 @@ export const searchRecipes = async (query) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { response_mime_type: "application/json" }
+            contents: [{ parts: [{ text: `${systemPrompt}\n\nGenerate recipes for: ${cleanQuery}` }] }],
+            generationConfig: { 
+              response_mime_type: "application/json",
+              temperature: 0.7
+            }
           }),
           signal: controller.signal
         });
@@ -479,10 +501,27 @@ export const searchRecipes = async (query) => {
           if (jsonText) {
             let cleanJson = jsonText.trim().replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
             const parsed = JSON.parse(cleanJson);
-            const recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
+            let recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
             const isFood = parsed.is_food !== false;
 
             if (recipes.length > 0) {
+              recipes = recipes.map((r, idx) => {
+                const parsedTime = parseInt(r.cookTime || r.prepTime || r.time || 20, 10) || 20;
+                return {
+                  id: r.id || `recipe-${Date.now()}-${idx}`,
+                  title: r.title,
+                  type: r.type || (['Drinks', 'Beverage'].includes(r.category) ? 'drink' : 'food'),
+                  category: r.category || 'Main Course',
+                  prepTime: r.prepTime || '10m',
+                  cookTime: r.cookTime || `${parsedTime}m`,
+                  time: parsedTime,
+                  ingredientsPreview: r.ingredientsPreview || (r.ingredients ? r.ingredients.slice(0, 4).join(', ') : ''),
+                  ingredients: r.ingredients || [],
+                  instructions: r.instructions || r.steps || [],
+                  steps: r.steps || r.instructions || []
+                };
+              });
+
               console.log(`Live Gemini AI (${model}) successfully returned ${recipes.length} recipes.`);
               return { recipes, isFood, needsApiKey: false };
             }
@@ -494,7 +533,7 @@ export const searchRecipes = async (query) => {
     }
   }
 
-  // Seamless zero-setup fallback: instantly returns 8 rich recipes without red console 404 errors!
+  // Seamless zero-setup fallback: returns accurate recipes adhering strictly to master chef rules
   console.log(`ChefStack AI: Instant smart generator active for query "${cleanQuery}"`);
   return {
     recipes: generateSmartRecipes(cleanQuery),
