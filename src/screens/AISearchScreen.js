@@ -15,18 +15,19 @@ import { useTheme } from '../context/ThemeContext';
 import { useRecipes } from '../context/RecipeContext';
 import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { searchRecipes, saveCustomApiKey, getCustomApiKey } from '../services/aiService';
+import { searchRecipes, saveCustomApiKey, getCustomApiKey, searchLocalRecipes } from '../services/aiService';
 import { Modal } from 'react-native';
 
 export default function AISearchScreen({ navigation }) {
   const { colors, isDark } = useTheme();
-  const { saveRecipe } = useRecipes();
+  const { recipes: storedRecipes, saveRecipe } = useRecipes();
   const { user } = useAuth();
   
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [searchError, setSearchError] = useState(null);
+  const [isOfflineSearch, setIsOfflineSearch] = useState(false);
   const [needsApiKey, setNeedsApiKey] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [inputApiKey, setInputApiKey] = useState('');
