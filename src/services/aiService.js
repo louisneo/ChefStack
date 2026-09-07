@@ -1112,7 +1112,6 @@ export const generateSmartRecipes = (query) => {
   ];
 };
 
-const DUMMY_KEY = 'AIzaSyBmOS9t2bbaCAWehuTMu98D3kiOsfiMQYE';
 
 // Structured JSON schema for Gemini SDK structured output
 const recipeSchema = {
@@ -1172,8 +1171,8 @@ export const searchRecipes = async (query) => {
     apiKey = DEFAULT_GEMINI_KEY;
   }
 
-  // Only make Gemini API calls if a REAL, VALID Google AI Studio key is configured (not the dummy key)
-  const isKeyValid = apiKey && apiKey.trim().startsWith('AIzaSy') && apiKey.trim() !== DUMMY_KEY;
+  // Use Gemini API if any valid-looking key is available (env key or user custom key)
+  const isKeyValid = apiKey && apiKey.trim().startsWith('AIzaSy');
 
   if (isKeyValid) {
     const genAI = new GoogleGenerativeAI(apiKey.trim());
