@@ -209,14 +209,7 @@ export default function AISearchScreen({ navigation }) {
           <View style={styles.titleContainer}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>AI Recipe Finder</Text>
           </View>
-          <TouchableOpacity 
-            onPress={() => setShowKeyModal(true)} 
-            style={styles.headerBtn}
-            accessibilityLabel="Configure Gemini API Key"
-            accessibilityRole="button"
-          >
-            <Ionicons name="key-outline" size={24} color={colors.primary} />
-          </TouchableOpacity>
+          <View style={{ width: 44 }} />
         </View>
 
         {/* Search Section */}
