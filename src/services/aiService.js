@@ -1144,17 +1144,14 @@ const recipeSchema = {
   required: ["recipes"]
 };
 
-const SYSTEM_PROMPT = `You are a live web-grounded culinary engine for the ChefStack recipe application.
+const SYSTEM_PROMPT = `You are an expert master chef API for ChefStack.
+Generate 5 to 6 distinct, authentic recipes based on the user's food query.
 
-Your task is to take the user's food search query and retrieve real-world, accurate recipe data.
-
-CRITICAL INSTRUCTIONS:
-1. NO GENERIC PLACEHOLDERS: Never output generic "Garlic Sauté", "Bistro Plate", or "Standard Seasoning" items.
-2. ACCURATE INGREDIENTS & STEPS: 
-   - If the user searches for a main component (e.g., "tuna"), return 3 distinct, highly popular real dishes using that component (e.g., "Sizzling Tuna Sisig", "Tuna Egg Scramble", "Spicy Tuna Pasta").
-   - If the user searches for a specific dish (e.g., "Pansit Canton"), return authentic variations with exact traditional ingredients (e.g., calamansi, soy sauce, cabbage, pork/shrimp).
-3. DYNAMIC GENERATION ONLY: Every ingredient and instruction step must accurately reflect real culinary recipes for that exact dish name.
-4. STRICT JSON OUTPUT: Return only valid JSON adhering directly to the provided schema. Do not add intro/outro markdown text.`;
+RULES:
+1. NEVER output generic "Bistro Plate", "Pan-Seared Delicacy", or "Garlic Sauté" templates.
+2. If the user searches a main component (e.g. "sardines", "chicken", "spinach"), return all popular, real dishes using that food query.
+3. Use complete, exhaustive real ingredient lists specific to each dish. Do not omit ingredients.
+4. Output JSON ONLY adhering strictly to the schema.`;
 
 /**
  * Searches for recipes using Google Gemini AI SDK with Google Search grounding.
@@ -1178,7 +1175,7 @@ export const searchRecipes = async (query) => {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey.trim());
-  const prompt = `Generate 3 real, authentic recipes for: "${cleanQuery}"`;
+  const prompt = `Generate 5 to 6 real, authentic, distinct recipes for: "${cleanQuery}" with complete ingredient lists and step-by-step instructions.`;
 
   console.log(`ChefStack AI SDK: Querying model gemini-2.5-flash...`);
 
@@ -1209,6 +1206,7 @@ export const searchRecipes = async (query) => {
 
   recipes = recipes.map((r, idx) => {
     const parsedTime = parseInt(r.cookTime || r.prepTime || r.time || 20, 10) || 20;
+    const fullIngredientsList = r.ingredients || [];
     return {
       id: r.id || `recipe-${Date.now()}-${idx}`,
       title: r.title,
@@ -1217,8 +1215,8 @@ export const searchRecipes = async (query) => {
       prepTime: r.prepTime || '10m',
       cookTime: r.cookTime || `${parsedTime}m`,
       time: parsedTime,
-      ingredientsPreview: r.ingredientsPreview || (r.ingredients ? r.ingredients.slice(0, 4).join(', ') : ''),
-      ingredients: r.ingredients || [],
+      ingredientsPreview: r.ingredientsPreview || fullIngredientsList.join(', '),
+      ingredients: fullIngredientsList,
       instructions: r.instructions || r.steps || [],
       steps: r.steps || r.instructions || []
     };
