@@ -136,25 +136,32 @@ export function AuthProvider({ children }) {
 
   const signInAsGuest = async () => {
     console.log('AuthProvider: Beginning Guest Sign-in');
-    try {
-      const guestPromise = supabase.auth.signInAnonymously();
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Offline guest mode')), 1500));
-      const res = await Promise.race([guestPromise, timeoutPromise]);
-      if (res && !res.error && res.data?.user) {
-        await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(res.data.user)).catch(() => {});
-        return { data: res.data, error: null };
+    
+    // Check if network is offline or unresolvable
+    const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+    if (isOnline) {
+      try {
+        const guestPromise = supabase.auth.signInAnonymously();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Offline guest mode')), 1200));
+        const res = await Promise.race([guestPromise, timeoutPromise]);
+        if (res && !res.error && res.data?.user) {
+          await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(res.data.user)).catch(() => {});
+          setUser(res.data.user);
+          return { data: res.data, error: null };
+        }
+      } catch (err) {
+        console.log('Online guest login unavailable, instantly activating offline guest mode');
       }
-    } catch (err) {
-      console.log('Online guest login unavailable, instantly active offline guest mode');
     }
 
     // Offline / Fallback local guest account
     const offlineGuestUser = {
-      id: 'guest-offline-' + Date.now(),
+      id: 'guest-offline-mode',
       email: 'guest@chefstack.local',
       is_anonymous: true,
       is_offline_guest: true,
-      user_metadata: { full_name: 'Guest Chef' }
+      user_metadata: { full_name: 'Offline Chef' }
     };
     await AsyncStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(offlineGuestUser)).catch(() => {});
     setUser(offlineGuestUser);

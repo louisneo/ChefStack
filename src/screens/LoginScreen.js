@@ -38,11 +38,7 @@ export default function LoginScreen() {
     const { error } = await signInAsGuest();
     setIsLoading(false);
     if (error) {
-      if (error.message?.includes('Anonymous sign-ins are disabled') || error.message?.includes('not enabled')) {
-        setErrorMsg('Guest Mode is disabled in your Supabase Dashboard.');
-      } else {
-        setErrorMsg(error.message);
-      }
+      setErrorMsg(error.message);
     }
   };
 
@@ -62,16 +58,15 @@ export default function LoginScreen() {
           setErrorMsg('Server is currently busy. Please wait a few minutes.');
         } else if (error.message?.includes('Invalid login credentials')) {
           setErrorMsg('The email you entered is not registered, or the password is incorrect. Please try again.');
-        } else if (error.message?.includes('Failed to fetch') || error.message?.includes('Network')) {
-          setErrorMsg('Unable to connect to online server. Would you like to enter Offline Mode?');
         } else {
-          setErrorMsg(error.message);
+          // Automatic offline fallback prompt
+          setErrorMsg('Unable to connect to online server. Would you like to enter Offline Mode?');
         }
       }
     } catch (err) {
       setErrorMsg('Unable to connect to online server. Would you like to enter Offline Mode?');
     } finally {
-      setTimeout(() => setIsLoading(false), 1000);
+      setIsLoading(false);
     }
   };
 
