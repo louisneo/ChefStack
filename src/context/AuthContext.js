@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
     const initializeAuth = async () => {
       try {
         const getSessionPromise = supabase.auth.getSession().catch(() => null);
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 1500));
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 600));
         
         const [authResponse, cachedOfflineUser] = await Promise.all([
           Promise.race([getSessionPromise, timeoutPromise]),
@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
     initializeAuth();
 
     const timer = setTimeout(() => {
-      if (mounted && loading) setLoading(false);
+      if (mounted) setLoading(false);
     }, 1500);
 
     let subscription;
