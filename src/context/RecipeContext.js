@@ -178,28 +178,43 @@ export const RecipeProvider = ({ children }) => {
     });
   };
 
+  const sanitizeRecipePayload = (raw) => {
+    return {
+      title: raw.title || 'Untitled Recipe',
+      category: raw.category || 'Ulam',
+      type: raw.type || 'food',
+      time: parseInt(raw.time || raw.cookTime || raw.prepTime || 20, 10) || 20,
+      ingredients: Array.isArray(raw.ingredients) ? raw.ingredients : [],
+      steps: Array.isArray(raw.steps) ? raw.steps : (Array.isArray(raw.instructions) ? raw.instructions : []),
+      image: raw.image || null,
+      is_favorite: !!raw.is_favorite,
+    };
+  };
+
   const saveRecipe = async (recipeData) => {
     if (!user) return { error: new Error('User not logged in') };
     
+    const dbPayload = sanitizeRecipePayload(recipeData);
+
     if (editingRecipe) {
-      const optimisticUpdated = { ...editingRecipe, ...recipeData };
+      const optimisticUpdated = { ...editingRecipe, ...dbPayload };
       setRecipes(prev => prev.map(r => r.id === optimisticUpdated.id ? optimisticUpdated : r));
       closeAddRecipe();
       
       try {
-        const { error } = await supabase.from('recipes').update(recipeData).eq('id', optimisticUpdated.id);
+        const { error } = await supabase.from('recipes').update(dbPayload).eq('id', optimisticUpdated.id);
         return { error };
       } catch (err) {
         return { error: null }; // Saved locally offline
       }
     } else {
       const newId = generateUUID(); 
-      const optimisticRecipe = { ...recipeData, id: newId, user_id: user.id, is_favorite: false, created_at: new Date().toISOString() };
+      const optimisticRecipe = { ...dbPayload, id: newId, user_id: user.id, created_at: new Date().toISOString() };
       setRecipes(prev => [optimisticRecipe, ...prev]);
       closeAddRecipe();
       
       try {
-        const { error, data: savedData } = await supabase.from('recipes').insert([{ ...recipeData, id: newId, user_id: user.id }]).select();
+        const { error, data: savedData } = await supabase.from('recipes').insert([{ ...dbPayload, id: newId, user_id: user.id }]).select();
         return { error, data: savedData };
       } catch (err) {
         return { error: null, data: [optimisticRecipe] };
