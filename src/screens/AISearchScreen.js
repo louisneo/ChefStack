@@ -40,7 +40,7 @@ export default function AISearchScreen({ navigation }) {
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [inputApiKey, setInputApiKey] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 5;
   const [importing, setImporting] = useState(null);
 
   const toastRef = useRef(null);
