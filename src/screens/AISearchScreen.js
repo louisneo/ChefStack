@@ -133,18 +133,24 @@ export default function AISearchScreen({ navigation }) {
           if (reqKey) setNeedsApiKey(true);
         }
       } else if (!recipes || recipes.length === 0) {
-        setResults(generateSmartRecipes(searchQuery));
+        const localMatches = searchLocalRecipes(storedRecipes, searchQuery);
+        if (localMatches.length > 0) {
+          setIsOfflineSearch(true);
+          setResults(localMatches);
+        } else {
+          setSearchError(`No authentic food recipes found for "${searchQuery}". Please try searching for a real dish or ingredient.`);
+        }
       } else {
         setResults(recipes);
       }
     } catch (error) {
-      console.warn("AISearchScreen handleSearch error, using smart generator:", error);
+      console.warn("AISearchScreen handleSearch error:", error);
       const localMatches = searchLocalRecipes(storedRecipes, searchQuery);
       if (localMatches.length > 0) {
         setIsOfflineSearch(true);
         setResults(localMatches);
       } else {
-        setResults(generateSmartRecipes(searchQuery));
+        setSearchError(error.message || "Unable to complete AI search. Please check your network or try another query.");
       }
     } finally {
       setLoading(false);
