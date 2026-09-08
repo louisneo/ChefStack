@@ -224,15 +224,13 @@ export default function AISearchScreen({ navigation }) {
                   { 
                     backgroundColor: colors.background, 
                     borderColor: isFocused ? colors.primary : colors.borderLight,
-                    shadowColor: isFocused ? colors.primary : '#000',
-                    shadowOpacity: isFocused ? 0.25 : 0.05,
-                    borderWidth: isFocused ? 2 : 1
+                    borderWidth: 1.5,
                   }
                 ]}
               >
-                <Ionicons name="sparkles" size={22} color={colors.primary} style={styles.searchIcon} />
+                <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
                 <TextInput
-                  style={[styles.input, { color: colors.text }]}
+                  style={[styles.input, { color: colors.text, outlineStyle: 'none' }]}
                   placeholder="Search food, ingredients (e.g. oat, pasta, adobo)..."
                   value={query}
                   onChangeText={handleQueryChange}
@@ -244,7 +242,6 @@ export default function AISearchScreen({ navigation }) {
                   }}
                   onBlur={() => {
                     setIsFocused(false);
-                    // Slight delay so click on suggestion registers before closing
                     setTimeout(() => setShowSuggestions(false), 200);
                   }}
                   onSubmitEditing={() => handleSearch()}
@@ -254,7 +251,7 @@ export default function AISearchScreen({ navigation }) {
                 />
                 {query.length > 0 && (
                   <TouchableOpacity onPress={() => { setQuery(''); setFilteredSuggestions([]); setShowSuggestions(false); }} accessibilityLabel="Clear search text">
-                    <Ionicons name="close-circle" size={22} color={colors.textMuted} />
+                    <Ionicons name="close-circle" size={20} color={colors.textMuted} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -473,7 +470,7 @@ export default function AISearchScreen({ navigation }) {
               </Text>
 
               <TextInput
-                style={[styles.keyInput, { backgroundColor: colors.background, borderColor: colors.borderLight, color: colors.text }]}
+                style={[styles.keyInput, { backgroundColor: colors.background, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
                 placeholder="Paste AIzaSy... API key here"
                 placeholderTextColor={colors.textMuted}
                 value={inputApiKey}

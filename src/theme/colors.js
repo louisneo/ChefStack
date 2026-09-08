@@ -1,39 +1,39 @@
 const shared = {
-  primary: '#2D6A4F', // deep green
-  primaryHover: '#1B4332',
-  primaryLight: '#D8F3DC',
-  primaryActive: '#B7E4C7',
-  error: '#D90429',
-  errorBackground: '#FFE6E9',
-  success: '#2B9348',
-  accent: '#FFD700', // Gold/Star accent
+  primary: '#10B981', // Clean Emerald Green (Tarsi style)
+  primaryHover: '#059669',
+  primaryLight: 'rgba(16, 185, 129, 0.12)',
+  primaryActive: '#047857',
+  error: '#EF4444',
+  errorBackground: '#FEE2E2',
+  success: '#10B981',
+  accent: '#F59E0B', // Warm Amber
 };
 
 export const themeColors = {
   light: {
     ...shared,
-    background: '#F4F7F5',
+    background: '#F8FAFC', // Slate-50 background
     surface: '#FFFFFF',
-    text: '#1A2F26',
-    textSecondary: '#334155',
-    textMuted: '#475569',
-    border: '#CBD5E1',
-    borderLight: '#E2E8F0',
+    text: '#0F172A', // Slate-900 heading
+    textSecondary: '#475569', // Slate-600
+    textMuted: '#94A3B8', // Slate-400
+    border: '#E2E8F0', // Slate-200
+    borderLight: '#F1F5F9', // Slate-100
     card: '#FFFFFF',
   },
   dark: {
     ...shared,
-    primary: '#00E58F', // Neon mint green accent for dark mode
-    primaryHover: '#00C77A',
-    primaryLight: '#00E58F20',
-    background: '#1D1F24', // Very dark gray/charcoal
-    surface: '#262931', // Panel surface
-    text: '#FFFFFF', // Clean white
-    textSecondary: '#CBD5E1',
-    textMuted: '#94A3B8',
-    border: '#353945',
-    borderLight: '#2C303A',
-    card: '#262931',
+    primary: '#10B981', // Vibrant Emerald
+    primaryHover: '#059669',
+    primaryLight: 'rgba(16, 185, 129, 0.15)',
+    background: '#0F172A', // Tarsi Slate 900 dark background
+    surface: '#1E293B', // Tarsi Slate 800 surface panels
+    text: '#F8FAFC', // Crisp white text
+    textSecondary: '#94A3B8', // Slate-400
+    textMuted: '#64748B', // Slate-500
+    border: '#334155', // Slate-700
+    borderLight: '#1E293B',
+    card: '#1E293B',
   }
 };
 

@@ -188,7 +188,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
             <TextInput
               style={[
                 styles.input, 
-                { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text },
+                { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' },
                 errors.title && { borderColor: colors.error, backgroundColor: colors.error + '05' }
               ]}
               placeholder="e.g. Adobong Manok"
@@ -220,7 +220,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
                 style={[
                   styles.input, 
                   styles.inputWithIcon, 
-                  { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text },
+                  { backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' },
                   errors.time && { borderColor: colors.error, backgroundColor: colors.error + '05' }
                 ]}
                 placeholder="30"
@@ -240,7 +240,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
               <TextInput
                 style={[
                   styles.input, 
-                  { flex: 1, marginBottom: 0, backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text }
+                  { flex: 1, marginBottom: 0, backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }
                 ]}
                 placeholder="e.g. 1 kg chicken"
                 value={newIngredient}
@@ -279,7 +279,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
               <TextInput
                 style={[
                   styles.input, 
-                  { flex: 1, marginBottom: 0, backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text }
+                  { flex: 1, marginBottom: 0, backgroundColor: colors.surface, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }
                 ]}
                 placeholder="e.g. Marinate chicken"
                 value={newStep}

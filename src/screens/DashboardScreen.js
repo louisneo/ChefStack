@@ -147,7 +147,7 @@ export default function DashboardScreen({ navigation, route }) {
               <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
                 <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
                 <TextInput
-                  style={[styles.searchInput, { color: colors.text }]}
+                  style={[styles.searchInput, { color: colors.text, outlineStyle: 'none' }]}
                   placeholder="Search recipes or ingredients..."
                   placeholderTextColor={colors.textMuted}
                   value={searchQuery}
