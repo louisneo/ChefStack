@@ -1205,19 +1205,15 @@ export const searchRecipes = async (query) => {
   }
 
   recipes = recipes.map((r, idx) => {
-    const parsedTime = parseInt(r.cookTime || r.prepTime || r.time || 20, 10) || 20;
+    const parsedTime = parseInt(r.time || r.cookTime || r.prepTime || 20, 10) || 20;
     const fullIngredientsList = r.ingredients || [];
     return {
       id: r.id || `recipe-${Date.now()}-${idx}`,
       title: r.title,
       type: r.type || (['Drinks', 'Beverage'].includes(r.category) ? 'drink' : 'food'),
       category: r.category || 'Main Course',
-      prepTime: r.prepTime || '10m',
-      cookTime: r.cookTime || `${parsedTime}m`,
       time: parsedTime,
-      ingredientsPreview: r.ingredientsPreview || fullIngredientsList.join(', '),
       ingredients: fullIngredientsList,
-      instructions: r.instructions || r.steps || [],
       steps: r.steps || r.instructions || []
     };
   });

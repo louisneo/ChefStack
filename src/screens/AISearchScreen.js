@@ -165,11 +165,18 @@ export default function AISearchScreen({ navigation }) {
 
     setImporting(index);
     try {
-      const { error } = await saveRecipe({
-        ...recipe,
+      const cleanRecipe = {
+        title: recipe.title,
+        category: recipe.category || 'Ulam',
+        type: recipe.type || 'food',
+        time: parseInt(recipe.time || 20, 10) || 20,
+        ingredients: recipe.ingredients || [],
+        steps: recipe.steps || recipe.instructions || [],
         image: null,
         is_favorite: false
-      });
+      };
+
+      const { error } = await saveRecipe(cleanRecipe);
 
       if (error) throw error;
       
