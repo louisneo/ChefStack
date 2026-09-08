@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -8,7 +8,8 @@ import {
   ScrollView, 
   ActivityIndicator,
   Alert,
-  BackHandler
+  BackHandler,
+  Pressable
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
@@ -16,10 +17,11 @@ import { useRecipes } from '../context/RecipeContext';
 import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { searchRecipes, saveCustomApiKey, getCustomApiKey, searchLocalRecipes, generateSmartRecipes } from '../services/aiService';
+import { FOOD_SUGGESTIONS } from '../data/foodSuggestions';
 import { Modal } from 'react-native';
 import Toast from '../components/Toast';
 import AISearchCardSkeleton from '../components/AISearchCardSkeleton';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
 
 export default function AISearchScreen({ navigation }) {
   const { colors, isDark } = useTheme();
@@ -27,6 +29,9 @@ export default function AISearchScreen({ navigation }) {
   const { user } = useAuth();
   
   const [query, setQuery] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [searchError, setSearchError] = useState(null);
@@ -38,13 +43,35 @@ export default function AISearchScreen({ navigation }) {
   const itemsPerPage = 6;
   const [importing, setImporting] = useState(null);
 
-  const toastRef = React.useRef(null);
+  const toastRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getCustomApiKey().then(k => {
       if (k) setInputApiKey(k);
     });
   }, []);
+
+  // Update suggestions dynamically as user types
+  const handleQueryChange = (text) => {
+    setQuery(text);
+    const trimmed = text.trim().toLowerCase();
+    if (trimmed.length > 0) {
+      const matches = FOOD_SUGGESTIONS.filter(item => 
+        item.toLowerCase().includes(trimmed)
+      ).slice(0, 6);
+      setFilteredSuggestions(matches);
+      setShowSuggestions(matches.length > 0);
+    } else {
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectSuggestion = (suggestion) => {
+    setQuery(suggestion);
+    setShowSuggestions(false);
+    handleSearch(suggestion);
+  };
 
   // Handle Android Hardware Back Button to return to Home Tab
   useFocusEffect(
@@ -72,6 +99,7 @@ export default function AISearchScreen({ navigation }) {
     const searchQuery = (typeof overrideQuery === 'string' ? overrideQuery : query).trim();
     if (!searchQuery) return;
     
+    setShowSuggestions(false);
     setLoading(true);
     setSearchError(null);
     setIsOfflineSearch(false);
@@ -188,24 +216,85 @@ export default function AISearchScreen({ navigation }) {
               </Text>
             </View>
 
-            <View style={[styles.searchBox, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
-              <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
-              <TextInput
-                style={[styles.input, { color: colors.text }]}
-                placeholder="Search any food recipe..."
-                value={query}
-                onChangeText={setQuery}
-                onSubmitEditing={() => handleSearch()}
-                placeholderTextColor={colors.textMuted}
-                underlineColorAndroid="transparent"
-                accessibilityLabel="Search food recipe input"
-              />
-              {query.length > 0 && (
-                <TouchableOpacity onPress={() => setQuery('')} accessibilityLabel="Clear search text">
-                  <Ionicons name="close-circle" size={20} color={colors.textMuted} />
-                </TouchableOpacity>
+            {/* Enhanced UI Search Box with Focus Glow & Suggestion Popup */}
+            <View style={styles.searchBoxWrapper}>
+              <View 
+                style={[
+                  styles.searchBox, 
+                  { 
+                    backgroundColor: colors.background, 
+                    borderColor: isFocused ? colors.primary : colors.borderLight,
+                    shadowColor: isFocused ? colors.primary : '#000',
+                    shadowOpacity: isFocused ? 0.25 : 0.05,
+                    borderWidth: isFocused ? 2 : 1
+                  }
+                ]}
+              >
+                <Ionicons name="sparkles" size={22} color={colors.primary} style={styles.searchIcon} />
+                <TextInput
+                  style={[styles.input, { color: colors.text }]}
+                  placeholder="Search food, ingredients (e.g. oat, pasta, adobo)..."
+                  value={query}
+                  onChangeText={handleQueryChange}
+                  onFocus={() => {
+                    setIsFocused(true);
+                    if (query.trim().length > 0 && filteredSuggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    setIsFocused(false);
+                    // Slight delay so click on suggestion registers before closing
+                    setTimeout(() => setShowSuggestions(false), 200);
+                  }}
+                  onSubmitEditing={() => handleSearch()}
+                  placeholderTextColor={colors.textMuted}
+                  underlineColorAndroid="transparent"
+                  accessibilityLabel="Search food recipe input"
+                />
+                {query.length > 0 && (
+                  <TouchableOpacity onPress={() => { setQuery(''); setFilteredSuggestions([]); setShowSuggestions(false); }} accessibilityLabel="Clear search text">
+                    <Ionicons name="close-circle" size={22} color={colors.textMuted} />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Google-Style Instant Auto-Complete Suggestions Dropdown */}
+              {showSuggestions && filteredSuggestions.length > 0 && (
+                <Animated.View 
+                  entering={FadeInDown.duration(200)}
+                  exiting={FadeOut.duration(150)}
+                  style={[styles.suggestionsDropdown, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
+                >
+                  {filteredSuggestions.map((item, idx) => {
+                    const matchIndex = item.toLowerCase().indexOf(query.trim().toLowerCase());
+                    const beforeMatch = item.slice(0, matchIndex);
+                    const matchText = item.slice(matchIndex, matchIndex + query.trim().length);
+                    const afterMatch = item.slice(matchIndex + query.trim().length);
+
+                    return (
+                      <TouchableOpacity
+                        key={idx}
+                        style={[
+                          styles.suggestionRow, 
+                          { borderBottomColor: idx === filteredSuggestions.length - 1 ? 'transparent' : colors.borderLight + '50' }
+                        ]}
+                        onPress={() => selectSuggestion(item)}
+                      >
+                        <Ionicons name="search-outline" size={18} color={colors.primary} style={{ marginRight: 12 }} />
+                        <Text style={[styles.suggestionText, { color: colors.text }]}>
+                          {beforeMatch}
+                          <Text style={{ fontWeight: 'bold', color: colors.primary }}>{matchText}</Text>
+                          {afterMatch}
+                        </Text>
+                        <Ionicons name="arrow-forward-outline" size={16} color={colors.textMuted} />
+                      </TouchableOpacity>
+                    );
+                  })}
+                </Animated.View>
               )}
             </View>
+
             <TouchableOpacity 
               style={[styles.searchBtn, { backgroundColor: colors.primary, shadowColor: colors.primary }]} 
               onPress={() => handleSearch()}
@@ -225,6 +314,7 @@ export default function AISearchScreen({ navigation }) {
               <Text style={[styles.chipSectionTitle, { color: colors.textSecondary }]}>Popular Suggestions:</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
                 {[
+                  { label: '🥣 Oatmeal', term: 'Oatmeal' },
                   { label: '🐟 Kinilaw', term: 'Kinilaw' },
                   { label: '🍲 Sinigang', term: 'Sinigang' },
                   { label: '🍗 Adobo', term: 'Pork Adobo' },
@@ -480,14 +570,47 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 16,
   },
+  searchBoxWrapper: {
+    position: 'relative',
+    zIndex: 100,
+    marginBottom: 16,
+  },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 16,
     paddingHorizontal: 16,
     height: 56,
+    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+  },
+  suggestionsDropdown: {
+    position: 'absolute',
+    top: 62,
+    left: 0,
+    right: 0,
+    borderRadius: 16,
     borderWidth: 1,
-    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 999,
+    overflow: 'hidden',
+    paddingVertical: 4,
+  },
+  suggestionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+  },
+  suggestionText: {
+    flex: 1,
+    fontSize: 15,
   },
   searchIcon: {
     marginRight: 12,
