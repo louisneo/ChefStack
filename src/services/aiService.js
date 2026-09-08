@@ -1171,92 +1171,61 @@ export const searchRecipes = async (query) => {
     apiKey = DEFAULT_GEMINI_KEY;
   }
 
-  // Use Gemini API if any valid-looking key is available (env key or user custom key)
   const isKeyValid = apiKey && apiKey.trim().startsWith('AIzaSy');
 
-  if (isKeyValid) {
-    const genAI = new GoogleGenerativeAI(apiKey.trim());
-    const prompt = `Find 3 authentic, distinct recipes for: "${cleanQuery}". Extract full, accurate ingredient lists and steps.`;
-
-    // Try each model in cascade: gemini-2.5-flash (with Google Search grounding) -> fallbacks
-    for (const modelName of GEMINI_MODELS) {
-      try {
-        console.log(`ChefStack AI SDK: Querying model ${modelName} with Google Search grounding...`);
-
-        // Configure model with Google Search grounding and structured JSON output
-        const modelConfig = {
-          model: modelName,
-          systemInstruction: SYSTEM_PROMPT,
-          generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: recipeSchema,
-            temperature: 0.2
-          }
-        };
-
-        // Enable Google Search grounding for web-sourced accuracy (supported on 2.5-flash and 1.5 models)
-        try {
-          modelConfig.tools = [{ googleSearch: {} }];
-        } catch (toolErr) {
-          // Some SDK versions may not support googleSearch tool config; continue without it
-          console.warn(`Google Search grounding not available for ${modelName}:`, toolErr.message);
-        }
-
-        const model = genAI.getGenerativeModel(modelConfig);
-
-        // Use AbortController for timeout (8 seconds to allow grounding)
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-        const result = await model.generateContent({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }]
-        });
-
-        clearTimeout(timeoutId);
-
-        const responseText = result.response.text();
-
-        if (responseText) {
-          let cleanJson = responseText.trim().replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
-          const parsed = JSON.parse(cleanJson);
-          let recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
-
-          if (recipes.length > 0) {
-            recipes = recipes.map((r, idx) => {
-              const parsedTime = parseInt(r.cookTime || r.prepTime || r.time || 20, 10) || 20;
-              return {
-                id: r.id || `recipe-${Date.now()}-${idx}`,
-                title: r.title,
-                type: r.type || (['Drinks', 'Beverage'].includes(r.category) ? 'drink' : 'food'),
-                category: r.category || 'Main Course',
-                prepTime: r.prepTime || '10m',
-                cookTime: r.cookTime || `${parsedTime}m`,
-                time: parsedTime,
-                ingredientsPreview: r.ingredientsPreview || (r.ingredients ? r.ingredients.slice(0, 4).join(', ') : ''),
-                ingredients: r.ingredients || [],
-                instructions: r.instructions || r.steps || [],
-                steps: r.steps || r.instructions || []
-              };
-            });
-
-            console.log(`Live Gemini AI SDK (${modelName}) successfully returned ${recipes.length} web-grounded recipes.`);
-            return { recipes, isFood: true, needsApiKey: false };
-          }
-        }
-      } catch (err) {
-        console.warn(`Gemini AI SDK (${modelName}) error:`, err.message);
-        // Continue to next model in cascade
-      }
-    }
+  if (!isKeyValid) {
+    throw new Error('Valid Gemini API key missing. Please provide a valid API key starting with AIzaSy.');
   }
 
-  // Instant smart generator fallback (0ms latency, zero hang)
-  console.log(`ChefStack AI: Instant smart generator active for query "${cleanQuery}"`);
-  return {
-    recipes: generateSmartRecipes(cleanQuery),
-    isFood: true,
-    needsApiKey: false
-  };
+  const genAI = new GoogleGenerativeAI(apiKey.trim());
+  const prompt = `Generate 3 real, authentic recipes for: "${cleanQuery}"`;
+
+  console.log(`ChefStack AI SDK: Querying model gemini-2.5-flash...`);
+
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    systemInstruction: SYSTEM_PROMPT,
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: recipeSchema,
+      temperature: 0.7
+    }
+  });
+
+  const result = await model.generateContent(prompt);
+  const responseText = result.response.text();
+
+  if (!responseText) {
+    throw new Error('Gemini API returned empty response.');
+  }
+
+  let cleanJson = responseText.trim().replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+  const parsed = JSON.parse(cleanJson);
+  let recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
+
+  if (recipes.length === 0) {
+    throw new Error('Gemini API returned no recipes for this query.');
+  }
+
+  recipes = recipes.map((r, idx) => {
+    const parsedTime = parseInt(r.cookTime || r.prepTime || r.time || 20, 10) || 20;
+    return {
+      id: r.id || `recipe-${Date.now()}-${idx}`,
+      title: r.title,
+      type: r.type || (['Drinks', 'Beverage'].includes(r.category) ? 'drink' : 'food'),
+      category: r.category || 'Main Course',
+      prepTime: r.prepTime || '10m',
+      cookTime: r.cookTime || `${parsedTime}m`,
+      time: parsedTime,
+      ingredientsPreview: r.ingredientsPreview || (r.ingredients ? r.ingredients.slice(0, 4).join(', ') : ''),
+      ingredients: r.ingredients || [],
+      instructions: r.instructions || r.steps || [],
+      steps: r.steps || r.instructions || []
+    };
+  });
+
+  console.log(`Live Gemini AI SDK (gemini-2.5-flash) successfully returned ${recipes.length} recipes.`);
+  return { recipes, isFood: true, needsApiKey: false };
 };
 
 export const saveCustomApiKey = async (key) => {
