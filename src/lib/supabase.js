@@ -10,7 +10,7 @@ const safeFetch = async (input, init) => {
   const urlStr = typeof input === 'string' ? input : input?.url || '';
   
   // If URL is an unresolvable placeholder or dead domain, return immediate offline response without triggering browser DNS error
-  if (urlStr.includes('placeholder.supabase.co') || urlStr.includes('gnzzjmxewwtidpnoxspe.supabase.co') || urlStr.includes('gnzzjmxexewtjdpnoxpe.supabase.co')) {
+  if (urlStr.includes('placeholder.supabase.co') || urlStr.includes('gnzzjmxewwtidpnoxspe.supabase.co')) {
     return new Response(
       JSON.stringify({ error: 'Offline mode active', message: 'Supabase offline' }),
       { status: 503, statusText: 'Service Unavailable', headers: { 'Content-Type': 'application/json' } }

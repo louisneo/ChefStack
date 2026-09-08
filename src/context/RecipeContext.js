@@ -55,7 +55,7 @@ export const RecipeProvider = ({ children }) => {
     fetchRecipes();
 
     // Skip Realtime WebSocket connection for offline guests or unresolvable endpoints
-    if (user.is_offline_guest || isOffline || !process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('placeholder') || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('gnzzjmxewwtidpnoxspe') || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('gnzzjmxexewtjdpnoxpe')) {
+    if (user.is_offline_guest || isOffline || !process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('placeholder') || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('gnzzjmxewwtidpnoxspe')) {
       return;
     }
 
