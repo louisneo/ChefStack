@@ -77,7 +77,6 @@ export default function AISearchScreen({ navigation }) {
     const searchQuery = (typeof overrideQuery === 'string' ? overrideQuery : query).trim();
     if (!searchQuery) return;
     
-    setShowSuggestions(false);
     setLoading(true);
     setSearchError(null);
     setIsOfflineSearch(false);
