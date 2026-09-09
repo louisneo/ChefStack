@@ -151,7 +151,7 @@ function CustomDrawerContent(props) {
         contentContainerStyle={{ paddingTop: 0 }}
         style={{ flex: 1 }}
       >
-        {/* Header Branding + Collapse Toggle */}
+        {/* Header Branding + Collapse Toggle (3 lines / hamburger menu) */}
         <View style={{ 
           padding: isCollapsed ? 12 : 20, 
           flexDirection: 'row',
@@ -186,25 +186,45 @@ function CustomDrawerContent(props) {
             accessibilityLabel="Toggle Sidebar"
           >
             <Ionicons 
-              name={isCollapsed ? "chevron-forward" : "chevron-back"} 
-              size={20} 
+              name="menu" 
+              size={22} 
               color={colors.text} 
             />
           </TouchableOpacity>
         </View>
 
         <DrawerItemList {...props} />
+
+        {/* New Recipe Button (inside upper nav items area) */}
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: isCollapsed ? 'center' : 'center',
+            backgroundColor: colors.primary,
+            marginHorizontal: isCollapsed ? 8 : 16,
+            marginVertical: 12,
+            paddingVertical: 12,
+            paddingHorizontal: isCollapsed ? 0 : 16,
+            borderRadius: 14,
+            gap: isCollapsed ? 0 : 10
+          }}
+          onPress={() => openAddRecipe()}
+        >
+          <Ionicons name="add-circle" size={24} color="#FFFFFF" />
+          {!isCollapsed && (
+            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 15 }}>New Recipe</Text>
+          )}
+        </TouchableOpacity>
       </DrawerContentScrollView>
 
-      {/* Bottom Section: Profile + New Recipe Button */}
+      {/* Bottom Section: ONLY Profile */}
       <View style={{ 
         padding: isCollapsed ? 10 : 16, 
         borderTopWidth: 1, 
         borderTopColor: colors.borderLight, 
         backgroundColor: colors.surface,
-        gap: 10
       }}>
-        {/* Profile Item */}
         <TouchableOpacity
           style={{
             flexDirection: 'row',
@@ -231,26 +251,6 @@ function CustomDrawerContent(props) {
             }}>
               Profile
             </Text>
-          )}
-        </TouchableOpacity>
-
-        {/* New Recipe Button */}
-        <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: isCollapsed ? 'center' : 'center',
-            backgroundColor: colors.primary,
-            paddingVertical: 12,
-            paddingHorizontal: isCollapsed ? 0 : 16,
-            borderRadius: 14,
-            gap: isCollapsed ? 0 : 10
-          }}
-          onPress={() => openAddRecipe()}
-        >
-          <Ionicons name="add-circle" size={24} color="#FFFFFF" />
-          {!isCollapsed && (
-            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 15 }}>New Recipe</Text>
           )}
         </TouchableOpacity>
       </View>
