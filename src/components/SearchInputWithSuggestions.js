@@ -201,7 +201,18 @@ export default function SearchInputWithSuggestions({
                   <Text style={{ color: colors.text }}>{matchText}</Text>
                   <Text style={{ fontWeight: '700', color: colors.text }}>{suffix}</Text>
                 </Text>
-                <Ionicons name="arrow-forward-outline" size={16} color={colors.textMuted} />
+                
+                {/* Arrow button: fills the input bar without executing search immediately */}
+                <TouchableOpacity
+                  style={styles.arrowButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    onChangeText(item);
+                  }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="arrow-back-outline" size={16} color={colors.textSecondary} style={{ transform: [{ rotate: '135deg' }] }} />
+                </TouchableOpacity>
               </TouchableOpacity>
             );
           })}
@@ -219,9 +230,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    height: 50,
-    borderRadius: 15,
+    paddingHorizontal: 16,
+    height: 52,
+    borderRadius: 16,
+    borderWidth: 1.5,
   },
   searchIcon: {
     marginRight: 10,
@@ -233,11 +245,11 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     position: 'absolute',
-    top: 56,
+    top: 58,
     left: 0,
     right: 0,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 1.5,
     elevation: 10,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
@@ -260,4 +272,9 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
   },
+  arrowButton: {
+    padding: 6,
+    marginLeft: 8,
+    borderRadius: 8,
+  }
 });
