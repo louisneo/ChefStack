@@ -11,7 +11,7 @@ export default function Header() {
         <View style={styles.logoContainer} accessibilityRole="header">
           <Image 
             source={require('../../assets/chefstack_logo.png')} 
-            style={{ width: 32, height: 32 }} 
+            style={{ width: 32, height: 32, borderRadius: 8 }} 
             accessibilityLabel="ChefStack App Logo"
             alt="ChefStack App Logo"
           />

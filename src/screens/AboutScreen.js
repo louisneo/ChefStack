@@ -38,9 +38,10 @@ export default function AboutScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.formContainer}>
           <Animated.View entering={FadeInDown.duration(400)} style={styles.appInfoSection}>
-            <View style={styles.iconContainer}>
-              <FontAwesome5 name="utensils" size={40} color={colors.surface} />
-            </View>
+            <Image 
+              source={require('../../assets/chefstack_logo.png')} 
+              style={{ width: 80, height: 80, borderRadius: 20, marginBottom: 16 }} 
+            />
             <Text style={styles.appName}>ChefStack</Text>
             <Text style={styles.appVersion}>Version 1.0.0</Text>
             <Text style={styles.appDescription}>
