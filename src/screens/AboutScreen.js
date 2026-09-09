@@ -5,7 +5,8 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   ScrollView,
-  Platform
+  Platform,
+  Image
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
