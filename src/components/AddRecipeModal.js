@@ -403,6 +403,9 @@ const styles = StyleSheet.create({
   formContent: {
     padding: 24,
     paddingBottom: 60,
+    maxWidth: 800,
+    width: '100%',
+    alignSelf: 'center',
   },
   formGroup: {
     marginBottom: 32,
