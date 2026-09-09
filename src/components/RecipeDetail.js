@@ -178,10 +178,10 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
               </View>
             </View>
 
-            {/* Detailed Body Content */}
-            <View style={styles.contentBody}>
-              {/* Ingredients */}
-              <View style={styles.section}>
+            {/* Detailed Body Content (2-Column Grid layout for PC / Web) */}
+            <View style={styles.twoColumnBody}>
+              {/* Column 1: Ingredients */}
+              <View style={[styles.column, styles.section]}>
                 <View style={styles.sectionHeader}>
                   <Ionicons name="list" size={20} color={colors.primary} />
                   <Text style={[styles.sectionTitle, { color: colors.text }]}>Ingredients</Text>
@@ -200,8 +200,8 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
                 ))}
               </View>
 
-              {/* Steps */}
-              <View style={styles.section}>
+              {/* Column 2: Method / Instructions */}
+              <View style={[styles.column, styles.section]}>
                 <View style={styles.sectionHeader}>
                   <Ionicons name="list-outline" size={20} color={colors.primary} />
                   <Text style={[styles.sectionTitle, { color: colors.text }]}>Method</Text>
@@ -213,7 +213,7 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
                   )}
                 </View>
                 {recipe.steps && recipe.steps.map((step, index) => (
-                  <View key={index} style={styles.stepItem}>
+                  <View key={index} style={[styles.stepItem, { backgroundColor: colors.surface, padding: 14, borderRadius: 12, marginBottom: 10, borderWidth: 1, borderColor: colors.borderLight }]}>
                     <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
                       <Text style={[styles.stepNumberText, { color: colors.surface }]}>{index + 1}</Text>
                     </View>
@@ -373,9 +373,19 @@ const styles = StyleSheet.create({
   },
   scrollContentContainer: {
     paddingBottom: 40,
+    maxWidth: 1200,
+    width: '100%',
+    alignSelf: 'center',
   },
-  contentBody: {
-    padding: 16,
+  twoColumnBody: {
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    padding: 24,
+    gap: 24,
+    width: '100%',
+  },
+  column: {
+    flex: 1,
+    minWidth: 0,
   },
   section: {
     marginBottom: 24,
