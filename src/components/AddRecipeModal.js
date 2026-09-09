@@ -359,6 +359,9 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
+    maxWidth: 1200,
+    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',

@@ -274,9 +274,14 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   container: {
     flex: 1,
+    width: '100%',
+    maxWidth: 1200,
+    alignSelf: 'center',
   },
   imageContainer: {
     height: 250,
