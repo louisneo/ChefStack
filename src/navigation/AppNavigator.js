@@ -2,7 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, TouchableOpacity, Platform, StyleSheet } from 'react-native';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
+import { View, TouchableOpacity, Platform, StyleSheet, useWindowDimensions, Image, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -27,6 +28,7 @@ import CookiePolicyScreen from '../screens/CookiePolicyScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const Drawer = createDrawerNavigator();
 
 // Dummy screen for the "Add" tab (never actually navigated to)
 function AddPlaceholder() { return null; }
@@ -136,6 +138,120 @@ function BottomTabNavigator() {
   );
 }
 
+// Custom Sidebar Drawer Content
+function CustomDrawerContent(props) {
+  const { colors } = useTheme();
+  const { openAddRecipe } = useRecipes();
+
+  return (
+    <DrawerContentScrollView {...props} style={{ backgroundColor: colors.surface }}>
+      <View style={{ padding: 20, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderLight, marginBottom: 12 }}>
+        <Image 
+          source={require('../../assets/chefstack_logo.png')} 
+          style={{ width: 48, height: 48, borderRadius: 12, marginBottom: 8 }} 
+        />
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text }}>ChefStack</Text>
+        <Text style={{ fontSize: 12, color: colors.textSecondary }}>Personal Recipe Manager</Text>
+      </View>
+
+      <DrawerItemList {...props} />
+
+      <TouchableOpacity
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: colors.primary,
+          marginHorizontal: 16,
+          marginVertical: 12,
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          borderRadius: 14,
+          gap: 12
+        }}
+        onPress={() => openAddRecipe()}
+      >
+        <Ionicons name="add-circle" size={24} color="#FFFFFF" />
+        <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 15 }}>New Recipe</Text>
+      </TouchableOpacity>
+    </DrawerContentScrollView>
+  );
+}
+
+// Drawer Navigator for Desktop / Web / Windows screens
+function WebDrawerNavigator() {
+  const { colors } = useTheme();
+
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerShown: false,
+        drawerType: 'permanent',
+        drawerStyle: {
+          width: 250,
+          backgroundColor: colors.surface,
+          borderRightColor: colors.borderLight,
+          borderRightWidth: 1,
+        },
+        drawerActiveBackgroundColor: colors.primary + '15',
+        drawerActiveTintColor: colors.primary,
+        drawerInactiveTintColor: colors.textSecondary,
+        drawerLabelStyle: {
+          fontSize: 15,
+          fontWeight: '600',
+          marginLeft: -10,
+        },
+      }}
+    >
+      <Drawer.Screen 
+        name="Home" 
+        component={DashboardScreen} 
+        options={{
+          drawerLabel: 'Recipes',
+          drawerIcon: ({ color }) => <Ionicons name="restaurant-outline" size={22} color={color} />
+        }}
+      />
+      <Drawer.Screen 
+        name="Favorites" 
+        component={DashboardScreen} 
+        initialParams={{ filterFavorites: true }}
+        options={{
+          drawerLabel: 'Favorites',
+          drawerIcon: ({ color }) => <Ionicons name="heart-outline" size={22} color={color} />
+        }}
+      />
+      <Drawer.Screen 
+        name="AISearch" 
+        component={AISearchScreen} 
+        options={{
+          drawerLabel: 'AI Chef',
+          drawerIcon: ({ color }) => <Ionicons name="sparkles-outline" size={22} color={color} />
+        }}
+      />
+      <Drawer.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{
+          drawerLabel: 'Profile',
+          drawerIcon: ({ color }) => <Ionicons name="person-circle-outline" size={22} color={color} />
+        }}
+      />
+    </Drawer.Navigator>
+  );
+}
+
+// Responsive Main Navigator (Uses Drawer on Web/Desktop/Windows, Tabs on Mobile)
+function ResponsiveMainNavigator(props) {
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === 'web' || width >= 768;
+
+  if (isDesktop) {
+    return <WebDrawerNavigator {...props} />;
+  }
+
+  return <BottomTabNavigator {...props} />;
+}
+
 const linking = {
   prefixes: ['chefstack://', 'https://chefstack.vercel.app'],
   config: {
@@ -179,7 +295,7 @@ export default function AppNavigator() {
             <Stack.Screen name="MainTabs">
               {(props) => (
                 <RecipeProvider>
-                  <BottomTabNavigator {...props} />
+                  <ResponsiveMainNavigator {...props} />
                   <RecipeConsumer />
                 </RecipeProvider>
               )}
