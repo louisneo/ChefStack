@@ -22,6 +22,8 @@ import RecipeCardSkeleton from '../components/RecipeCardSkeleton';
 import RecipeDetail from '../components/RecipeDetail';
 import DeleteConfirmation from '../components/DeleteConfirmation';
 import Toast from '../components/Toast';
+import SearchInputWithSuggestions from '../components/SearchInputWithSuggestions';
+import { standardizeCategory, STANDARD_CATEGORIES } from '../lib/categories';
 
 // Context
 import { useAuth } from '../context/AuthContext';
@@ -79,14 +81,32 @@ export default function DashboardScreen({ navigation, route }) {
     setRefreshing(false);
   };
 
+  // Recipe title and ingredient suggestions for search bar autocomplete
+  const recipeSuggestions = useMemo(() => {
+    const suggestions = [];
+    recipes.forEach(r => {
+      if (r.title) suggestions.push(r.title);
+      if (Array.isArray(r.ingredients)) {
+        r.ingredients.forEach(i => {
+          if (typeof i === 'string' && i.length > 2) suggestions.push(i);
+        });
+      }
+    });
+    return suggestions;
+  }, [recipes]);
+
   // Filter & Sort based on categories and search query
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
       if (isFavoritesView && !r.is_favorite) return false;
-      const matchesCategory = categoryFilter === 'all' || r.category === categoryFilter;
+
+      const stdCat = standardizeCategory(r.category, r.title);
+      const matchesCategory = categoryFilter === 'all' || stdCat.toLowerCase() === categoryFilter.toLowerCase();
+
       const matchesSearch = searchQuery === '' || 
         (r.title && r.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (r.ingredients && r.ingredients.some(i => i.toLowerCase().includes(searchQuery.toLowerCase())));
+
       return matchesCategory && matchesSearch;
     });
   }, [recipes, isFavoritesView, categoryFilter, searchQuery]);
@@ -143,23 +163,14 @@ export default function DashboardScreen({ navigation, route }) {
                 </Text>
               </View>
 
-              {/* Search Bar */}
-              <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
-                <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
-                <TextInput
-                  style={[styles.searchInput, { color: colors.text, outlineStyle: 'none' }]}
-                  placeholder="Search recipes or ingredients..."
-                  placeholderTextColor={colors.textMuted}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  underlineColorAndroid="transparent"
-                />
-                {searchQuery.length > 0 && (
-                  <TouchableOpacity onPress={() => setSearchQuery('')}>
-                    <Ionicons name="close-circle" size={20} color={colors.textMuted} />
-                  </TouchableOpacity>
-                )}
-              </View>
+              {/* Search Bar with Instant Autocomplete Suggestions */}
+              <SearchInputWithSuggestions
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Search recipes or ingredients..."
+                customSuggestions={recipeSuggestions}
+                containerStyle={{ marginBottom: 20 }}
+              />
 
               {/* Category Scroller */}
               <View style={styles.categoryScrollerWrapper}>
@@ -168,7 +179,7 @@ export default function DashboardScreen({ navigation, route }) {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.filterRow}
                 >
-                  {['all', 'Ulam', 'Meryenda', 'Drinks', 'Dessert', 'Appetizer', 'Soup', 'Breakfast'].map(cat => (
+                  {['all', ...STANDARD_CATEGORIES].map(cat => (
                     <TouchableOpacity
                       key={cat}
                       style={[

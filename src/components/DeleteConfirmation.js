@@ -4,41 +4,70 @@ import {
   Text, 
   TouchableOpacity, 
   StyleSheet, 
-  Modal 
+  Modal,
+  useWindowDimensions 
 } from 'react-native';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
+import Animated, { ZoomIn } from 'react-native-reanimated';
 
 export default function DeleteConfirmation({ recipe, visible, onClose, onConfirm }) {
+  const { colors } = useTheme();
+  const { width } = useWindowDimensions();
+
   if (!recipe || !visible) return null;
+
+  // Strict compact width calculation for PC/Web & Mobile (max 380px)
+  const cardWidth = Math.min(width * 0.85, 380);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <Animated.View entering={ZoomIn.duration(300)} style={styles.modalBox}>
-          
-          <View style={styles.iconContainer}>
-            <Ionicons name="trash" size={32} color={colors.primary} />
-          </View>
-          
-          <Text style={styles.title}>Delete Recipe?</Text>
-          <Text style={styles.message}>
-            Are you sure you want to delete <Text style={styles.bold}>{recipe.title}</Text>? This action cannot be undone.
-          </Text>
-
-          <View style={styles.buttonsRow}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
+      <TouchableOpacity 
+        style={styles.overlay} 
+        activeOpacity={1} 
+        onPress={onClose}
+      >
+        <TouchableOpacity activeOpacity={1} style={{ width: cardWidth }}>
+          <Animated.View 
+            entering={ZoomIn.duration(250)} 
+            style={[
+              styles.modalBox, 
+              { 
+                width: cardWidth, 
+                backgroundColor: colors.surface,
+                borderColor: colors.borderLight 
+              }
+            ]}
+          >
             
-            <TouchableOpacity style={styles.deleteBtn} onPress={() => onConfirm(recipe.id)}>
-              <Text style={styles.deleteBtnText}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-          
-        </Animated.View>
-      </View>
+            <View style={[styles.iconContainer, { backgroundColor: colors.error + '15' }]}>
+              <Ionicons name="trash-outline" size={28} color={colors.error} />
+            </View>
+            
+            <Text style={[styles.title, { color: colors.text }]}>Delete Recipe?</Text>
+            <Text style={[styles.message, { color: colors.textSecondary }]}>
+              Are you sure you want to delete <Text style={[styles.bold, { color: colors.text }]}>{recipe.title}</Text>? This action cannot be undone.
+            </Text>
+
+            <View style={styles.buttonsRow}>
+              <TouchableOpacity 
+                style={[styles.cancelBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
+                onPress={onClose}
+              >
+                <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.deleteBtn, { backgroundColor: colors.error }]} 
+                onPress={() => onConfirm(recipe.id)}
+              >
+                <Text style={[styles.deleteBtnText, { color: '#FFFFFF' }]}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+            
+          </Animated.View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 }
@@ -46,78 +75,69 @@ export default function DeleteConfirmation({ recipe, visible, onClose, onConfirm
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: 16,
   },
   modalBox: {
-    width: '100%',
-    backgroundColor: colors.surface,
-    borderRadius: 32,
-    padding: 32,
+    maxWidth: 380,
+    borderRadius: 24,
+    padding: 24,
     alignItems: 'center',
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 20,
-    elevation: 8,
+    elevation: 10,
   },
   iconContainer: {
-    width: 64,
-    height: 64,
-    backgroundColor: colors.primaryLight,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 8,
   },
   message: {
     textAlign: 'center',
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginBottom: 32,
-    lineHeight: 24,
+    fontSize: 14,
+    marginBottom: 24,
+    lineHeight: 20,
   },
   bold: {
-    fontWeight: 'bold',
-    color: colors.text,
+    fontWeight: '700',
   },
   buttonsRow: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
     width: '100%',
   },
   cancelBtn: {
     flex: 1,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
-    paddingVertical: 16,
-    borderRadius: 16,
+    borderWidth: 1.5,
+    paddingVertical: 12,
+    borderRadius: 14,
     alignItems: 'center',
   },
   cancelBtnText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '700',
   },
   deleteBtn: {
     flex: 1,
-    backgroundColor: colors.primary,
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingVertical: 12,
+    borderRadius: 14,
     alignItems: 'center',
   },
   deleteBtnText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.surface,
+    fontSize: 14,
+    fontWeight: '700',
   }
 });

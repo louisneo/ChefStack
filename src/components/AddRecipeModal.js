@@ -16,6 +16,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp, SlideInDown } from 'react-native-reanimated';
 import * as ImagePicker from 'expo-image-picker';
+import { standardizeCategory, STANDARD_CATEGORIES } from '../lib/categories';
 
 export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe }) {
   const { colors } = useTheme();
@@ -36,7 +37,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
     if (visible) {
       if (editingRecipe) {
         setTitle(editingRecipe.title || '');
-        setCategory(editingRecipe.category || 'Ulam');
+        setCategory(standardizeCategory(editingRecipe.category, editingRecipe.title));
         setTime(editingRecipe.time?.toString() || '30');
         setIngredients(editingRecipe.ingredients || []);
         setSteps(editingRecipe.steps || []);
@@ -121,11 +122,12 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
       return;
     }
 
+    const stdCat = standardizeCategory(category, title);
     onSave({
       ...(editingRecipe || {}),
       title: title.trim(),
-      type: category === 'Drinks' ? 'drink' : 'food',
-      category,
+      type: stdCat === 'Drinks' ? 'drink' : 'food',
+      category: stdCat,
       time: parseInt(time),
       ingredients,
       steps,
@@ -325,7 +327,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
           onPress={() => setCategoryDropdownVisible(false)}
         >
           <View style={[styles.dropdownMenu, { backgroundColor: colors.surface }]}>
-            {['Ulam', 'Meryenda', 'Drinks', 'Dessert', 'Appetizer', 'Soup', 'Breakfast'].map(c => (
+            {STANDARD_CATEGORIES.map(c => (
               <TouchableOpacity 
                 key={c} 
                 style={[

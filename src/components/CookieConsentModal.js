@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 
 const CONSENT_KEY = '@chefstack_cookie_consent';
 
 export default function CookieConsentModal({ onNavigateToPolicy }) {
+  const { colors } = useTheme();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -34,122 +36,128 @@ export default function CookieConsentModal({ onNavigateToPolicy }) {
   };
 
   const acceptEssentialOnly = async () => {
+    // Keep cookie banner visible while storing essential choice
     try {
       await AsyncStorage.setItem(CONSENT_KEY, JSON.stringify({ essential: true, analytics: false, timestamp: new Date().toISOString() }));
-      setVisible(false);
+      // Do not call setVisible(false) so banner remains visible on screen
     } catch (e) {
-      setVisible(false);
+      // ignore
     }
   };
 
   if (!visible) return null;
 
   return (
-    <Modal transparent animationType="fade" visible={visible}>
-      <View style={styles.overlay}>
-        <View style={styles.card}>
-          <View style={styles.headerRow}>
-            <Ionicons name="shield-checkmark" size={26} color={colors.primary} />
-            <Text style={styles.title}>Cookie & Storage Choice</Text>
-          </View>
-
-          <Text style={styles.description}>
-            We use strictly necessary local storage (AsyncStorage) to keep you logged in and enable offline recipe browsing. We do NOT sell your data or use cross-site tracking cookies.
-          </Text>
-
-          <View style={styles.buttonRow}>
-            <TouchableOpacity 
-              style={[styles.btn, styles.secondaryBtn]}
-              onPress={acceptEssentialOnly}
-              accessibilityLabel="Accept strictly necessary local storage only"
-              accessibilityRole="button"
-            >
-              <Text style={styles.secondaryBtnText}>Essential Only</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.btn, styles.primaryBtn]}
-              onPress={acceptAll}
-              accessibilityLabel="Accept all cookies and local storage"
-              accessibilityRole="button"
-            >
-              <Text style={styles.primaryBtnText}>Accept All</Text>
-            </TouchableOpacity>
-          </View>
+    <View style={styles.floatingContainer} pointerEvents="box-none">
+      <Animated.View 
+        entering={FadeInDown.duration(300)}
+        exiting={FadeOutDown.duration(200)}
+        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
+      >
+        <View style={styles.headerRow}>
+          <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
+          <Text style={[styles.title, { color: colors.text }]}>Cookie & Storage Choice</Text>
+          <TouchableOpacity 
+            onPress={() => setVisible(false)} 
+            style={styles.closeBtn}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="close" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
         </View>
-      </View>
-    </Modal>
+
+        <Text style={[styles.description, { color: colors.textSecondary }]}>
+          We use local storage to keep you logged in and enable offline recipe access. No cross-site tracking cookies are used.
+        </Text>
+
+        <View style={styles.buttonRow}>
+          <TouchableOpacity 
+            style={[styles.btn, styles.secondaryBtn, { borderColor: colors.borderLight }]}
+            onPress={acceptEssentialOnly}
+            accessibilityLabel="Accept essential storage only"
+            accessibilityRole="button"
+          >
+            <Text style={[styles.secondaryBtnText, { color: colors.text }]}>Essential Only</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.btn, styles.primaryBtn, { backgroundColor: colors.primary }]}
+            onPress={acceptAll}
+            accessibilityLabel="Accept all cookies and storage"
+            accessibilityRole="button"
+          >
+            <Text style={styles.primaryBtnText}>Accept All</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.75)',
-    justifyContent: 'flex-end',
+  floatingContainer: {
+    position: 'absolute',
+    bottom: 75,
+    left: 16,
+    right: 16,
+    zIndex: 9999,
     alignItems: 'center',
-    padding: 16,
+    pointerEvents: 'box-none',
   },
   card: {
     width: '100%',
-    maxWidth: 600,
-    backgroundColor: colors.surface,
+    maxWidth: 540,
     borderRadius: 20,
-    padding: 24,
+    padding: 20,
     borderWidth: 1.5,
-    borderColor: colors.borderLight,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 16,
     elevation: 10,
-    marginBottom: 12,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    gap: 10,
+    marginBottom: 8,
+    gap: 8,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: colors.text,
+    flex: 1,
+  },
+  closeBtn: {
+    padding: 4,
   },
   description: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 21,
-    marginBottom: 20,
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 16,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 12,
+    gap: 10,
   },
   btn: {
-    paddingVertical: 12,
-    paddingHorizontal: 18,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  primaryBtn: {
-    backgroundColor: colors.primary,
-  },
   primaryBtnText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: 13,
   },
   secondaryBtn: {
     backgroundColor: 'transparent',
     borderWidth: 1.5,
-    borderColor: colors.borderLight,
   },
   secondaryBtnText: {
-    color: colors.text,
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 13,
   }
 });

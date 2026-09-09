@@ -14,7 +14,7 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
-import { findSubstitutes } from '../services/aiService';
+import { standardizeCategory } from '../lib/categories';
 
 export default function RecipeDetail({ recipe, visible, onClose }) {
   const { colors } = useTheme();
@@ -148,7 +148,7 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
               )}
 
               <View style={[styles.badgeContainer, { backgroundColor: colors.primary }]}>
-                <Text style={[styles.badgeText, { color: colors.surface }]}>{recipe.category}</Text>
+                <Text style={[styles.badgeText, { color: colors.surface }]}>{standardizeCategory(recipe.category, recipe.title)}</Text>
               </View>
             </View>
 

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { standardizeCategory } from '../lib/categories';
 
 const GEMINI_MODELS = [
   'gemini-2.5-flash',
@@ -15,6 +16,76 @@ export const generateSmartRecipes = (query) => {
   const q = (query || 'Delight').trim();
   const titleQuery = q.charAt(0).toUpperCase() + q.slice(1);
   const lowerQ = q.toLowerCase();
+
+  // 0. MANGO GRAHAM FLOAT & MANGO DESSERTS
+  if (lowerQ.includes('mango graham') || lowerQ.includes('graham float') || lowerQ.includes('graham')) {
+    return [
+      {
+        id: `recipe-mango-graham-1`,
+        title: `Classic Mango Graham Float`,
+        type: 'food',
+        category: 'Dessert',
+        prepTime: '20m',
+        cookTime: '0m',
+        time: 20,
+        ingredientsPreview: `2 packs Honey Graham Crackers, 2 ripe Sweet Mangoes (sliced), 2 cups Heavy Whipping Cream, 1 cup Sweetened Condensed Milk`,
+        ingredients: [
+          '2 packs (200g) Honey Graham Crackers',
+          '2 large Ripe Sweet Mangoes (thinly sliced)',
+          '2 cups (500ml) Chilled All-Purpose Cream or Heavy Cream',
+          '1 cup (300ml) Sweetened Condensed Milk',
+          '1/2 cup Crushed Graham Crackers for topping'
+        ],
+        instructions: [
+          'In a large bowl, whip chilled all-purpose cream with sweetened condensed milk until fluffy and smooth.',
+          'Arrange a single layer of honey graham crackers at the bottom of a rectangular glass baking dish.',
+          'Spread a layer of whipped cream mixture evenly over the graham crackers.',
+          'Lay sweet mango slices over the cream layer.',
+          'Repeat layers of crackers, cream, and mangoes until dish is filled, finishing with a cream layer topped with mango slices and crushed grahams.',
+          'Cover and chill in the freezer for at least 4 hours (or overnight) before slicing and serving cold.'
+        ],
+        steps: [
+          'In a large bowl, whip chilled all-purpose cream with sweetened condensed milk until fluffy and smooth.',
+          'Arrange a single layer of honey graham crackers at the bottom of a rectangular glass baking dish.',
+          'Spread a layer of whipped cream mixture evenly over the graham crackers.',
+          'Lay sweet mango slices over the cream layer.',
+          'Repeat layers of crackers, cream, and mangoes until dish is filled, finishing with a cream layer topped with mango slices and crushed grahams.',
+          'Cover and chill in the freezer for at least 4 hours (or overnight) before slicing and serving cold.'
+        ]
+      },
+      {
+        id: `recipe-mango-graham-2`,
+        title: `Mango Graham Cup Parfait`,
+        type: 'food',
+        category: 'Dessert',
+        prepTime: '15m',
+        cookTime: '0m',
+        time: 15,
+        ingredientsPreview: `Crushed Grahams, Sweetened Cream, Fresh Diced Mangoes, Mango Puree`,
+        ingredients: [
+          '1.5 cups Crushed Graham Crackers',
+          '1 cup Chilled Heavy Cream',
+          '1/2 cup Condensed Milk',
+          '2 Sweet Ripe Mangoes (diced)',
+          'Fresh Mint Leaves for garnish'
+        ],
+        instructions: [
+          'Whip heavy cream and condensed milk until smooth.',
+          'In individual dessert cups, add a layer of crushed grahams.',
+          'Top with a layer of sweet cream followed by diced mangoes.',
+          'Repeat layers until cups are filled.',
+          'Garnish with fresh mint and chill for 1 hour before serving.'
+        ],
+        steps: [
+          'Whip heavy cream and condensed milk until smooth.',
+          'In individual dessert cups, add a layer of crushed grahams.',
+          'Top with a layer of sweet cream followed by diced mangoes.',
+          'Repeat layers until cups are filled.',
+          'Garnish with fresh mint and chill for 1 hour before serving.'
+        ]
+      }
+    ];
+  }
 
   // 1. ICE CREAM, DESSERTS, SWEETS, BAKERY, CAKES & PASTRIES
   const isSweet = lowerQ.includes('ice cream') || lowerQ.includes('gelato') || lowerQ.includes('sorbet') || 
@@ -552,13 +623,73 @@ export const generateSmartRecipes = (query) => {
     ];
   }
 
-  // 8. BEVERAGES, DRINKS, COFFEE, TEA, SMOOTHIES, JUICES
+  // 8. MILKSHAKES, SMOOTHIES & DRINKS
+  if (lowerQ.includes('milkshake') || lowerQ.includes('shake') || lowerQ.includes('smoothie')) {
+    return [
+      {
+        id: `recipe-shake-1`,
+        title: `Classic ${titleQuery}`,
+        type: 'drink',
+        category: 'Drinks',
+        prepTime: '5m',
+        cookTime: '0m',
+        time: 5,
+        ingredientsPreview: `2 cups Fresh Base (Strawberries/Fruit), 3 scoops Vanilla Ice Cream, 1/2 cup Cold Milk, Whipped Cream`,
+        ingredients: [
+          `2 cups Fresh ${titleQuery} ingredients (e.g. fresh strawberries or fruit)`,
+          '3 scoops Premium Vanilla Ice Cream',
+          '1/2 cup Whole Milk or Cream',
+          '2 tbsp Sugar or Honey (optional)',
+          'Whipped Cream & Maraschino Cherry for topping'
+        ],
+        instructions: [
+          `Place fresh ingredients, vanilla ice cream, and cold milk into a high-speed blender.`,
+          'Blend on high speed for 45-60 seconds until thick, smooth, and creamy.',
+          'Pour into a tall chilled glass.',
+          'Top generously with whipped cream and a cherry before serving.'
+        ],
+        steps: [
+          `Place fresh ingredients, vanilla ice cream, and cold milk into a high-speed blender.`,
+          'Blend on high speed for 45-60 seconds until thick, smooth, and creamy.',
+          'Pour into a tall chilled glass.',
+          'Top generously with whipped cream and a cherry before serving.'
+        ]
+      },
+      {
+        id: `recipe-shake-2`,
+        title: `Creamy ${titleQuery} Thickshake`,
+        type: 'drink',
+        category: 'Drinks',
+        prepTime: '5m',
+        cookTime: '0m',
+        time: 5,
+        ingredientsPreview: `${titleQuery} base, Condensed Milk, Crushed Ice, Cream`,
+        ingredients: [
+          `1.5 cups ${titleQuery} base`,
+          '1/2 cup Heavy Cream',
+          '3 tbsp Sweetened Condensed Milk',
+          '1 cup Crushed Ice'
+        ],
+        instructions: [
+          'Combine base, heavy cream, condensed milk, and crushed ice in a blender.',
+          'Pulse until ice is finely crushed and thick consistency is reached.',
+          'Serve immediately cold with a thick straw.'
+        ],
+        steps: [
+          'Combine base, heavy cream, condensed milk, and crushed ice in a blender.',
+          'Pulse until ice is finely crushed and thick consistency is reached.',
+          'Serve immediately cold with a thick straw.'
+        ]
+      }
+    ];
+  }
+
+  // 9. BEVERAGES, DRINKS, COFFEE, TEA, JUICES
   const isDrink = lowerQ.includes('drink') || lowerQ.includes('beverage') || lowerQ.includes('coffee') || 
                   lowerQ.includes('tea') || lowerQ.includes('latte') || lowerQ.includes('espresso') || 
-                  lowerQ.includes('juice') || lowerQ.includes('smoothie') || lowerQ.includes('shake') || 
-                  lowerQ.includes('matcha') || lowerQ.includes('boba') || lowerQ.includes('cocktail') || 
-                  lowerQ.includes('mocktail') || lowerQ.includes('soda') || lowerQ.includes('lemonade') || 
-                  lowerQ.includes('cider') || lowerQ.includes('milkshake');
+                  lowerQ.includes('juice') || lowerQ.includes('matcha') || lowerQ.includes('boba') || 
+                  lowerQ.includes('cocktail') || lowerQ.includes('mocktail') || lowerQ.includes('soda') || 
+                  lowerQ.includes('lemonade') || lowerQ.includes('cider');
 
   if (isDrink) {
     return [
@@ -1150,76 +1281,160 @@ RULES:
 1. FOOD VALIDATION: Check if the user query refers to a real food, ingredient, dish, beverage, or cooking style. If the query is random gibberish, non-food text (e.g., "asdasd", "qwerty", "12345"), or completely unrelated to food, return {"recipes": []}.
 2. NO GENERIC TEMPLATES: Never output generic "Bistro Plate", "Pan-Seared Delicacy", or "Asdasd Delicacy" templates.
 3. REAL DISHES ONLY: Generate 5 to 6 distinct, authentic, real-world dishes based on the food query.
-4. COMPLETE INGREDIENTS: Use full, accurate ingredient lists and step-by-step instructions.
-5. STRICT JSON: Output valid JSON adhering strictly to the schema.`;
+4. CATEGORY MANDATE: The "category" field MUST be strictly one of: "Ulam", "Meryenda", "Drinks", "Dessert", "Appetizer", "Soup", "Breakfast".
+5. COMPLETE INGREDIENTS: Use full, accurate ingredient lists and step-by-step instructions.
+6. STRICT JSON: Output valid JSON adhering strictly to the schema.`;
+
+// Cache key prefix for resource distribution
+const CACHE_PREFIX = '@chefstack_search_cache_';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+/**
+ * Gets all available Gemini API keys from custom storage or environment variable.
+ * Supports comma-separated keys for API key chaining / account pooling.
+ */
+export const getApiKeyPool = async () => {
+  let customKeysRaw = await AsyncStorage.getItem(CUSTOM_KEY_STORAGE).catch(() => null);
+  let keys = [];
+
+  if (customKeysRaw && customKeysRaw.trim()) {
+    keys = customKeysRaw
+      .split(',')
+      .map(k => k.trim())
+      .filter(k => k.length > 5);
+  }
+
+  if (keys.length === 0 && DEFAULT_GEMINI_KEY) {
+    keys = DEFAULT_GEMINI_KEY
+      .split(',')
+      .map(k => k.trim())
+      .filter(k => k.length > 5);
+  }
+
+  return keys;
+};
 
 /**
  * Searches for recipes using Google Gemini AI SDK with Google Search grounding.
- * Uses the official @google/generative-ai SDK for structured output and web search.
- * Falls back to local generateSmartRecipes on any error.
+ * Features:
+ * 1. Resource Distribution: Caches search results in AsyncStorage for 24 hours.
+ * 2. API Chaining / Multi-Account Key Pool: Rotates through available keys on 429 / quota errors.
+ * 3. Fallback: Uses offline Smart Recipe Engine if all keys or network requests fail.
  */
 export const searchRecipes = async (query) => {
   const cleanQuery = (query || '').trim();
   if (!cleanQuery) return { recipes: [], isFood: true };
 
-  // Check custom key in local storage first, then server environment variable key
-  let apiKey = await AsyncStorage.getItem(CUSTOM_KEY_STORAGE).catch(() => null);
-  if (!apiKey || !apiKey.trim()) {
-    apiKey = DEFAULT_GEMINI_KEY;
-  }
+  const cacheKey = `${CACHE_PREFIX}${cleanQuery.toLowerCase()}`;
 
-  const isKeyValid = apiKey && apiKey.trim().startsWith('AIzaSy');
-
-  if (!isKeyValid) {
-    throw new Error('Valid Gemini API key missing. Please provide a valid API key starting with AIzaSy.');
-  }
-
-  const genAI = new GoogleGenerativeAI(apiKey.trim());
-  const prompt = `Generate 5 to 6 real, authentic, distinct recipes for: "${cleanQuery}" with complete ingredient lists and step-by-step instructions.`;
-
-  console.log(`ChefStack AI SDK: Querying model gemini-2.5-flash...`);
-
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    systemInstruction: SYSTEM_PROMPT,
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: recipeSchema,
-      temperature: 0.7
+  // 1. Resource Distribution: Check local AsyncStorage cache first
+  try {
+    const cachedDataRaw = await AsyncStorage.getItem(cacheKey);
+    if (cachedDataRaw) {
+      const cached = JSON.parse(cachedDataRaw);
+      if (Date.now() - cached.timestamp < CACHE_TTL_MS && cached.recipes?.length > 0) {
+        console.log(`ChefStack Cache Hit: Serving cached AI response for "${cleanQuery}"`);
+        return { recipes: cached.recipes, isFood: true, needsApiKey: false, isCached: true };
+      }
     }
-  });
-
-  const result = await model.generateContent(prompt);
-  const responseText = result.response.text();
-
-  if (!responseText) {
-    throw new Error('Gemini API returned empty response.');
+  } catch (e) {
+    console.warn('Cache read error:', e);
   }
 
-  let cleanJson = responseText.trim().replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
-  const parsed = JSON.parse(cleanJson);
-  let recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
+  // 2. Retrieve API Key Pool for chaining across Google accounts
+  const keyPool = await getApiKeyPool();
+  const isKeyValid = keyPool.length > 0;
 
-  if (recipes.length === 0) {
-    throw new Error('Gemini API returned no recipes for this query.');
+  if (isKeyValid) {
+    const candidateModels = [
+      'gemini-2.5-flash',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro'
+    ];
+
+    const prompt = `Generate 5 to 6 real, authentic, distinct recipes for: "${cleanQuery}" with complete ingredient lists and step-by-step instructions.`;
+
+    // Chain across key pool (different Google accounts)
+    for (let keyIdx = 0; keyIdx < keyPool.length; keyIdx++) {
+      const currentApiKey = keyPool[keyIdx];
+      const genAI = new GoogleGenerativeAI(currentApiKey);
+
+      for (const modelName of candidateModels) {
+        try {
+          console.log(`ChefStack AI SDK: Trying Key #${keyIdx + 1}/${keyPool.length} with model ${modelName}...`);
+
+          const model = genAI.getGenerativeModel({
+            model: modelName,
+            systemInstruction: SYSTEM_PROMPT,
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseSchema: recipeSchema,
+              temperature: 0.7
+            }
+          });
+
+          const result = await model.generateContent(prompt);
+          const responseText = result.response.text();
+
+          if (responseText) {
+            let cleanJson = responseText.trim().replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+            const parsed = JSON.parse(cleanJson);
+            let recipes = Array.isArray(parsed) ? parsed : (parsed.recipes || []);
+
+            if (recipes.length > 0) {
+              recipes = recipes.map((r, idx) => {
+                const parsedTime = parseInt(r.time || r.cookTime || r.prepTime || 20, 10) || 20;
+                const fullIngredientsList = r.ingredients || [];
+                const stdCategory = standardizeCategory(r.category, r.title);
+                return {
+                  id: r.id || `recipe-${Date.now()}-${idx}`,
+                  title: r.title,
+                  type: stdCategory === 'Drinks' ? 'drink' : 'food',
+                  category: stdCategory,
+                  time: parsedTime,
+                  ingredients: fullIngredientsList,
+                  steps: r.steps || r.instructions || []
+                };
+              });
+
+              console.log(`Live Gemini AI SDK (${modelName}, Key #${keyIdx + 1}) successfully returned ${recipes.length} recipes.`);
+
+              // Cache the successful search result for resource distribution
+              try {
+                await AsyncStorage.setItem(cacheKey, JSON.stringify({
+                  timestamp: Date.now(),
+                  recipes
+                }));
+              } catch (e) {
+                console.warn('Failed to save search cache:', e);
+              }
+
+              return { recipes, isFood: true, needsApiKey: false };
+            }
+          }
+        } catch (err) {
+          const errMsg = err?.message || String(err);
+          console.warn(`Gemini Key #${keyIdx + 1} (${modelName}) failed/quota error:`, errMsg);
+
+          // If quota reached (429 / resource exhausted), break model loop to try NEXT API key in the pool immediately!
+          if (errMsg.includes('429') || errMsg.includes('Quota') || errMsg.includes('RESOURCE_EXHAUSTED')) {
+            console.log(`Quota hit on Key #${keyIdx + 1}. Auto-rotating to next key in pool...`);
+            break; 
+          }
+        }
+      }
+    }
   }
 
-  recipes = recipes.map((r, idx) => {
-    const parsedTime = parseInt(r.time || r.cookTime || r.prepTime || 20, 10) || 20;
-    const fullIngredientsList = r.ingredients || [];
-    return {
-      id: r.id || `recipe-${Date.now()}-${idx}`,
-      title: r.title,
-      type: r.type || (['Drinks', 'Beverage'].includes(r.category) ? 'drink' : 'food'),
-      category: r.category || 'Main Course',
-      time: parsedTime,
-      ingredients: fullIngredientsList,
-      steps: r.steps || r.instructions || []
-    };
-  });
-
-  console.log(`Live Gemini AI SDK (gemini-2.5-flash) successfully returned ${recipes.length} recipes.`);
-  return { recipes, isFood: true, needsApiKey: false };
+  // Fallback to Smart Recipe Engine if Gemini API is quota limited, key invalid, or offline
+  console.log(`Using ChefStack Smart Culinary Engine fallback for: "${cleanQuery}"`);
+  const fallbackRecipes = generateSmartRecipes(cleanQuery);
+  return { 
+    recipes: fallbackRecipes, 
+    isFood: true, 
+    needsApiKey: !isKeyValid,
+    isFallback: true 
+  };
 };
 
 export const saveCustomApiKey = async (key) => {

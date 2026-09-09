@@ -4,8 +4,12 @@ import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp, Layout } from 'react-native-reanimated';
 
+import { standardizeCategory } from '../lib/categories';
+
 export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggleFavorite, style }) {
   const { colors } = useTheme();
+
+  const stdCat = standardizeCategory(recipe.category, recipe.title);
 
   return (
     <Animated.View 
@@ -39,7 +43,7 @@ export default function RecipeCard({ recipe, onClick, onEdit, onDelete, onToggle
 
           {/* Category Badge */}
           <View style={[styles.badgeContainer, { backgroundColor: colors.primary }]}>
-            <Text style={[styles.badgeText, { color: colors.surface }]} numberOfLines={1}>{recipe.category}</Text>
+            <Text style={[styles.badgeText, { color: colors.surface }]} numberOfLines={1}>{stdCat}</Text>
           </View>
 
           {/* Action buttons */}

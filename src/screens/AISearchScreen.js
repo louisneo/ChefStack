@@ -17,10 +17,11 @@ import { useRecipes } from '../context/RecipeContext';
 import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { searchRecipes, saveCustomApiKey, getCustomApiKey, searchLocalRecipes, generateSmartRecipes } from '../services/aiService';
-import { FOOD_SUGGESTIONS } from '../data/foodSuggestions';
 import { Modal } from 'react-native';
 import Toast from '../components/Toast';
 import AISearchCardSkeleton from '../components/AISearchCardSkeleton';
+import SearchInputWithSuggestions from '../components/SearchInputWithSuggestions';
+import { standardizeCategory } from '../lib/categories';
 import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
 
 export default function AISearchScreen({ navigation }) {
@@ -29,9 +30,6 @@ export default function AISearchScreen({ navigation }) {
   const { user } = useAuth();
   
   const [query, setQuery] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [searchError, setSearchError] = useState(null);
@@ -51,27 +49,7 @@ export default function AISearchScreen({ navigation }) {
     });
   }, []);
 
-  // Update suggestions dynamically as user types
-  const handleQueryChange = (text) => {
-    setQuery(text);
-    const trimmed = text.trim().toLowerCase();
-    if (trimmed.length > 0) {
-      const matches = FOOD_SUGGESTIONS.filter(item => 
-        item.toLowerCase().includes(trimmed)
-      ).slice(0, 6);
-      setFilteredSuggestions(matches);
-      setShowSuggestions(matches.length > 0);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
-    }
-  };
 
-  const selectSuggestion = (suggestion) => {
-    setQuery(suggestion);
-    setShowSuggestions(false);
-    handleSearch(suggestion);
-  };
 
   // Handle Android Hardware Back Button to return to Home Tab
   useFocusEffect(
@@ -122,35 +100,32 @@ export default function AISearchScreen({ navigation }) {
     }
 
     try {
-      const { recipes, isFood, error, needsApiKey: reqKey } = await searchRecipes(searchQuery);
-      if (error) {
-        const localMatches = searchLocalRecipes(storedRecipes, searchQuery);
-        if (localMatches.length > 0) {
-          setIsOfflineSearch(true);
-          setResults(localMatches);
-        } else {
-          setSearchError(error);
-          if (reqKey) setNeedsApiKey(true);
+      const { recipes, isFood, error, needsApiKey: reqKey, isFallback } = await searchRecipes(searchQuery);
+      if (recipes && recipes.length > 0) {
+        setResults(recipes);
+        setSearchError(null);
+        if (isFallback) {
+          toastRef.current?.show('Displaying authentic offline AI recipes', 'info');
         }
-      } else if (!recipes || recipes.length === 0) {
+      } else {
         const localMatches = searchLocalRecipes(storedRecipes, searchQuery);
         if (localMatches.length > 0) {
           setIsOfflineSearch(true);
           setResults(localMatches);
+          setSearchError(null);
         } else {
           setSearchError(`No authentic food recipes found for "${searchQuery}". Please try searching for a real dish or ingredient.`);
         }
-      } else {
-        setResults(recipes);
       }
     } catch (error) {
       console.warn("AISearchScreen handleSearch error:", error);
-      const localMatches = searchLocalRecipes(storedRecipes, searchQuery);
-      if (localMatches.length > 0) {
-        setIsOfflineSearch(true);
-        setResults(localMatches);
+      const fallbackRecipes = generateSmartRecipes(searchQuery);
+      if (fallbackRecipes.length > 0) {
+        setResults(fallbackRecipes);
+        setSearchError(null);
+        toastRef.current?.show('Displaying authentic offline AI recipes', 'info');
       } else {
-        setSearchError(error.message || "Unable to complete AI search. Please check your network or try another query.");
+        setSearchError("Unable to complete AI search. Please try another query.");
       }
     } finally {
       setLoading(false);
@@ -171,10 +146,11 @@ export default function AISearchScreen({ navigation }) {
 
     setImporting(index);
     try {
+      const stdCat = standardizeCategory(recipe.category, recipe.title);
       const cleanRecipe = {
         title: recipe.title,
-        category: recipe.category || 'Ulam',
-        type: recipe.type || 'food',
+        category: stdCat,
+        type: stdCat === 'Drinks' ? 'drink' : 'food',
         time: parseInt(recipe.time || 20, 10) || 20,
         ingredients: recipe.ingredients || [],
         steps: recipe.steps || recipe.instructions || [],
@@ -222,81 +198,17 @@ export default function AISearchScreen({ navigation }) {
               </Text>
             </View>
 
-            {/* Enhanced UI Search Box with Focus Glow & Suggestion Popup */}
-            <View style={styles.searchBoxWrapper}>
-              <View 
-                style={[
-                  styles.searchBox, 
-                  { 
-                    backgroundColor: colors.background, 
-                    borderColor: isFocused ? colors.primary : colors.borderLight,
-                    borderWidth: 1.5,
-                  }
-                ]}
-              >
-                <Ionicons name="sparkles" size={20} color={colors.primary} style={styles.searchIcon} />
-                <TextInput
-                  style={[styles.input, { color: colors.text, outlineStyle: 'none' }]}
-                  placeholder="Search food, ingredients (e.g. oat, pasta, adobo)..."
-                  value={query}
-                  onChangeText={handleQueryChange}
-                  onFocus={() => {
-                    setIsFocused(true);
-                    if (query.trim().length > 0 && filteredSuggestions.length > 0) {
-                      setShowSuggestions(true);
-                    }
-                  }}
-                  onBlur={() => {
-                    setIsFocused(false);
-                    setTimeout(() => setShowSuggestions(false), 200);
-                  }}
-                  onSubmitEditing={() => handleSearch()}
-                  placeholderTextColor={colors.textMuted}
-                  underlineColorAndroid="transparent"
-                  accessibilityLabel="Search food recipe input"
-                />
-                {query.length > 0 && (
-                  <TouchableOpacity onPress={() => { setQuery(''); setFilteredSuggestions([]); setShowSuggestions(false); }} accessibilityLabel="Clear search text">
-                    <Ionicons name="close-circle" size={20} color={colors.textMuted} />
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              {/* Google-Style Instant Auto-Complete Suggestions Dropdown */}
-              {showSuggestions && filteredSuggestions.length > 0 && (
-                <Animated.View 
-                  entering={FadeInDown.duration(200)}
-                  exiting={FadeOut.duration(150)}
-                  style={[styles.suggestionsDropdown, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
-                >
-                  {filteredSuggestions.map((item, idx) => {
-                    const matchIndex = item.toLowerCase().indexOf(query.trim().toLowerCase());
-                    const beforeMatch = item.slice(0, matchIndex);
-                    const matchText = item.slice(matchIndex, matchIndex + query.trim().length);
-                    const afterMatch = item.slice(matchIndex + query.trim().length);
-
-                    return (
-                      <TouchableOpacity
-                        key={idx}
-                        style={[
-                          styles.suggestionRow, 
-                          { borderBottomColor: idx === filteredSuggestions.length - 1 ? 'transparent' : colors.borderLight + '50' }
-                        ]}
-                        onPress={() => selectSuggestion(item)}
-                      >
-                        <Ionicons name="search-outline" size={18} color={colors.primary} style={{ marginRight: 12 }} />
-                        <Text style={[styles.suggestionText, { color: colors.text }]}>
-                          {beforeMatch}
-                          <Text style={{ fontWeight: 'bold', color: colors.primary }}>{matchText}</Text>
-                          {afterMatch}
-                        </Text>
-                        <Ionicons name="arrow-forward-outline" size={16} color={colors.textMuted} />
-                      </TouchableOpacity>
-                    );
-                  })}
-                </Animated.View>
-              )}
-            </View>
+            {/* Live Autocomplete Search Bar */}
+            <SearchInputWithSuggestions
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search food, ingredients (e.g. oat, pasta, adobo)..."
+              onSearch={(term) => handleSearch(term)}
+              iconName="sparkles"
+              iconColor={colors.primary}
+              customSuggestions={storedRecipes.map(r => r.title)}
+              containerStyle={{ marginBottom: 16 }}
+            />
 
             <TouchableOpacity 
               style={[styles.searchBtn, { backgroundColor: colors.primary, shadowColor: colors.primary }]} 
@@ -357,18 +269,10 @@ export default function AISearchScreen({ navigation }) {
             </Animated.View>
           )}
 
-          {searchError && !loading && (
+          {searchError && !searchError.includes('GoogleGenerativeAI') && !searchError.includes('429') && !searchError.includes('Quota') && !loading && (
             <Animated.View entering={FadeIn} style={[styles.errorCard, { backgroundColor: colors.error + '10', borderColor: colors.error + '30' }]}>
               <Ionicons name="information-circle-outline" size={32} color={colors.error} />
               <Text style={[styles.errorText, { color: colors.text }]}>{searchError}</Text>
-              {needsApiKey && (
-                <TouchableOpacity 
-                  style={{ backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 12, marginTop: 10 }}
-                  onPress={() => setShowKeyModal(true)}
-                >
-                  <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 14 }}>Enter Gemini API Key</Text>
-                </TouchableOpacity>
-              )}
             </Animated.View>
           )}
 
@@ -400,7 +304,7 @@ export default function AISearchScreen({ navigation }) {
             >
               <View style={styles.cardHeader}>
                 <View style={[styles.typeBadge, { backgroundColor: colors.primary + '20' }]}>
-                  <Text style={[styles.typeText, { color: colors.primary }]}>{recipe.category}</Text>
+                  <Text style={[styles.typeText, { color: colors.primary }]}>{standardizeCategory(recipe.category, recipe.title)}</Text>
                 </View>
                 <View style={styles.timeBadge}>
                   <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
@@ -462,46 +366,6 @@ export default function AISearchScreen({ navigation }) {
 
         <Toast ref={toastRef} />
 
-        {/* API Key Modal */}
-        <Modal visible={showKeyModal} transparent animationType="fade">
-          <View style={styles.keyModalOverlay}>
-            <View style={[styles.keyModalContent, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
-              <View style={styles.keyModalHeader}>
-                <Ionicons name="sparkles" size={28} color={colors.primary} />
-                <Text style={[styles.keyModalTitle, { color: colors.text }]}>Configure Gemini AI Key</Text>
-              </View>
-              
-              <Text style={[styles.keyModalDesc, { color: colors.textSecondary }]}>
-                ChefStack uses live Google Gemini AI to search and generate recipes. Enter your free Gemini API key from Google AI Studio.
-              </Text>
-
-              <TextInput
-                style={[styles.keyInput, { backgroundColor: colors.background, borderColor: colors.borderLight, color: colors.text, outlineStyle: 'none' }]}
-                placeholder="Paste AIzaSy... API key here"
-                placeholderTextColor={colors.textMuted}
-                value={inputApiKey}
-                onChangeText={setInputApiKey}
-                autoCapitalize="none"
-              />
-
-              <View style={styles.keyModalButtons}>
-                <TouchableOpacity 
-                  style={[styles.keyBtn, { backgroundColor: colors.borderLight }]}
-                  onPress={() => setShowKeyModal(false)}
-                >
-                  <Text style={[styles.keyBtnText, { color: colors.text }]}>Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                  style={[styles.keyBtn, { backgroundColor: colors.primary }]}
-                  onPress={handleSaveKey}
-                >
-                  <Text style={[styles.keyBtnText, { color: '#FFFFFF', fontWeight: 'bold' }]}>Save Key</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
       </View>
     </View>
   );
