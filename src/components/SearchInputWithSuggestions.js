@@ -28,6 +28,8 @@ export default function SearchInputWithSuggestions({
   const [isFocused, setIsFocused] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+
   // Pool all suggestion candidates (FOOD_SUGGESTIONS + user recipes titles/ingredients)
   const pool = useMemo(() => {
     const set = new Set();
@@ -82,6 +84,7 @@ export default function SearchInputWithSuggestions({
   const handleSelect = (item) => {
     onChangeText(item);
     setShowDropdown(false);
+    setSelectedIndex(-1);
     if (onSearch) {
       onSearch(item);
     }
@@ -90,8 +93,35 @@ export default function SearchInputWithSuggestions({
   const handleClear = () => {
     onChangeText('');
     setShowDropdown(false);
+    setSelectedIndex(-1);
     if (onSearch) {
       onSearch('');
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (!showDropdown || suggestions.length === 0) return;
+
+    const nativeEvent = e.nativeEvent || {};
+    const key = nativeEvent.key;
+
+    if (key === 'ArrowDown') {
+      if (e.preventDefault) e.preventDefault();
+      const nextIndex = selectedIndex < suggestions.length - 1 ? selectedIndex + 1 : 0;
+      setSelectedIndex(nextIndex);
+      if (suggestions[nextIndex]) {
+        onChangeText(suggestions[nextIndex]);
+      }
+    } else if (key === 'ArrowUp') {
+      if (e.preventDefault) e.preventDefault();
+      const prevIndex = selectedIndex > 0 ? selectedIndex - 1 : suggestions.length - 1;
+      setSelectedIndex(prevIndex);
+      if (suggestions[prevIndex]) {
+        onChangeText(suggestions[prevIndex]);
+      }
+    } else if (key === 'Enter' && selectedIndex >= 0 && suggestions[selectedIndex]) {
+      if (e.preventDefault) e.preventDefault();
+      handleSelect(suggestions[selectedIndex]);
     }
   };
 
@@ -102,8 +132,8 @@ export default function SearchInputWithSuggestions({
           styles.inputContainer,
           {
             backgroundColor: colors.surface,
-            borderColor: isFocused ? colors.primary : colors.borderLight,
-            borderWidth: isFocused ? 1.5 : 1,
+            borderColor: isFocused ? colors.primary : (colors.borderLight || colors.border || '#334155'),
+            borderWidth: 1.5,
           },
         ]}
       >
@@ -121,6 +151,7 @@ export default function SearchInputWithSuggestions({
           onChangeText={(text) => {
             onChangeText(text);
             setShowDropdown(text.trim().length > 0);
+            setSelectedIndex(-1);
           }}
           onFocus={() => {
             setIsFocused(true);
@@ -133,9 +164,14 @@ export default function SearchInputWithSuggestions({
             // Small delay to allow pressing dropdown items
             setTimeout(() => setShowDropdown(false), 200);
           }}
+          onKeyPress={handleKeyPress}
           onSubmitEditing={() => {
-            setShowDropdown(false);
-            if (onSearch) onSearch(value);
+            if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+              handleSelect(suggestions[selectedIndex]);
+            } else {
+              setShowDropdown(false);
+              if (onSearch) onSearch(value);
+            }
           }}
           underlineColorAndroid="transparent"
           returnKeyType="search"
@@ -156,12 +192,13 @@ export default function SearchInputWithSuggestions({
             styles.dropdown,
             {
               backgroundColor: colors.surface,
-              borderColor: colors.borderLight,
+              borderColor: colors.primary,
               shadowColor: '#000',
             },
           ]}
         >
           {suggestions.map((item, index) => {
+            const isSelected = index === selectedIndex;
             const queryLower = value.trim().toLowerCase();
             const itemLower = item.toLowerCase();
             const matchIdx = itemLower.indexOf(queryLower);
@@ -182,6 +219,7 @@ export default function SearchInputWithSuggestions({
                 style={[
                   styles.suggestionRow,
                   {
+                    backgroundColor: isSelected ? (colors.primary + '25') : 'transparent',
                     borderBottomColor:
                       index === suggestions.length - 1
                         ? 'transparent'
@@ -193,7 +231,7 @@ export default function SearchInputWithSuggestions({
                 <Ionicons
                   name="search-outline"
                   size={18}
-                  color={colors.textSecondary}
+                  color={isSelected ? colors.primary : colors.textSecondary}
                   style={styles.suggestionIcon}
                 />
                 <Text style={[styles.suggestionText, { color: colors.text }]} numberOfLines={1}>
@@ -211,7 +249,7 @@ export default function SearchInputWithSuggestions({
                   }}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Ionicons name="arrow-back-outline" size={16} color={colors.textSecondary} style={{ transform: [{ rotate: '135deg' }] }} />
+                  <Ionicons name="arrow-back-outline" size={16} color={isSelected ? colors.primary : colors.textSecondary} style={{ transform: [{ rotate: '135deg' }] }} />
                 </TouchableOpacity>
               </TouchableOpacity>
             );
