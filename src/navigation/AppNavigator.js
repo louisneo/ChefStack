@@ -142,53 +142,141 @@ function BottomTabNavigator() {
 function CustomDrawerContent(props) {
   const { colors } = useTheme();
   const { openAddRecipe } = useRecipes();
+  const { isCollapsed, toggleCollapsed } = props;
 
   return (
-    <DrawerContentScrollView {...props} style={{ backgroundColor: colors.surface }}>
-      <View style={{ padding: 20, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderLight, marginBottom: 12 }}>
-        <Image 
-          source={require('../../assets/chefstack_logo.png')} 
-          style={{ width: 48, height: 48, borderRadius: 12, marginBottom: 8 }} 
-        />
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text }}>ChefStack</Text>
-        <Text style={{ fontSize: 12, color: colors.textSecondary }}>Personal Recipe Manager</Text>
-      </View>
-
-      <DrawerItemList {...props} />
-
-      <TouchableOpacity
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: colors.primary,
-          marginHorizontal: 16,
-          marginVertical: 12,
-          paddingVertical: 12,
-          paddingHorizontal: 16,
-          borderRadius: 14,
-          gap: 12
-        }}
-        onPress={() => openAddRecipe()}
+    <View style={{ flex: 1, backgroundColor: colors.surface }}>
+      <DrawerContentScrollView 
+        {...props} 
+        contentContainerStyle={{ paddingTop: 0 }}
+        style={{ flex: 1 }}
       >
-        <Ionicons name="add-circle" size={24} color="#FFFFFF" />
-        <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 15 }}>New Recipe</Text>
-      </TouchableOpacity>
-    </DrawerContentScrollView>
+        {/* Header Branding + Collapse Toggle */}
+        <View style={{ 
+          padding: isCollapsed ? 12 : 20, 
+          flexDirection: 'row',
+          alignItems: 'center', 
+          justifyContent: isCollapsed ? 'center' : 'space-between',
+          borderBottomWidth: 1, 
+          borderBottomColor: colors.borderLight, 
+          marginBottom: 12 
+        }}>
+          {!isCollapsed && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Image 
+                source={require('../../assets/chefstack_logo.png')} 
+                style={{ width: 36, height: 36, borderRadius: 10 }} 
+              />
+              <View>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text }}>ChefStack</Text>
+                <Text style={{ fontSize: 11, color: colors.textSecondary }}>Recipe Manager</Text>
+              </View>
+            </View>
+          )}
+
+          <TouchableOpacity 
+            onPress={toggleCollapsed}
+            style={{ 
+              padding: 8, 
+              borderRadius: 8, 
+              backgroundColor: colors.borderLight + '40',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            accessibilityLabel="Toggle Sidebar"
+          >
+            <Ionicons 
+              name={isCollapsed ? "chevron-forward" : "chevron-back"} 
+              size={20} 
+              color={colors.text} 
+            />
+          </TouchableOpacity>
+        </View>
+
+        <DrawerItemList {...props} />
+      </DrawerContentScrollView>
+
+      {/* Bottom Section: Profile + New Recipe Button */}
+      <View style={{ 
+        padding: isCollapsed ? 10 : 16, 
+        borderTopWidth: 1, 
+        borderTopColor: colors.borderLight, 
+        backgroundColor: colors.surface,
+        gap: 10
+      }}>
+        {/* Profile Item */}
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: isCollapsed ? 'center' : 'flex-start',
+            paddingVertical: 10,
+            paddingHorizontal: isCollapsed ? 0 : 12,
+            borderRadius: 12,
+            backgroundColor: props.state.routes[props.state.index]?.name === 'Profile' ? colors.primary + '15' : 'transparent',
+            gap: 12
+          }}
+          onPress={() => props.navigation.navigate('Profile')}
+        >
+          <Ionicons 
+            name={props.state.routes[props.state.index]?.name === 'Profile' ? "person-circle" : "person-circle-outline"} 
+            size={24} 
+            color={props.state.routes[props.state.index]?.name === 'Profile' ? colors.primary : colors.textSecondary} 
+          />
+          {!isCollapsed && (
+            <Text style={{ 
+              fontSize: 15, 
+              fontWeight: '600', 
+              color: props.state.routes[props.state.index]?.name === 'Profile' ? colors.primary : colors.text 
+            }}>
+              Profile
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        {/* New Recipe Button */}
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: isCollapsed ? 'center' : 'center',
+            backgroundColor: colors.primary,
+            paddingVertical: 12,
+            paddingHorizontal: isCollapsed ? 0 : 16,
+            borderRadius: 14,
+            gap: isCollapsed ? 0 : 10
+          }}
+          onPress={() => openAddRecipe()}
+        >
+          <Ionicons name="add-circle" size={24} color="#FFFFFF" />
+          {!isCollapsed && (
+            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 15 }}>New Recipe</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 // Drawer Navigator for Desktop / Web / Windows screens
 function WebDrawerNavigator() {
   const { colors } = useTheme();
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
 
   return (
     <Drawer.Navigator
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      drawerContent={(props) => (
+        <CustomDrawerContent 
+          {...props} 
+          isCollapsed={isCollapsed} 
+          toggleCollapsed={() => setIsCollapsed(!isCollapsed)} 
+        />
+      )}
       screenOptions={{
         headerShown: false,
         drawerType: 'permanent',
         drawerStyle: {
-          width: 250,
+          width: isCollapsed ? 76 : 250,
           backgroundColor: colors.surface,
           borderRightColor: colors.borderLight,
           borderRightWidth: 1,
@@ -200,7 +288,11 @@ function WebDrawerNavigator() {
           fontSize: 15,
           fontWeight: '600',
           marginLeft: -10,
+          display: isCollapsed ? 'none' : 'flex',
         },
+        drawerItemStyle: {
+          justifyContent: isCollapsed ? 'center' : 'flex-start',
+        }
       }}
     >
       <Drawer.Screen 
@@ -226,14 +318,6 @@ function WebDrawerNavigator() {
         options={{
           drawerLabel: 'AI Chef',
           drawerIcon: ({ color }) => <Ionicons name="sparkles-outline" size={22} color={color} />
-        }}
-      />
-      <Drawer.Screen 
-        name="Profile" 
-        component={ProfileScreen} 
-        options={{
-          drawerLabel: 'Profile',
-          drawerIcon: ({ color }) => <Ionicons name="person-circle-outline" size={22} color={color} />
         }}
       />
     </Drawer.Navigator>
