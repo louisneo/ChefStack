@@ -38,11 +38,19 @@ export default function PrivacyScreen() {
     );
   };
 
+  const handleBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('MainTabs', { screen: 'Profile' });
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity 
-          onPress={() => navigation.goBack()} 
+          onPress={handleBack} 
           style={styles.headerBtn}
           accessibilityLabel="Go back"
           accessibilityRole="button"
