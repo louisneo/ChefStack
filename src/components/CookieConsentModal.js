@@ -53,6 +53,7 @@ export default function CookieConsentModal({ onNavigateToPolicy }) {
         entering={FadeInDown.duration(300)}
         exiting={FadeOutDown.duration(200)}
         style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
+        pointerEvents="auto"
       >
         <View style={styles.headerRow}>
           <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
@@ -97,18 +98,18 @@ export default function CookieConsentModal({ onNavigateToPolicy }) {
 const styles = StyleSheet.create({
   floatingContainer: {
     position: 'absolute',
-    bottom: 75,
-    left: 16,
+    bottom: 16,
     right: 16,
+    left: 16,
     zIndex: 9999,
-    alignItems: 'center',
+    alignItems: 'flex-end',
     pointerEvents: 'box-none',
   },
   card: {
     width: '100%',
-    maxWidth: 540,
-    borderRadius: 20,
-    padding: 20,
+    maxWidth: 420,
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1.5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
