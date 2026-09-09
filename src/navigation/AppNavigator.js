@@ -324,10 +324,10 @@ function WebDrawerNavigator() {
   );
 }
 
-// Responsive Main Navigator (Uses Drawer on Web/Desktop/Windows, Tabs on Mobile)
+// Responsive Main Navigator (Uses Drawer on Web/Desktop/Windows >= 768px, Tabs on Mobile < 768px)
 function ResponsiveMainNavigator(props) {
   const { width } = useWindowDimensions();
-  const isDesktop = Platform.OS === 'web' || width >= 768;
+  const isDesktop = width >= 768;
 
   if (isDesktop) {
     return <WebDrawerNavigator {...props} />;
