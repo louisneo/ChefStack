@@ -15,6 +15,8 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true;
 
+    const startTime = Date.now();
+
     const initializeAuth = async () => {
       try {
         const getSessionPromise = supabase.auth.getSession().catch(() => null);
@@ -41,7 +43,11 @@ export function AuthProvider({ children }) {
           setUser(JSON.parse(cachedOfflineUser));
         }
       } finally {
-        if (mounted) setLoading(false);
+        const elapsed = Date.now() - startTime;
+        const remainingDelay = Math.max(0, 1800 - elapsed);
+        setTimeout(() => {
+          if (mounted) setLoading(false);
+        }, remainingDelay);
       }
     };
 
@@ -49,7 +55,7 @@ export function AuthProvider({ children }) {
 
     const timer = setTimeout(() => {
       if (mounted) setLoading(false);
-    }, 1500);
+    }, 2000);
 
     let subscription;
     try {
