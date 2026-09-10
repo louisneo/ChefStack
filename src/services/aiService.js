@@ -13,14 +13,33 @@ const DEFAULT_GEMINI_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'AIzaSyBmOS
 
 // Smart Dynamic Culinary Recipe Generator Fallback (Returns authentic, accurate recipes per food category)
 export const generateSmartRecipes = (query) => {
-  const q = (query || 'Delight').trim();
+  const q = (query || '').trim();
+  if (!q) return [];
   const lowerQ = q.toLowerCase();
 
-  // Validate non-food / random gibberish input (e.g. "asasdasdd", "asdfg", "qwerty", "zxcvbn")
-  const isGibberish = /^[a-z]{5,}$/i.test(lowerQ) && 
-    (lowerQ.includes('asdasd') || lowerQ.includes('asdf') || lowerQ.includes('qwerty') || lowerQ.includes('zxcv') || lowerQ.includes('hjkl') || !/[aeiou]{1,}/i.test(lowerQ));
+  // Known culinary keywords for fallback generator matching
+  const culinaryTerms = [
+    'adobo', 'sinigang', 'sisig', 'kinilaw', 'pansit', 'pancit', 'menudo', 'caldereta', 'bistek', 'talong',
+    'sardine', 'sardinas', 'tofu', 'tokwa', 'siomai', 'inasal', 'kare', 'bulalo', 'bicol', 'pinakbet', 'laing',
+    'dinuguan', 'lechon', 'kawali', 'pata', 'pares', 'tinola', 'pochero', 'embutido', 'mechado', 'afritada',
+    'hamonado', 'liempo', 'lumpia', 'carbonara', 'spaghetti', 'lasagna', 'alfredo', 'pizza', 'burger',
+    'pesto', 'teriyaki', 'gyudon', 'ramen', 'pad thai', 'tom yum', 'sushi', 'taco', 'quesadilla', 'shawarma',
+    'salad', 'tapsilog', 'tocilog', 'longsilog', 'corned beef', 'pancake', 'toast', 'waffle', 'egg', 'avocado',
+    'champorado', 'arroz caldo', 'goto', 'lugaw', 'halo-halo', 'leche flan', 'graham', 'ube', 'biko', 'turon',
+    'cake', 'brownie', 'cheesecake', 'cookie', 'pie', 'ice cream', 'churro', 'matcha', 'latte', 'macchiato',
+    'coffee', 'smoothie', 'shake', 'milkshake', 'boba', 'calamansi', 'buko', 'lemonade', 'beef', 'chicken',
+    'pork', 'fish', 'tuna', 'shrimp', 'squid', 'crab', 'eggplant', 'tofu', 'meatloaf', 'spam', 'sausage',
+    'hotdog', 'rice', 'noodle', 'pasta', 'soup', 'stew', 'curry', 'fry', 'roast', 'grill', 'bake', 'oat',
+    'mango', 'banana', 'strawberry', 'chocolate', 'vanilla', 'tea', 'juice', 'drink', 'beverage', 'snack',
+    'breakfast', 'dessert', 'appetizer', 'ulam', 'meryenda', 'adidas', 'isaw', 'kangkong', 'spinach', 'broccoli',
+    'mushroom', 'cabbage', 'carrot', 'corn', 'potato', 'squash', 'bean'
+  ];
 
-  if (isGibberish) {
+  // Check if lowerQ matches or contains any known culinary term or food suggestion item
+  const isKnownFood = culinaryTerms.some(term => lowerQ.includes(term)) || 
+    FOOD_SUGGESTIONS.some(fs => fs.toLowerCase().includes(lowerQ) || lowerQ.includes(fs.toLowerCase()));
+
+  if (!isKnownFood) {
     return [];
   }
 
