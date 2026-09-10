@@ -114,6 +114,7 @@ export default function AISearchScreen({ navigation }) {
           setResults(localMatches);
           setSearchError(null);
         } else {
+          setResults([]);
           setSearchError(`No authentic food recipes found for "${searchQuery}". Please try searching for a real dish or ingredient.`);
         }
       }
@@ -125,7 +126,8 @@ export default function AISearchScreen({ navigation }) {
         setSearchError(null);
         toastRef.current?.show('Displaying authentic offline AI recipes', 'info');
       } else {
-        setSearchError("Unable to complete AI search. Please try another query.");
+        setResults([]);
+        setSearchError(`No authentic food recipes found for "${searchQuery}". Please try searching for a real dish or ingredient.`);
       }
     } finally {
       setLoading(false);
