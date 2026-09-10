@@ -14,8 +14,17 @@ const DEFAULT_GEMINI_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'AIzaSyBmOS
 // Smart Dynamic Culinary Recipe Generator Fallback (Returns authentic, accurate recipes per food category)
 export const generateSmartRecipes = (query) => {
   const q = (query || 'Delight').trim();
-  const titleQuery = q.charAt(0).toUpperCase() + q.slice(1);
   const lowerQ = q.toLowerCase();
+
+  // Validate non-food / random gibberish input (e.g. "asasdasdd", "asdfg", "qwerty", "zxcvbn")
+  const isGibberish = /^[a-z]{5,}$/i.test(lowerQ) && 
+    (lowerQ.includes('asdasd') || lowerQ.includes('asdf') || lowerQ.includes('qwerty') || lowerQ.includes('zxcv') || lowerQ.includes('hjkl') || !/[aeiou]{1,}/i.test(lowerQ));
+
+  if (isGibberish) {
+    return [];
+  }
+
+  const titleQuery = q.charAt(0).toUpperCase() + q.slice(1);
 
   // 0. MANGO GRAHAM FLOAT & MANGO DESSERTS
   if (lowerQ.includes('mango graham') || lowerQ.includes('graham float') || lowerQ.includes('graham')) {

@@ -65,8 +65,8 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
       } else {
         setTitle('');
         setCategory('Ulam');
-        setTime('30');
-        setServings('4');
+        setTime('');
+        setServings('');
         setIngredients([]);
         setSteps([]);
         setImage(null);
