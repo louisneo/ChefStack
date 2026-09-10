@@ -490,6 +490,8 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
     alignItems: 'center',
+    zIndex: 1000,
+    overflow: 'visible',
   },
   searchContainer: {
     width: '100%',

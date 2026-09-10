@@ -191,7 +191,7 @@ export default function SearchInputWithSuggestions({
           style={[
             styles.dropdown,
             {
-              backgroundColor: colors.surface,
+              backgroundColor: isDark ? '#1E1E22' : '#FFFFFF',
               borderColor: colors.primary,
               shadowColor: '#000',
             },
