@@ -9,7 +9,8 @@ import {
   Modal,
   Platform,
   BackHandler,
-  ActivityIndicator
+  ActivityIndicator,
+  useWindowDimensions
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,9 @@ import { standardizeCategory } from '../lib/categories';
 
 export default function RecipeDetail({ recipe, visible, onClose }) {
   const { colors } = useTheme();
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+
   const [imgError, setImgError] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [subModalVisible, setSubModalVisible] = useState(false);
@@ -178,19 +182,19 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
               </View>
             </View>
 
-            {/* Detailed Body Content (2-Column Grid layout for PC / Web) */}
-            <View style={styles.twoColumnBody}>
+            {/* Detailed Body Content (Responsive layout: 2-column grid on desktop, single-column stack on mobile) */}
+            <View style={[styles.twoColumnBody, { flexDirection: isDesktop ? 'row' : 'column', padding: isDesktop ? 24 : 16 }]}>
               {/* Column 1: Ingredients */}
               <View style={[styles.column, styles.section]}>
                 <View style={styles.sectionHeader}>
                   <Ionicons name="list" size={20} color={colors.primary} />
                   <Text style={[styles.sectionTitle, { color: colors.text }]}>Ingredients</Text>
-                  <Text style={{ fontSize: 12, color: colors.textMuted, marginLeft: 'auto' }}>Tap item for substitute</Text>
+                  <Text style={{ fontSize: 11, color: colors.textMuted, marginLeft: 'auto' }}>Tap for substitute</Text>
                 </View>
                 {recipe.ingredients && recipe.ingredients.map((item, index) => (
                   <TouchableOpacity 
                     key={index} 
-                    style={[styles.listItem, { backgroundColor: colors.surface, padding: 12, borderRadius: 12, marginBottom: 8, borderWidth: 1, borderColor: colors.borderLight }]}
+                    style={[styles.listItem, { backgroundColor: colors.surface, padding: 14, borderRadius: 14, marginBottom: 10, borderWidth: 1, borderColor: colors.borderLight }]}
                     onPress={() => handleFindSubstitute(item)}
                   >
                     <View style={[styles.bullet, { backgroundColor: colors.primary }]} />
@@ -213,7 +217,7 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
                   )}
                 </View>
                 {recipe.steps && recipe.steps.map((step, index) => (
-                  <View key={index} style={[styles.stepItem, { backgroundColor: colors.surface, padding: 14, borderRadius: 12, marginBottom: 10, borderWidth: 1, borderColor: colors.borderLight }]}>
+                  <View key={index} style={[styles.stepItem, { backgroundColor: colors.surface, padding: 14, borderRadius: 14, marginBottom: 10, borderWidth: 1, borderColor: colors.borderLight }]}>
                     <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
                       <Text style={[styles.stepNumberText, { color: colors.surface }]}>{index + 1}</Text>
                     </View>
@@ -303,9 +307,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: Platform.OS === 'web' ? 12 : 50,
+    paddingBottom: 12,
     borderBottomWidth: 1,
-    height: 60,
+    height: Platform.OS === 'web' ? 60 : 90,
   },
   headerBtn: {
     padding: 8,
