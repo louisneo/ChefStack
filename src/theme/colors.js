@@ -25,15 +25,15 @@ export const themeColors = {
     ...shared,
     primary: '#10B981', // Vibrant Emerald
     primaryHover: '#059669',
-    primaryLight: 'rgba(16, 185, 129, 0.15)',
-    background: '#0F172A', // Tarsi Slate 900 dark background
-    surface: '#1E293B', // Tarsi Slate 800 surface panels
-    text: '#F8FAFC', // Crisp white text
-    textSecondary: '#94A3B8', // Slate-400
-    textMuted: '#64748B', // Slate-500
-    border: '#334155', // Slate-700
-    borderLight: '#1E293B',
-    card: '#1E293B',
+    primaryLight: 'rgba(16, 185, 129, 0.18)',
+    background: '#121214', // Deep obsidian charcoal black
+    surface: '#1C1C1E', // Sleek dark zinc surface panels
+    text: '#F4F4F5', // Crisp bright text
+    textSecondary: '#A1A1AA', // Zinc secondary text
+    textMuted: '#71717A', // Zinc muted text
+    border: '#27272A', // Dark zinc border
+    borderLight: '#202023',
+    card: '#1C1C1E',
   }
 };
 

@@ -27,7 +27,7 @@
       "description": "Your ultimate culinary companion.",
       "display": "standalone",
       "themeColor": "#2D6A4F",
-      "backgroundColor": "#0F172A",
+      "backgroundColor": "#121214",
       "bundler": "metro"
     },
     "plugins": [
@@ -40,7 +40,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#2D6A4F",
           "dark": {
-            "backgroundColor": "#0F172A"
+            "backgroundColor": "#121214"
           }
         }
       ]
