@@ -225,13 +225,6 @@ export default function DashboardScreen({ navigation, route }) {
               </View>
               <Text style={[styles.emptyTitle, { color: colors.text }]}>No Recipes Yet</Text>
               <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>Start building your recipe collection!</Text>
-              <TouchableOpacity 
-                style={[styles.emptyBtn, { backgroundColor: colors.primary }]} 
-                onPress={() => openAddRecipe()}
-              >
-                <Ionicons name="add" size={20} color="white" />
-                <Text style={styles.emptyBtnText}>Add Your First Recipe</Text>
-              </TouchableOpacity>
             </Animated.View>
           }
           renderItem={({ item }) => {

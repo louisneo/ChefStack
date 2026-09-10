@@ -40,6 +40,7 @@ export default function AISearchScreen({ navigation }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [importing, setImporting] = useState(null);
+  const [previewRecipe, setPreviewRecipe] = useState(null);
 
   const toastRef = useRef(null);
 
@@ -318,20 +319,30 @@ export default function AISearchScreen({ navigation }) {
                 {recipe.ingredients.join(', ')}
               </Text>
 
-              <TouchableOpacity 
-                style={[styles.importBtn, { backgroundColor: colors.text }]} 
-                onPress={() => handleImport(recipe, index)}
-                disabled={importing === index}
-              >
-                {importing === index ? (
-                  <ActivityIndicator color={colors.background} size="small" />
-                ) : (
-                  <>
-                    <Ionicons name="download-outline" size={20} color={colors.background} />
-                    <Text style={[styles.importBtnText, { color: colors.background }]}>Import to Dashboard</Text>
-                  </>
-                )}
-              </TouchableOpacity>
+              <View style={styles.cardBtnRow}>
+                <TouchableOpacity 
+                  style={[styles.previewBtn, { backgroundColor: colors.background, borderColor: colors.borderLight }]} 
+                  onPress={() => setPreviewRecipe(recipe)}
+                >
+                  <Ionicons name="eye-outline" size={18} color={colors.text} />
+                  <Text style={[styles.previewBtnText, { color: colors.text }]}>Preview</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.importBtn, { backgroundColor: colors.primary }]} 
+                  onPress={() => handleImport(recipe, index)}
+                  disabled={importing === index}
+                >
+                  {importing === index ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <>
+                      <Ionicons name="download-outline" size={18} color="#FFFFFF" />
+                      <Text style={[styles.importBtnText, { color: '#FFFFFF' }]}>Import</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
             </Animated.View>
           ))}
 
@@ -362,6 +373,66 @@ export default function AISearchScreen({ navigation }) {
 
           <View style={{ height: 40 }} />
         </ScrollView>
+
+        {/* Recipe Preview Modal */}
+        {previewRecipe && (
+          <Modal visible={!!previewRecipe} animationType="slide" transparent={true} onRequestClose={() => setPreviewRecipe(null)}>
+            <View style={styles.previewModalOverlay}>
+              <View style={[styles.previewModalContent, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <View style={[styles.previewModalHeader, { borderBottomColor: colors.borderLight }]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.previewBadgeText, { color: colors.primary }]}>
+                      {standardizeCategory(previewRecipe.category, previewRecipe.title)} • {previewRecipe.time} MINS
+                    </Text>
+                    <Text style={[styles.previewModalTitle, { color: colors.text }]}>{previewRecipe.title}</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => setPreviewRecipe(null)} style={{ padding: 6 }}>
+                    <Ionicons name="close" size={24} color={colors.text} />
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView style={{ maxHeight: 420 }} showsVerticalScrollIndicator={false}>
+                  <Text style={[styles.modalSectionLabel, { color: colors.primary }]}>INGREDIENTS</Text>
+                  {previewRecipe.ingredients.map((ing, i) => (
+                    <View key={i} style={styles.modalItemRow}>
+                      <Ionicons name="checkmark-circle" size={16} color={colors.primary} />
+                      <Text style={[styles.modalItemText, { color: colors.text }]}>{ing}</Text>
+                    </View>
+                  ))}
+
+                  <Text style={[styles.modalSectionLabel, { color: colors.primary, marginTop: 16 }]}>COOKING INSTRUCTIONS</Text>
+                  {(previewRecipe.steps || previewRecipe.instructions || []).map((step, i) => (
+                    <View key={i} style={styles.modalItemRow}>
+                      <Text style={[styles.stepNum, { color: colors.primary }]}>{i + 1}.</Text>
+                      <Text style={[styles.modalItemText, { color: colors.text, flex: 1 }]}>{step}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+
+                <View style={[styles.previewModalActions, { borderTopColor: colors.borderLight }]}>
+                  <TouchableOpacity 
+                    style={[styles.modalCloseBtn, { borderColor: colors.borderLight }]} 
+                    onPress={() => setPreviewRecipe(null)}
+                  >
+                    <Text style={[styles.modalCloseBtnText, { color: colors.text }]}>Close</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={[styles.modalImportBtn, { backgroundColor: colors.primary }]} 
+                    onPress={() => {
+                      const r = previewRecipe;
+                      setPreviewRecipe(null);
+                      handleImport(r, 0);
+                    }}
+                  >
+                    <Ionicons name="download-outline" size={18} color="#FFFFFF" />
+                    <Text style={styles.modalImportBtnText}>Import Recipe</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        )}
 
         <Toast ref={toastRef} />
 
@@ -408,9 +479,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   searchSection: {
-    padding: 20,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
@@ -425,10 +498,11 @@ const styles = StyleSheet.create({
   disclaimerBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
-    marginBottom: 14,
+    marginBottom: 12,
     gap: 8,
   },
   disclaimerText: {
@@ -486,8 +560,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   searchBtn: {
-    height: 56,
-    borderRadius: 16,
+    height: 48,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     shadowOffset: { width: 0, height: 4 },
@@ -496,16 +570,16 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   searchBtnText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
   },
   chipWrapper: {
-    marginTop: 16,
+    marginTop: 12,
   },
   chipSectionTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 6,
     textTransform: 'uppercase',
   },
   chipRow: {
@@ -513,7 +587,7 @@ const styles = StyleSheet.create({
   },
   suggestionChip: {
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 1,
   },
@@ -528,31 +602,31 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 64,
+    marginTop: 40,
   },
   aiIconWave: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center',
     paddingHorizontal: 40,
-    lineHeight: 24,
+    lineHeight: 22,
   },
   recipeCard: {
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 16,
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -564,7 +638,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   typeBadge: {
     paddingHorizontal: 10,
@@ -586,31 +660,137 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   recipeTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   sectionLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
     marginBottom: 4,
     textTransform: 'uppercase',
   },
   previewText: {
     fontSize: 14,
-    marginBottom: 20,
+    marginBottom: 16,
     lineHeight: 20,
   },
-  importBtn: {
+  cardBtnRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  previewBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    height: 44,
     borderRadius: 12,
-    gap: 8,
+    borderWidth: 1,
+    gap: 6,
+  },
+  previewBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  importBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 44,
+    borderRadius: 12,
+    gap: 6,
   },
   importBtnText: {
-    fontSize: 15,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  previewModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  previewModalContent: {
+    width: '100%',
+    maxWidth: 550,
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+  },
+  previewModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    marginBottom: 16,
+  },
+  previewBadgeText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    letterSpacing: 0.8,
+    marginBottom: 4,
+  },
+  previewModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  modalSectionLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 0.8,
+    marginBottom: 10,
+  },
+  modalItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  modalItemText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  stepNum: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    width: 20,
+  },
+  previewModalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    marginTop: 16,
+  },
+  modalCloseBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCloseBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  modalImportBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+  },
+  modalImportBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: 'bold',
   },
   errorCard: {

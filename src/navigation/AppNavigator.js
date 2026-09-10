@@ -52,15 +52,15 @@ function BottomTabNavigator() {
           marginBottom: Platform.OS === 'web' ? 4 : 2,
         },
         tabBarStyle: {
-          height: Platform.OS === 'web' ? 60 : 85,
-          paddingTop: 8,
-          paddingBottom: Platform.OS === 'web' ? 8 : 28,
+          height: Platform.OS === 'web' ? 64 : 88,
+          paddingTop: 10,
+          paddingBottom: Platform.OS === 'web' ? 10 : 28,
           backgroundColor: colors.surface,
           borderTopWidth: 1,
           borderTopColor: colors.borderLight,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.06,
+          shadowOpacity: 0.08,
           shadowRadius: 8,
           elevation: 10,
         },
@@ -104,7 +104,8 @@ function BottomTabNavigator() {
                 {...restProps}
                 onPress={() => openAddRecipe()}
                 style={styles.addButtonContainer}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
+                hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
               >
                 <View style={[
                   styles.addButton, 
@@ -112,12 +113,12 @@ function BottomTabNavigator() {
                     backgroundColor: colors.primary,
                     shadowColor: colors.primary,
                     shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.35,
+                    shadowOpacity: 0.4,
                     shadowRadius: 8,
-                    elevation: 8,
+                    elevation: 10,
                   }
                 ]}>
-                  <Ionicons name="add" size={32} color={colors.surface} />
+                  <Ionicons name="add" size={32} color="#FFFFFF" />
                 </View>
               </TouchableOpacity>
             );
@@ -436,15 +437,16 @@ function RecipeConsumer() {
 
 const styles = StyleSheet.create({
   addButtonContainer: {
-    top: Platform.OS === 'web' ? -10 : -15,
+    top: Platform.OS === 'web' ? -18 : -22,
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
+    zIndex: 99,
   },
   addButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
   },
