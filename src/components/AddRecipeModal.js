@@ -350,16 +350,6 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
             <View style={[styles.cardGroup, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
               <View style={styles.sectionHeaderRow}>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>Steps</Text>
-                
-                <View style={styles.aiToggleContainer}>
-                  <Text style={[styles.aiToggleText, { color: colors.textSecondary }]}>AI Step Draft</Text>
-                  <Switch
-                    value={aiDraftEnabled}
-                    onValueChange={setAiDraftEnabled}
-                    trackColor={{ false: '#767577', true: colors.primary }}
-                    thumbColor={Platform.OS === 'ios' ? '#fff' : aiDraftEnabled ? colors.surface : '#f4f3f4'}
-                  />
-                </View>
               </View>
 
               {/* Step Input */}
@@ -385,7 +375,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
                 </TouchableOpacity>
               </View>
 
-              {/* Steps List with drag/reorder handles */}
+              {/* Steps List */}
               {steps.length > 0 && (
                 <View style={styles.stepsListContainer}>
                   {steps.map((step, i) => (
@@ -393,12 +383,9 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
                       <Text style={[styles.stepIndexText, { color: colors.text }]}>{i + 1}.</Text>
                       <Text style={[styles.stepContentText, { color: colors.text }]}>{step}</Text>
                       
-                      <View style={styles.stepRightActions}>
-                        <TouchableOpacity onPress={() => removeStep(i)} style={{ padding: 4 }}>
-                          <Ionicons name="trash-outline" size={18} color={colors.error} />
-                        </TouchableOpacity>
-                        <Ionicons name="ellipsis-vertical" size={18} color={colors.textMuted} style={{ marginLeft: 4 }} />
-                      </View>
+                      <TouchableOpacity onPress={() => removeStep(i)} style={{ padding: 4 }}>
+                        <Ionicons name="trash-outline" size={18} color={colors.error} />
+                      </TouchableOpacity>
                     </View>
                   ))}
                 </View>
