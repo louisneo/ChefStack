@@ -1,11 +1,11 @@
-const CACHE_NAME = 'chefstack-v27-b';
+const CACHE_NAME = 'chefstack-v29';
 
 const STATIC_SHELL = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/pwa-icon.png?v=28',
-  '/favicon.ico?v=28'
+  '/pwa-icon.png?v=29',
+  '/favicon.ico?v=29'
 ];
 
 // Install event - Pre-cache the app shell and skip waiting
