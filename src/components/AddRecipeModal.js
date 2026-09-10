@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    height: 48,
     fontSize: 15,
   },
   errorText: {
@@ -623,13 +623,16 @@ const styles = StyleSheet.create({
   },
   addInputRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
     marginBottom: 12,
+    width: '100%',
   },
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 18,
+    height: 48,
     borderRadius: 14,
     gap: 6,
     justifyContent: 'center',
