@@ -1,11 +1,11 @@
 const shared = {
-  primary: '#10B981', // Clean Emerald Green (Tarsi style)
-  primaryHover: '#059669',
-  primaryLight: 'rgba(16, 185, 129, 0.12)',
-  primaryActive: '#047857',
+  primary: '#059669', // Deep Muted Emerald Green (easy on eyes)
+  primaryHover: '#047857',
+  primaryLight: 'rgba(5, 150, 105, 0.15)',
+  primaryActive: '#065F46',
   error: '#EF4444',
   errorBackground: '#FEE2E2',
-  success: '#10B981',
+  success: '#059669',
   accent: '#F59E0B', // Warm Amber
 };
 
@@ -23,9 +23,9 @@ export const themeColors = {
   },
   dark: {
     ...shared,
-    primary: '#10B981', // Vibrant Emerald
-    primaryHover: '#059669',
-    primaryLight: 'rgba(16, 185, 129, 0.18)',
+    primary: '#059669', // Deep Muted Emerald
+    primaryHover: '#047857',
+    primaryLight: 'rgba(5, 150, 105, 0.18)',
     background: '#121214', // Deep obsidian charcoal black
     surface: '#1C1C1E', // Sleek dark zinc surface panels
     text: '#F4F4F5', // Crisp bright text
