@@ -274,6 +274,7 @@ export default function RecipeDetail({ recipe, visible, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },

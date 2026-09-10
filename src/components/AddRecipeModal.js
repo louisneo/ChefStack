@@ -139,10 +139,11 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <KeyboardAvoidingView 
-        style={[styles.container, { backgroundColor: colors.background }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : null}
-      >
+      <View style={{ flex: 1, width: '100%', backgroundColor: colors.background }}>
+        <KeyboardAvoidingView 
+          style={[styles.container, { backgroundColor: colors.background }]}
+          behavior={Platform.OS === 'ios' ? 'padding' : null}
+        >
         {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
           <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
@@ -352,6 +353,7 @@ export default function AddRecipeModal({ visible, onClose, onSave, editingRecipe
           </View>
         </TouchableOpacity>
       )}
+      </View>
     </Modal>
   );
 }
