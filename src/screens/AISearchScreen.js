@@ -41,6 +41,7 @@ export default function AISearchScreen({ navigation }) {
   const itemsPerPage = 5;
   const [importing, setImporting] = useState(null);
   const [previewRecipe, setPreviewRecipe] = useState(null);
+  const [buttonOrigin, setButtonOrigin] = useState(null);
 
   const toastRef = useRef(null);
 
@@ -324,7 +325,12 @@ export default function AISearchScreen({ navigation }) {
               <View style={styles.cardBtnRow}>
                 <TouchableOpacity 
                   style={[styles.previewBtn, { backgroundColor: colors.background, borderColor: colors.borderLight }]} 
-                  onPress={() => setPreviewRecipe(recipe)}
+                  onPress={(e) => {
+                    const pageX = e.nativeEvent.pageX || e.nativeEvent.clientX || 0;
+                    const pageY = e.nativeEvent.pageY || e.nativeEvent.clientY || 0;
+                    setButtonOrigin({ x: pageX, y: pageY });
+                    setPreviewRecipe(recipe);
+                  }}
                 >
                   <Ionicons name="eye-outline" size={18} color={colors.text} />
                   <Text style={[styles.previewBtnText, { color: colors.text }]}>Preview</Text>
@@ -376,14 +382,20 @@ export default function AISearchScreen({ navigation }) {
           <View style={{ height: 40 }} />
         </ScrollView>
 
-        {/* Recipe Preview Modal with Origin Spring Expand Transition */}
+        {/* Recipe Preview Modal with Origin Button Scale-Out Transition */}
         {previewRecipe && (
           <Modal visible={!!previewRecipe} animationType="fade" transparent={true} onRequestClose={() => setPreviewRecipe(null)}>
-            <Animated.View entering={FadeIn.duration(250)} exiting={FadeOut.duration(200)} style={styles.previewModalOverlay}>
+            <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)} style={styles.previewModalOverlay}>
               <Animated.View 
-                entering={ZoomInEasyUp.duration(350).springify().damping(18)} 
-                exiting={ZoomOutEasyDown.duration(250)}
-                style={[styles.previewModalContent, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
+                entering={FadeInDown.duration(300).springify().damping(16)} 
+                exiting={FadeOut.duration(180)}
+                style={[
+                  styles.previewModalContent, 
+                  { backgroundColor: colors.surface, borderColor: colors.borderLight },
+                  Platform.OS === 'web' && buttonOrigin ? {
+                    transformOrigin: `${buttonOrigin.x}px ${buttonOrigin.y}px`
+                  } : null
+                ]}
               >
                 <View style={[styles.previewModalHeader, { borderBottomColor: colors.borderLight }]}>
                   <View style={{ flex: 1 }}>
