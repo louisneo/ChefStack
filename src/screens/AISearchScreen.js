@@ -22,7 +22,7 @@ import Toast from '../components/Toast';
 import AISearchCardSkeleton from '../components/AISearchCardSkeleton';
 import SearchInputWithSuggestions from '../components/SearchInputWithSuggestions';
 import { standardizeCategory } from '../lib/categories';
-import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeOut, ZoomInEasyUp, ZoomOutEasyDown } from 'react-native-reanimated';
 
 export default function AISearchScreen({ navigation }) {
   const { colors, isDark } = useTheme();
@@ -376,11 +376,15 @@ export default function AISearchScreen({ navigation }) {
           <View style={{ height: 40 }} />
         </ScrollView>
 
-        {/* Recipe Preview Modal */}
+        {/* Recipe Preview Modal with Origin Spring Expand Transition */}
         {previewRecipe && (
-          <Modal visible={!!previewRecipe} animationType="slide" transparent={true} onRequestClose={() => setPreviewRecipe(null)}>
-            <View style={styles.previewModalOverlay}>
-              <View style={[styles.previewModalContent, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+          <Modal visible={!!previewRecipe} animationType="fade" transparent={true} onRequestClose={() => setPreviewRecipe(null)}>
+            <Animated.View entering={FadeIn.duration(250)} exiting={FadeOut.duration(200)} style={styles.previewModalOverlay}>
+              <Animated.View 
+                entering={ZoomInEasyUp.duration(350).springify().damping(18)} 
+                exiting={ZoomOutEasyDown.duration(250)}
+                style={[styles.previewModalContent, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
+              >
                 <View style={[styles.previewModalHeader, { borderBottomColor: colors.borderLight }]}>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.previewBadgeText, { color: colors.primary }]}>
@@ -431,8 +435,8 @@ export default function AISearchScreen({ navigation }) {
                     <Text style={styles.modalImportBtnText}>Import Recipe</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
-            </View>
+              </Animated.View>
+            </Animated.View>
           </Modal>
         )}
 
