@@ -49,7 +49,7 @@ export default function ProfileScreen() {
       <View style={styles.webWrapper}>
         {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.background }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
+          <TouchableOpacity onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')} style={styles.headerBtn}>
             <Ionicons name="arrow-back" size={28} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.titleContainer}>

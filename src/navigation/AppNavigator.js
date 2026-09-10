@@ -320,6 +320,14 @@ function WebDrawerNavigator() {
           drawerIcon: ({ color }) => <Ionicons name="sparkles-outline" size={22} color={color} />
         }}
       />
+      <Drawer.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{
+          drawerLabel: 'Profile',
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
     </Drawer.Navigator>
   );
 }
