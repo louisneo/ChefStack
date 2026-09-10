@@ -24,7 +24,7 @@ export default function SearchInputWithSuggestions({
   inputStyle,
   maxSuggestions = 6
 }) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
