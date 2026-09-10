@@ -3,13 +3,13 @@
   "name": "ChefStack - Personal Culinary Companion",
   "icons": [
     {
-      "src": "/pwa-icon.png",
+      "src": "/pwa-icon.png?v=26",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/pwa-icon.png",
+      "src": "/pwa-icon.png?v=26",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
