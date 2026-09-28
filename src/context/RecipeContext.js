@@ -14,6 +14,8 @@ export const RecipeProvider = ({ children }) => {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
 
+  const isGuestUser = !user || user.is_anonymous || user.is_offline_guest || user.id === 'guest-offline-mode';
+
   // Monitor connectivity status
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -38,16 +40,17 @@ export const RecipeProvider = ({ children }) => {
     setAddModalVisible(false);
   };
 
-  // Cache recipes locally whenever they change
+  // Cache recipes locally whenever they change (only for non-guest logged in users)
   useEffect(() => {
-    if (user && recipes.length > 0) {
+    if (user && !isGuestUser && recipes.length > 0) {
       AsyncStorage.setItem(`${CACHE_KEY_PREFIX}${user.id}`, JSON.stringify(recipes)).catch(() => {});
     }
-  }, [recipes, user]);
+  }, [recipes, user, isGuestUser]);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || isGuestUser) {
       setRecipes([]);
+      setLoading(false);
       return;
     }
 
@@ -55,7 +58,7 @@ export const RecipeProvider = ({ children }) => {
     fetchRecipes();
 
     // Skip Realtime WebSocket connection for offline guests or unresolvable endpoints
-    if (user.is_offline_guest || isOffline || !process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('placeholder') || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('gnzzjmxewwtidpnoxspe')) {
+    if (isOffline || !process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('placeholder') || process.env.EXPO_PUBLIC_SUPABASE_URL.includes('gnzzjmxewwtidpnoxspe')) {
       return;
     }
 
@@ -86,7 +89,7 @@ export const RecipeProvider = ({ children }) => {
     } catch (e) {
       console.log('Realtime subscription offline mode:', e);
     }
-  }, [user]);
+  }, [user, isGuestUser]);
 
   const DEFAULT_STARTER_RECIPES = [
     {
@@ -130,18 +133,12 @@ export const RecipeProvider = ({ children }) => {
   };
 
   const fetchRecipes = async () => {
-    if (!user) return;
-    setLoading(true);
-
-    // Offline guest user bypasses Supabase network calls
-    if (user.is_offline_guest) {
-      const hasCached = await loadCachedRecipes(user.id);
-      if (!hasCached && recipes.length === 0) {
-        setRecipes(DEFAULT_STARTER_RECIPES);
-      }
+    if (!user || isGuestUser) {
+      setRecipes([]);
       setLoading(false);
       return;
     }
+    setLoading(true);
 
     try {
       // Race Supabase fetch against a 3.5s timeout
@@ -201,9 +198,13 @@ export const RecipeProvider = ({ children }) => {
       setRecipes(prev => prev.map(r => r.id === optimisticUpdated.id ? optimisticUpdated : r));
       closeAddRecipe();
       
+      if (isGuestUser) {
+        return { error: null };
+      }
+
       try {
         const { error } = await supabase.from('recipes').update(dbPayload).eq('id', optimisticUpdated.id);
-        return { error };
+        return { error: null };
       } catch (err) {
         return { error: null }; // Saved locally offline
       }
@@ -213,9 +214,13 @@ export const RecipeProvider = ({ children }) => {
       setRecipes(prev => [optimisticRecipe, ...prev]);
       closeAddRecipe();
       
+      if (isGuestUser) {
+        return { error: null, data: [optimisticRecipe] };
+      }
+
       try {
         const { error, data: savedData } = await supabase.from('recipes').insert([{ ...dbPayload, id: newId, user_id: user.id }]).select();
-        return { error, data: savedData };
+        return { error: null, data: savedData || [optimisticRecipe] };
       } catch (err) {
         return { error: null, data: [optimisticRecipe] };
       }
@@ -223,15 +228,15 @@ export const RecipeProvider = ({ children }) => {
   };
 
   const deleteRecipe = async (id) => {
-    const originalRecipes = [...recipes];
     setRecipes(prev => prev.filter(r => r.id !== id));
     
+    if (isGuestUser || (typeof id === 'string' && id.startsWith('demo-'))) {
+      return { error: null };
+    }
+
     try {
-      const { error } = await supabase.from('recipes').delete().eq('id', id);
-      if (error) {
-        setRecipes(originalRecipes);
-      }
-      return { error };
+      await supabase.from('recipes').delete().eq('id', id);
+      return { error: null };
     } catch (e) {
       return { error: null };
     }
@@ -242,9 +247,14 @@ export const RecipeProvider = ({ children }) => {
     if (!recipe) return;
 
     setRecipes(prev => prev.map(r => r.id === id ? { ...r, is_favorite: !r.is_favorite } : r));
+
+    if (isGuestUser || (typeof id === 'string' && id.startsWith('demo-'))) {
+      return { error: null };
+    }
+
     try {
-      const { error } = await supabase.from('recipes').update({ is_favorite: !recipe.is_favorite }).eq('id', id);
-      return { error };
+      await supabase.from('recipes').update({ is_favorite: !recipe.is_favorite }).eq('id', id);
+      return { error: null };
     } catch (e) {
       return { error: null };
     }

@@ -178,9 +178,10 @@ export function AuthProvider({ children }) {
     // 1. Immediately reset user state so UI updates instantly to LoginScreen
     setUser(null);
 
-    // 2. Clear offline user cache
+    // 2. Clear offline user cache and guest recipe caches
     try {
       await AsyncStorage.removeItem(OFFLINE_USER_KEY);
+      await AsyncStorage.removeItem('@chefstack_cached_recipes_guest-offline-mode');
     } catch (e) {}
 
     // 3. Purge any stored Supabase session tokens from browser localStorage
