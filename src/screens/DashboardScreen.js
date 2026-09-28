@@ -49,6 +49,9 @@ export default function DashboardScreen({ navigation, route }) {
   const [sortBy, setSortBy] = useState('newest');
   const [sortDropdownVisible, setSortDropdownVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [maxCookingTime, setMaxCookingTime] = useState(0); // 0 means 'All'
+  const [favoritesOnly, setFavoritesOnly] = useState(isFavoritesView);
+  const [showFiltersPanel, setShowFiltersPanel] = useState(true);
   
   // Modals state
   const [selectedRecipe, setSelectedRecipe] = useState(null);
@@ -95,10 +98,10 @@ export default function DashboardScreen({ navigation, route }) {
     return suggestions;
   }, [recipes]);
 
-  // Filter & Sort based on categories and search query
+  // Filter & Sort based on categories, search query, max cooking time, and favorites
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
-      if (isFavoritesView && !r.is_favorite) return false;
+      if ((isFavoritesView || favoritesOnly) && !r.is_favorite) return false;
 
       const stdCat = standardizeCategory(r.category, r.title);
       const matchesCategory = categoryFilter === 'all' || stdCat.toLowerCase() === categoryFilter.toLowerCase();
@@ -107,9 +110,12 @@ export default function DashboardScreen({ navigation, route }) {
         (r.title && r.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (r.ingredients && r.ingredients.some(i => i.toLowerCase().includes(searchQuery.toLowerCase())));
 
-      return matchesCategory && matchesSearch;
+      const rTime = parseInt(r.time || 0, 10);
+      const matchesTime = maxCookingTime === 0 || (rTime > 0 && rTime <= maxCookingTime);
+
+      return matchesCategory && matchesSearch && matchesTime;
     });
-  }, [recipes, isFavoritesView, categoryFilter, searchQuery]);
+  }, [recipes, isFavoritesView, favoritesOnly, categoryFilter, searchQuery, maxCookingTime]);
   
   const sortedRecipes = useMemo(() => {
     return [...filteredRecipes].sort((a, b) => {
@@ -123,6 +129,19 @@ export default function DashboardScreen({ navigation, route }) {
   const dataToRender = showSkeletons 
     ? Array.from({ length: 6 }, (_, i) => ({ id: `skeleton-${i}`, isSkeleton: true })) 
     : sortedRecipes;
+
+  const categoryIcons = {
+    'all': 'sparkles',
+    'Ulam': 'restaurant-outline',
+    'Meryenda': 'cafe-outline',
+    'Drinks': 'beer-outline',
+    'Dessert': 'ice-cream-outline',
+    'Appetizer': 'fast-food-outline',
+    'Soup': 'nutrition-outline',
+    'Breakfast': 'sunny-outline',
+    'Pasta & Noodles': 'pizza-outline',
+    'Seafood': 'fish-outline',
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -154,13 +173,25 @@ export default function DashboardScreen({ navigation, route }) {
                 </View>
               )}
 
-              <View style={styles.titleContainer}>
-                <Text style={[styles.title, { color: colors.text }]}>
-                  {isFavoritesView ? 'My Favorites' : 'Kitchen Stack'}
-                </Text>
-                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                  {isFavoritesView ? 'Your most loved recipes.' : 'Manage your curated culinary creations.'}
-                </Text>
+              <View style={styles.headerTitleRow}>
+                <View style={styles.titleContainer}>
+                  <Text style={[styles.title, { color: colors.text }]}>
+                    {isFavoritesView ? 'My Favorites' : 'Kitchen Stack'}
+                  </Text>
+                  <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                    {filteredRecipes.length} {filteredRecipes.length === 1 ? 'recipe' : 'recipes'} found in your stack
+                  </Text>
+                </View>
+
+                {/* Filters Toggle Button (Matches screenshot design) */}
+                <TouchableOpacity 
+                  style={[styles.filtersToggleBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
+                  onPress={() => setShowFiltersPanel(!showFiltersPanel)}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="options-outline" size={18} color={colors.text} />
+                  <Text style={[styles.filtersToggleText, { color: colors.text }]}>Filters</Text>
+                </TouchableOpacity>
               </View>
 
               {/* Search Bar with Instant Autocomplete Suggestions */}
@@ -169,53 +200,138 @@ export default function DashboardScreen({ navigation, route }) {
                 onChangeText={setSearchQuery}
                 placeholder="Search recipes or ingredients..."
                 customSuggestions={recipeSuggestions}
-                containerStyle={{ marginBottom: 20 }}
+                containerStyle={{ marginBottom: 16 }}
               />
 
-              {/* Category Scroller */}
-              <View style={styles.categoryScrollerWrapper}>
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.filterRow}
-                >
-                  {['all', ...STANDARD_CATEGORIES].map(cat => (
+              {/* Comprehensive Filter Panel (Matches screenshot 3 & 4) */}
+              {showFiltersPanel && (
+                <View style={[styles.filterPanelCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                  <Text style={[styles.filterPanelTag, { color: colors.textSecondary }]}>AMENITIES & FILTERS</Text>
+
+                  {/* Row 1: Category Pills with Icons */}
+                  <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.filterPillsRow}
+                  >
+                    {['all', ...STANDARD_CATEGORIES].map(cat => {
+                      const isActive = categoryFilter === cat;
+                      const icon = categoryIcons[cat] || 'restaurant-outline';
+                      return (
+                        <TouchableOpacity
+                          key={cat}
+                          style={[
+                            styles.categoryFilterPill,
+                            { backgroundColor: colors.background, borderColor: colors.borderLight },
+                            isActive && { backgroundColor: colors.primary, borderColor: colors.primary }
+                          ]}
+                          onPress={() => setCategoryFilter(cat)}
+                          activeOpacity={0.8}
+                        >
+                          <Ionicons name={icon} size={15} color={isActive ? '#FFFFFF' : colors.textSecondary} style={{ marginRight: 6 }} />
+                          <Text style={[
+                            styles.categoryFilterText,
+                            { color: colors.textSecondary },
+                            isActive && { color: '#FFFFFF', fontWeight: '700' }
+                          ]}>
+                            {cat === 'all' ? 'All Recipes' : cat}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+
+                  {/* Row 2: Controls (Favorites Toggle & Sort Dropdown) */}
+                  <View style={styles.controlsRow}>
                     <TouchableOpacity
-                      key={cat}
                       style={[
-                        styles.filterPill, 
-                        { backgroundColor: colors.surface, borderColor: colors.borderLight },
-                        categoryFilter === cat && { backgroundColor: colors.text, borderColor: colors.text }
+                        styles.quickTogglePill,
+                        { backgroundColor: colors.background, borderColor: colors.borderLight },
+                        favoritesOnly && { backgroundColor: colors.primary + '20', borderColor: colors.primary }
                       ]}
-                      onPress={() => setCategoryFilter(cat)}
+                      onPress={() => setFavoritesOnly(!favoritesOnly)}
                     >
+                      <Ionicons name={favoritesOnly ? "heart" : "heart-outline"} size={16} color={favoritesOnly ? colors.primary : colors.textSecondary} style={{ marginRight: 6 }} />
                       <Text style={[
-                        styles.filterText, 
+                        styles.quickToggleText,
                         { color: colors.textSecondary },
-                        categoryFilter === cat && { color: colors.surface }
+                        favoritesOnly && { color: colors.primary, fontWeight: '700' }
                       ]}>
-                        {cat === 'all' ? 'All Recipes' : cat}
+                        Favorites Only
                       </Text>
                     </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
 
-              {/* Sort Dropdown Button */}
-              <View style={styles.sortRow}>
-                <Ionicons name="filter" size={20} color={colors.textSecondary} />
-                <Text style={[styles.sortLabel, { color: colors.textSecondary }]}>Sort By</Text>
-                
-                <TouchableOpacity 
-                  style={[styles.dropdownBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
-                  onPress={() => setSortDropdownVisible(true)}
-                >
-                  <Text style={[styles.dropdownBtnText, { color: colors.text }]}>
-                    {sortBy === 'alpha' ? 'A-Z' : sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
-                  </Text>
-                  <Ionicons name="chevron-down" size={16} color={colors.text} />
-                </TouchableOpacity>
-              </View>
+                    <TouchableOpacity 
+                      style={[styles.sortDropdownBtn, { backgroundColor: colors.background, borderColor: colors.borderLight }]} 
+                      onPress={() => setSortDropdownVisible(true)}
+                    >
+                      <Ionicons name="filter-outline" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
+                      <Text style={[styles.sortDropdownText, { color: colors.text }]}>
+                        {sortBy === 'alpha' ? 'A-Z' : sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
+                      </Text>
+                      <Ionicons name="chevron-down" size={14} color={colors.textSecondary} style={{ marginLeft: 4 }} />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Row 3: Cooking Time Limit Slider & Preset Pills (Matches screenshot 4) */}
+                  <View style={styles.cookingTimeSection}>
+                    <View style={styles.cookingTimeHeaderRow}>
+                      <Text style={[styles.cookingTimeLabel, { color: colors.textSecondary }]}>Max Cooking Time</Text>
+                      <Text style={[styles.cookingTimeValue, { color: colors.primary }]}>
+                        {maxCookingTime === 0 ? 'All Times' : `${maxCookingTime} mins`}
+                      </Text>
+                    </View>
+
+                    {/* Interactive Cooking Time Slider Track */}
+                    <View style={styles.sliderTrackContainer}>
+                      <View style={[styles.sliderTrackBg, { backgroundColor: colors.borderLight }]} />
+                      <View style={[
+                        styles.sliderTrackFill, 
+                        { 
+                          backgroundColor: colors.primary,
+                          width: maxCookingTime === 0 ? '100%' : `${Math.min(100, (maxCookingTime / 60) * 100)}%` 
+                        }
+                      ]} />
+                      <View style={[
+                        styles.sliderThumbDot, 
+                        { 
+                          backgroundColor: colors.primary,
+                          left: maxCookingTime === 0 ? '96%' : `${Math.max(2, Math.min(94, (maxCookingTime / 60) * 100))}%`
+                        }
+                      ]} />
+                    </View>
+
+                    {/* Cooking Time Preset Pills */}
+                    <View style={styles.timePresetsRow}>
+                      {[
+                        { label: '15m', val: 15 },
+                        { label: '30m', val: 30 },
+                        { label: '45m', val: 45 },
+                        { label: '60m', val: 60 },
+                        { label: 'All', val: 0 }
+                      ].map(t => (
+                        <TouchableOpacity
+                          key={t.label}
+                          style={[
+                            styles.timePresetPill,
+                            { backgroundColor: colors.background, borderColor: colors.borderLight },
+                            maxCookingTime === t.val && { backgroundColor: colors.primary, borderColor: colors.primary }
+                          ]}
+                          onPress={() => setMaxCookingTime(t.val)}
+                        >
+                          <Text style={[
+                            styles.timePresetText,
+                            { color: colors.textSecondary },
+                            maxCookingTime === t.val && { color: '#FFFFFF', fontWeight: '700' }
+                          ]}>
+                            {t.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                </View>
+              )}
             </>
           }
           ListEmptyComponent={
@@ -346,8 +462,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     marginBottom: 15,
   },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
   titleContainer: {
-    marginBottom: 20,
+    flex: 1,
   },
   title: {
     fontSize: 28,
@@ -355,116 +477,144 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 14,
+    marginTop: 2,
+  },
+  filtersToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 6,
+  },
+  filtersToggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  filterPanelCard: {
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  filterPanelTag: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    marginBottom: 12,
+  },
+  filterPillsRow: {
+    paddingBottom: 10,
+    gap: 8,
+  },
+  categoryFilterPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  categoryFilterText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 6,
+    marginBottom: 16,
+    gap: 10,
+  },
+  quickTogglePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  quickToggleText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  sortDropdownBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  sortDropdownText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  cookingTimeSection: {
     marginTop: 4,
   },
-  searchContainer: {
+  cookingTimeHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    height: 50,
-    borderRadius: 15,
-    borderWidth: 1,
-    marginBottom: 20,
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    height: '100%',
-  },
-  categoryScrollerWrapper: {
-    marginBottom: 20,
-    marginHorizontal: -20,
-  },
-  filterRow: {
-    paddingHorizontal: 20,
-    paddingBottom: 5,
-  },
-  filterPill: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 25,
-    marginRight: 10,
-    borderWidth: 1,
-  },
-  filterPillActive: {
-    // Colors handled dynamically
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  filterTextActive: {
-    // Colors handled dynamically
-  },
-  sortRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  sortLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 8,
-    marginRight: 10,
-  },
-  dropdownBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  dropdownBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginRight: 4,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 60,
-    paddingHorizontal: 40,
-  },
-  emptyIconBg: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
-  emptySubtitle: {
-    textAlign: 'center',
-    fontSize: 16,
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  emptyBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 30,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  emptyBtnText: {
-    color: 'white',
-    fontSize: 16,
+  cookingTimeLabel: {
+    fontSize: 12,
     fontWeight: '700',
-    marginLeft: 8,
+  },
+  cookingTimeValue: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  sliderTrackContainer: {
+    height: 24,
+    justifyContent: 'center',
+    marginBottom: 10,
+    position: 'relative',
+  },
+  sliderTrackBg: {
+    height: 6,
+    borderRadius: 3,
+    width: '100%',
+    position: 'absolute',
+  },
+  sliderTrackFill: {
+    height: 6,
+    borderRadius: 3,
+    position: 'absolute',
+  },
+  sliderThumbDot: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    position: 'absolute',
+    top: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  timePresetsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 6,
+  },
+  timePresetPill: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  timePresetText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   dropdownOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -491,13 +641,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
   },
-  dropdownItemActive: {
-    // Handled dynamically
-  },
   dropdownItemText: {
     fontSize: 16,
-  },
-  dropdownItemTextActive: {
-    // Handled dynamically
   },
 });
