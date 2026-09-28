@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
-    paddingBottom: 40,
+    paddingBottom: 120,
     alignItems: 'center',
   },
   formContainer: {
