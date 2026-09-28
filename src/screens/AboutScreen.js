@@ -225,7 +225,7 @@ export default function AboutScreen({ route }) {
 
               {/* Section 3: Developer Info (Matches Tarakape /about Maker card) */}
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
-              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, position: 'relative', overflow: 'hidden', paddingBottom: 20 }]}>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, position: 'relative', overflow: 'visible', paddingBottom: 20 }]}>
                 
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start', position: 'relative' }}>
                   {/* Left Column */}
@@ -246,15 +246,15 @@ export default function AboutScreen({ route }) {
                     </Text>
                   </View>
 
-                  {/* Right Column Image sitting directly flush on top of horizontal line */}
+                  {/* Right Column Image overlapping card border so spear is not cut out */}
                   <Image 
                     source={require('../../assets/pantheon.png')}
                     style={{
                       position: 'absolute',
-                      right: -10,
+                      right: 0,
                       bottom: -46,
-                      width: 160,
-                      height: 160,
+                      width: 175,
+                      height: 175,
                     }}
                     resizeMode="contain"
                   />
