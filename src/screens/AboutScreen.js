@@ -227,9 +227,9 @@ export default function AboutScreen({ route }) {
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
               <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, position: 'relative', overflow: 'hidden', paddingBottom: 20 }]}>
                 
-                <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginBottom: 0 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start', position: 'relative' }}>
                   {/* Left Column */}
-                  <View style={{ flex: 1, paddingRight: 10 }}>
+                  <View style={{ flex: 1, paddingRight: 140 }}>
                     <View style={styles.developerHeaderRow}>
                       <Image 
                         source={{ uri: 'https://avatars.githubusercontent.com/u/225991575?v=4' }} 
@@ -246,18 +246,18 @@ export default function AboutScreen({ route }) {
                     </Text>
                   </View>
 
-                  {/* Right Column Image sitting cleanly right above horizontal line */}
-                  <View style={{ width: 140, height: 160, justifyContent: 'flex-end', alignItems: 'center', marginBottom: -4 }}>
-                    <Image 
-                      source={require('../../assets/pantheon.png')}
-                      style={{
-                        width: 170,
-                        height: 170,
-                        marginBottom: -12, // Fine-tuned so character base sits exactly on the line
-                      }}
-                      resizeMode="contain"
-                    />
-                  </View>
+                  {/* Right Column Image sitting directly flush on top of horizontal line */}
+                  <Image 
+                    source={require('../../assets/pantheon.png')}
+                    style={{
+                      position: 'absolute',
+                      right: -10,
+                      bottom: -12, // Flush with the line immediately following text block
+                      width: 160,
+                      height: 160,
+                    }}
+                    resizeMode="contain"
+                  />
                 </View>
 
                 {/* Divider Line */}
