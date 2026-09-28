@@ -252,7 +252,7 @@ export default function AboutScreen({ route }) {
                     style={{
                       position: 'absolute',
                       right: -10,
-                      bottom: -82, // Lowered an additional 50px
+                      bottom: -62, // Raised by 20px
                       width: 160,
                       height: 160,
                     }}
