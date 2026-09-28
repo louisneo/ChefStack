@@ -27,7 +27,7 @@ export default function TermsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <PageHeader title="Terms of Service" subtitle="Last Updated: September 7, 2026" icon="document-text-outline" onBack={handleBack} />
+      <PageHeader title="Terms of Service" subtitle="Last Updated: September 7, 2026" icon="document-text-outline" onBack={handleBack} maxWidth={750} />
 
       <ScrollView contentContainerStyle={[styles.content, { backgroundColor: colors.background }]}>
         <View style={styles.formContainer}>

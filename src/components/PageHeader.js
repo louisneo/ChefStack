@@ -3,12 +3,12 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 
-export default function PageHeader({ title, subtitle, icon, onBack, rightComponent, noBorder }) {
+export default function PageHeader({ title, subtitle, icon, onBack, rightComponent, noBorder, maxWidth }) {
   const { colors } = useTheme();
   
   return (
     <View style={[styles.headerContainer, !noBorder && { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}>
-      <View style={styles.innerWrapper}>
+      <View style={[styles.innerWrapper, maxWidth ? { maxWidth } : null]}>
         <View style={styles.headerLeft}>
           {onBack && (
             <TouchableOpacity onPress={onBack} style={[styles.backBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>

@@ -32,7 +32,7 @@ export default function NotificationsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <PageHeader title="Notifications" subtitle="Manage your alerts" icon="notifications-outline" onBack={handleBack} />
+      <PageHeader title="Notifications" subtitle="Manage your alerts" icon="notifications-outline" onBack={handleBack} maxWidth={600} />
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.formContainer}>

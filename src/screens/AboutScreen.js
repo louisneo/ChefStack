@@ -83,6 +83,7 @@ export default function AboutScreen({ route }) {
         subtitle="Version 1.3.0"
         icon="information-circle-outline"
         onBack={handleBack}
+        maxWidth={720}
         rightComponent={
           currentView !== 'main' ? (
             <TouchableOpacity style={[styles.backToAboutPill, { backgroundColor: colors.primary + '15' }]} onPress={() => setCurrentView('main')}>

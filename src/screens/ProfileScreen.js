@@ -49,7 +49,7 @@ export default function ProfileScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.webWrapper}>
         {/* Header */}
-        <PageHeader title="Profile" subtitle="Manage your account" icon="person-outline" onBack={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')} />
+        <PageHeader title="Profile" subtitle="Manage your account" icon="person-outline" onBack={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')} maxWidth={600} />
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.formContainer}>

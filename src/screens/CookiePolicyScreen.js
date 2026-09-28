@@ -19,7 +19,7 @@ export default function CookiePolicyScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <PageHeader title="Cookie Policy" subtitle="Last Updated: September 1, 2026" icon="cookie-outline" onBack={handleBack} />
+      <PageHeader title="Cookie Policy" subtitle="Last Updated: September 1, 2026" icon="cookie-outline" onBack={handleBack} maxWidth={750} />
 
       <ScrollView contentContainerStyle={[styles.content, { backgroundColor: colors.background }]}>
         <View style={styles.formContainer}>
