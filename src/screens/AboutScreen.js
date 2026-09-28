@@ -172,7 +172,7 @@ export default function AboutScreen({ route }) {
 
                   <TouchableOpacity 
                     style={[styles.linkNavCard, { backgroundColor: colors.background, borderColor: colors.borderLight }]}
-                    onPress={() => setCurrentView('privacy')}
+                    onPress={() => navigation.navigate('Privacy')}
                   >
                     <View style={styles.linkNavLeft}>
                       <Ionicons name="shield-checkmark-outline" size={20} color={colors.primary} />
@@ -214,7 +214,7 @@ export default function AboutScreen({ route }) {
 
                 <TouchableOpacity 
                   style={[styles.settingRowItem, { borderTopWidth: 1, borderTopColor: colors.borderLight }]} 
-                  onPress={() => setCurrentView('privacy')}
+                  onPress={() => navigation.navigate('Privacy')}
                 >
                   <View style={styles.settingLeftGroup}>
                     <Ionicons name="shield-outline" size={22} color={colors.textSecondary} />

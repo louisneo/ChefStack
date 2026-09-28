@@ -127,55 +127,7 @@ export default function ProfileScreen() {
               </View>
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.settingsSection}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Settings</Text>
-              
-              <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
-                <View style={styles.settingLeft}>
-                  <Ionicons name={isDark ? "moon" : "sunny-outline"} size={24} color={colors.textSecondary} />
-                  <Text style={[styles.settingText, { color: colors.text }]}>Dark Mode</Text>
-                </View>
-                <Switch
-                  value={isDark}
-                  onValueChange={toggleTheme}
-                  trackColor={{ false: '#767577', true: colors.primary }}
-                  thumbColor={Platform.OS === 'ios' ? '#fff' : isDark ? colors.surface : '#f4f3f4'}
-                />
-              </View>
 
-              <TouchableOpacity 
-                style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
-                onPress={() => navigation.navigate('Notifications')}
-              >
-                <View style={styles.settingLeft}>
-                  <Ionicons name="notifications-outline" size={24} color={colors.textSecondary} />
-                  <Text style={[styles.settingText, { color: colors.text }]}>Notifications</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
-                onPress={() => navigation.navigate('Privacy')}
-              >
-                <View style={styles.settingLeft}>
-                  <Ionicons name="shield-checkmark-outline" size={24} color={colors.textSecondary} />
-                  <Text style={[styles.settingText, { color: colors.text }]}>Privacy</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.borderLight }]} 
-                onPress={() => navigation.navigate('About')}
-              >
-                <View style={styles.settingLeft}>
-                  <Ionicons name="information-circle-outline" size={24} color={colors.textSecondary} />
-                  <Text style={[styles.settingText, { color: colors.text }]}>About</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
-            </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
               <TouchableOpacity 
