@@ -252,7 +252,7 @@ export default function AboutScreen({ route }) {
                     style={{
                       position: 'absolute',
                       right: -10,
-                      bottom: -12, // Flush with the line immediately following text block
+                      bottom: -22, // Shifted down 10px to sit flush on top of horizontal line
                       width: 160,
                       height: 160,
                     }}
