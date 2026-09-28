@@ -229,7 +229,7 @@ export default function AboutScreen({ route }) {
                 
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start', position: 'relative' }}>
                   {/* Left Column */}
-                  <View style={{ flex: 1, paddingRight: 140 }}>
+                  <View style={{ flex: 1, paddingRight: 180 }}>
                     <View style={styles.developerHeaderRow}>
                       <Image 
                         source={{ uri: 'https://avatars.githubusercontent.com/u/225991575?v=4' }} 
@@ -252,7 +252,7 @@ export default function AboutScreen({ route }) {
                     style={{
                       position: 'absolute',
                       right: -10,
-                      bottom: -62, // Raised by 20px
+                      bottom: -46,
                       width: 160,
                       height: 160,
                     }}
