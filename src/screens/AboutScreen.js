@@ -223,9 +223,9 @@ export default function AboutScreen({ route }) {
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
               <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, position: 'relative', overflow: 'visible', paddingBottom: 20 }]}>
                 
-                <View style={{ flexDirection: 'row', alignItems: 'flex-start', position: 'relative' }}>
-                  {/* Left Column */}
-                  <View style={{ flex: 1, paddingRight: 180 }}>
+                <View style={{ flexDirection: 'column' }}>
+                  {/* Bio Column */}
+                  <View style={{ flex: 1 }}>
                     <View style={styles.developerHeaderRow}>
                       <Image 
                         source={require('../../assets/profile.png')} 
@@ -242,20 +242,19 @@ export default function AboutScreen({ route }) {
                     </Text>
                   </View>
 
-                  {/* Right Column Image overlapping card border with shadow */}
-                  <Image 
-                    source={require('../../assets/pantheon.png')}
-                    style={{
-                      position: 'absolute',
-                      right: -90,
-                      bottom: -68,
-                      width: 260,
-                      height: 260,
-                      // RN Web drop-shadow for transparent PNGs
-                      filter: 'drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.4))'
-                    }}
-                    resizeMode="contain"
-                  />
+                  {/* Right Column Image below text */}
+                  <View style={{ alignItems: 'flex-end', marginTop: 10, marginRight: -20, marginBottom: -10 }}>
+                    <Image 
+                      source={require('../../assets/pantheon.png')}
+                      style={{
+                        width: 180,
+                        height: 180,
+                        // RN Web drop-shadow for transparent PNGs
+                        filter: 'drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.4))'
+                      }}
+                      resizeMode="contain"
+                    />
+                  </View>
                 </View>
 
                 {/* Divider Line */}
