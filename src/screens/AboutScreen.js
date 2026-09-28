@@ -225,11 +225,11 @@ export default function AboutScreen({ route }) {
 
               {/* Section 3: Developer Info (Matches Tarakape /about Maker card) */}
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
-              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, overflow: 'hidden', paddingBottom: 0 }]}>
                 
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-end', position: 'relative' }}>
                   {/* Left Column */}
-                  <View style={{ flex: 1, paddingRight: 16 }}>
+                  <View style={{ flex: 1, paddingRight: 10, paddingBottom: 16 }}>
                     <View style={styles.developerHeaderRow}>
                       <Image 
                         source={{ uri: 'https://avatars.githubusercontent.com/u/225991575?v=4' }} 
@@ -246,20 +246,20 @@ export default function AboutScreen({ route }) {
                     </Text>
                   </View>
 
-                  {/* Right Column Image */}
+                  {/* Right Column Image anchored to bottom divider */}
                   <Image 
                     source={require('../../assets/pantheon.png')}
                     style={{
-                      width: 130,
-                      height: 160,
-                      marginTop: -10,
+                      width: 170,
+                      height: 200,
+                      marginBottom: -2,
                     }}
                     resizeMode="contain"
                   />
                 </View>
 
                 {/* Divider Line */}
-                <View style={{ height: 1, backgroundColor: colors.borderLight, marginVertical: 20 }} />
+                <View style={{ height: 1, backgroundColor: colors.borderLight, marginTop: 0, marginBottom: 20 }} />
 
                 {/* Support Project Button */}
                 <TouchableOpacity 
