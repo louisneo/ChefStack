@@ -227,23 +227,24 @@ export default function AboutScreen({ route }) {
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
               <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
                 <View style={styles.developerHeaderRow}>
-                  <View style={[styles.developerAvatar, { backgroundColor: colors.primary }]}>
-                    <Text style={styles.developerAvatarText}>L</Text>
-                  </View>
+                  <Image 
+                    source={{ uri: 'https://avatars.githubusercontent.com/u/225991575?v=4' }} 
+                    style={styles.developerAvatarImg} 
+                  />
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.developerName, { color: colors.text }]}>Louis Neo Lok</Text>
-                    <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>Student Software Engineer | Aspiring Cloud Engineer</Text>
+                    <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>IT Student @ University of Nueva Caceres</Text>
                   </View>
                 </View>
 
                 <Text style={[styles.developerBio, { color: colors.textSecondary }]}>
-                  Hi, I'm Louis! I'm a Computer Science student and a builder deeply obsessed with LLMs, Agentic Tools, and Artificial Intelligence. I'm passionate about building clean, helpful web and mobile apps. Outside of tech, I love exploring culinary creations!
+                  Louis Neo Lok is an IT student at the University of Nueva Caceres in Naga, Philippines, training as a full-stack developer with skills in JavaScript, React, Java, and Python.
                 </Text>
 
                 {/* Support Project Button */}
                 <TouchableOpacity 
                   style={[styles.supportBtn, { backgroundColor: colors.background, borderColor: colors.borderLight }]}
-                  onPress={() => Linking.openURL('https://www.appbuildersph.com/apps/chefstack')}
+                  onPress={() => Linking.openURL('https://www.appbuildersph.com/apps/chefstack').catch(() => {})}
                 >
                   <Ionicons name="heart" size={18} color="#E53E3E" style={{ marginRight: 8 }} />
                   <Text style={[styles.supportBtnText, { color: colors.text }]}>Support the project</Text>
@@ -253,9 +254,9 @@ export default function AboutScreen({ route }) {
                 <View style={styles.socialGrid}>
                   {[
                     { label: 'Github', icon: 'logo-github', url: 'https://github.com/louisneo' },
-                    { label: 'LinkedIn', icon: 'logo-linkedin', url: 'https://linkedin.com' },
-                    { label: 'Facebook', icon: 'logo-facebook', url: 'https://facebook.com' },
-                    { label: 'Instagram', icon: 'logo-instagram', url: 'https://instagram.com' }
+                    { label: 'LinkedIn', icon: 'logo-linkedin', url: 'https://ph.linkedin.com/in/louisneolok' },
+                    { label: 'Facebook', icon: 'logo-facebook', url: 'https://www.facebook.com/chingchong300' },
+                    { label: 'Instagram', icon: 'logo-instagram', url: 'https://www.instagram.com/_fizzlebeef/' }
                   ].map(s => (
                     <TouchableOpacity 
                       key={s.label}
@@ -755,17 +756,10 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 12,
   },
-  developerAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  developerAvatarText: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '800',
+  developerAvatarImg: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
   },
   developerName: {
     fontSize: 17,
