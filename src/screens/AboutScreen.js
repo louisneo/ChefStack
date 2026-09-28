@@ -225,20 +225,34 @@ export default function AboutScreen({ route }) {
 
               {/* Section 3: Developer Info (Matches Tarakape /about Maker card) */}
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
-              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, overflow: 'visible' }]}>
+                
+                <Image 
+                  source={require('../../assets/panth.png')}
+                  style={{
+                    position: 'absolute',
+                    top: -50,
+                    right: -25,
+                    width: 140,
+                    height: 140,
+                    zIndex: 10,
+                  }}
+                  resizeMode="contain"
+                />
+
                 <View style={styles.developerHeaderRow}>
                   <Image 
                     source={{ uri: 'https://avatars.githubusercontent.com/u/225991575?v=4' }} 
                     style={styles.developerAvatarImg} 
                   />
-                  <View style={{ flex: 1 }}>
+                  <View style={{ flex: 1, zIndex: 1 }}>
                     <Text style={[styles.developerName, { color: colors.text }]}>Louis Neo Lok</Text>
-                    <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>IT Student @ University of Nueva Caceres</Text>
+                    <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>Full Stack AI Engineer</Text>
                   </View>
                 </View>
 
-                <Text style={[styles.developerBio, { color: colors.textSecondary }]}>
-                  Louis Neo Lok is an IT student at the University of Nueva Caceres in Naga, Philippines, training as a full-stack developer with skills in JavaScript, React, Java, and Python.
+                <Text style={[styles.developerBio, { color: colors.textSecondary, zIndex: 1 }]}>
+                  Hi, I'm Louis Neo Lok! I'm a senior IT student and developer specializing in LLMs, Agentic Tools, and clean web/mobile apps. Passionate about community leadership and tech education. When I'm offline, I'm either watching the latest MCU release or climbing ranks in Wild Rift!
                 </Text>
 
                 {/* Support Project Button */}
