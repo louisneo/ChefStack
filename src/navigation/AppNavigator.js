@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     height: 64,
-    borderRadius: 32,
+    borderRadius: 16,
     borderWidth: 1,
     paddingHorizontal: 8,
     paddingVertical: 6,
