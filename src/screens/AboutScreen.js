@@ -8,7 +8,8 @@ import {
   Platform,
   Image,
   Linking,
-  Switch
+  Switch,
+  Pressable
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -246,18 +247,29 @@ export default function AboutScreen({ route }) {
                     </Text>
                   </View>
 
-                  {/* Right Column Image overlapping card border so spear is not cut out */}
-                  <Image 
-                    source={require('../../assets/pantheon.png')}
-                    style={{
+                  {/* Right Column Image overlapping card border with shadow and hover */}
+                  <Pressable
+                    style={({ hovered }) => ({
                       position: 'absolute',
                       right: -90,
                       bottom: -68,
                       width: 260,
                       height: 260,
-                    }}
-                    resizeMode="contain"
-                  />
+                      transform: [{ scale: hovered ? 1.05 : 1 }],
+                      transition: 'transform 0.2s ease-in-out',
+                      // RN Web drop-shadow for transparent PNGs
+                      filter: 'drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.4))'
+                    })}
+                  >
+                    <Image 
+                      source={require('../../assets/pantheon.png')}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                      }}
+                      resizeMode="contain"
+                    />
+                  </Pressable>
                 </View>
 
                 {/* Divider Line */}
