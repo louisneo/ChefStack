@@ -16,14 +16,14 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 const POLICY_SECTIONS = [
   { id: 'intro', icon: 'information-circle-outline', title: 'Introduction', content: 'Welcome to ChefStack ("the Platform", "we", "our", or "us"). We are committed to protecting your privacy and handling your information responsibly. This Privacy Policy explains what information we collect, how we use it, and the choices available to you when using our website and mobile application.\n\nBy accessing or using ChefStack, you agree to the practices described in this Privacy Policy.' },
   { id: 'collect', icon: 'book-outline', title: 'Information We Collect', isList: true },
-  { id: 'use', icon: 'shield-outline', title: 'How We Use Information', content: 'We use collected information to:\n• Provide and maintain the Platform and its features\n• Personalize recommendations and AI searches\n• Improve user experience and platform performance\n• Monitor security, reliability, and system health\n• Respond to inquiries and provide support' },
-  { id: 'share', icon: 'share-social-outline', title: 'Information Sharing and Disclosure', content: 'We do NOT sell your personal information.\n\nWe may share information in the following situations:\n• With service providers that help operate the Platform (hosting, analytics, auth, and AI processing)\n• When required by law, legal process, or official government requests\n• To protect the rights, property, safety, and security of our users and the Platform' },
-  { id: 'third', icon: 'document-text-outline', title: 'Third-Party Services', content: 'ChefStack uses third-party services and technologies to deliver features and improve experience (such as Supabase for authentication and Google Gemini for AI). These services process data according to their own privacy policies. We encourage users to review the privacy practices of these third-party providers.' },
-  { id: 'ugc', icon: 'person-add-outline', title: 'User-Generated Content', content: 'The Platform allows you to submit user-generated content, including recipes, notes, and photos.\n\nImportant Warning: Any content you submit may be visible to other users if shared publicly. Please avoid sharing sensitive or confidential information in public fields.' },
-  { id: 'retention', icon: 'sync-outline', title: 'Data Retention', content: 'We retain information only for as long as necessary to provide the services, resolve disputes, enforce agreements, and maintain security. Once no longer needed, data is deleted, anonymized, or aggregated.' },
-  { id: 'security', icon: 'lock-closed-outline', title: 'Data Security', content: 'We implement administrative, technical, and organizational safeguards designed to protect your information from unauthorized access, loss, or alteration.\n\n* While we strive to protect your data, no method of transmission over the internet can be guaranteed 100% secure.' },
+  { id: 'use', icon: 'shield-outline', title: 'How We Use Information', content: 'We use collected information to:\n• Provide and maintain the Platform and its core features\n• Personalize your culinary recommendations and AI recipe searches\n• Improve user experience, app performance, and offline capabilities\n• Monitor security, reliability, and system health\n• Respond to inquiries and provide technical support' },
+  { id: 'share', icon: 'share-social-outline', title: 'Information Sharing and Disclosure', content: 'We do NOT sell your personal information.\n\nWe may share information in the following situations:\n• With service providers that help operate the Platform (such as Supabase for database hosting & authentication, and Google Gemini for AI recipe generation processing)\n• When required by law, legal process, or official government requests\n• To protect the rights, property, safety, and security of our users and the Platform' },
+  { id: 'third', icon: 'document-text-outline', title: 'Third-Party Services', content: 'ChefStack utilizes secure third-party services to deliver features and improve your experience. Supabase is used for backend authentication and data storage. Google Gemini API is utilized for AI Chef recipe generation. These services process data according to their own privacy policies. We encourage users to review the privacy practices of these providers.' },
+  { id: 'ugc', icon: 'person-add-outline', title: 'User-Generated Content', content: 'The Platform allows you to create and save user-generated content, including custom recipes, ingredient notes, and cooking preferences.\n\nImportant Warning: Any content you submit may be visible to other users if you choose to share your profile or recipes publicly. Please avoid sharing sensitive personal information in recipe notes.' },
+  { id: 'retention', icon: 'sync-outline', title: 'Data Retention', content: 'We retain information only for as long as necessary to provide our recipe and AI services, resolve disputes, enforce agreements, and maintain security. Once no longer needed, data is deleted, anonymized, or aggregated. Local guest data is cleared if the app is uninstalled.' },
+  { id: 'security', icon: 'lock-closed-outline', title: 'Data Security', content: 'We implement administrative, technical, and organizational safeguards designed to protect your information from unauthorized access, loss, or alteration. Authentication is securely handled via industry-standard protocols.\n\n* While we strive to protect your data, no method of transmission over the internet can be guaranteed 100% secure.' },
   { id: 'children', icon: 'scale-outline', title: "Children's Privacy", content: 'ChefStack is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If discovered, we will take steps to remove such records immediately.' },
-  { id: 'contact', icon: 'mail-outline', title: 'Contact Us', content: 'If you have questions, concerns, or requests regarding this Privacy Policy, please contact the developer:\n\nLouis Neo Lok\nFull Stack AI Engineer, ChefStack' }
+  { id: 'contact', icon: 'mail-outline', title: 'Contact Us', content: 'If you have questions, concerns, or data deletion requests regarding this Privacy Policy, please contact the developer:\n\nLouis Neo Lok\nFull-Stack Developer | Aspiring Software Engineer\nsupport@chefstack.app' }
 ];
 
 export default function PrivacyScreen() {
@@ -42,7 +42,6 @@ export default function PrivacyScreen() {
     setActiveSection(id);
     const yOffset = sectionLayouts.current[id];
     if (yOffset !== undefined && scrollViewRef.current) {
-      // Add roughly 100px to account for the top header height
       scrollViewRef.current.scrollTo({ y: yOffset + 100, animated: true });
     }
   };
@@ -55,19 +54,28 @@ export default function PrivacyScreen() {
     }
   };
 
+  const filteredSections = POLICY_SECTIONS.filter(sec => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    const matchTitle = sec.title.toLowerCase().includes(query);
+    const matchContent = sec.content?.toLowerCase().includes(query);
+    const matchTerms = sec.isList && 'recipes ingredients culinary dietary profile email'.includes(query);
+    return matchTitle || matchContent || matchTerms;
+  });
+
   const renderInfoList = () => (
     <View style={styles.listContainer}>
       <Text style={[styles.listHeader, { color: colors.textSecondary }]}>INFORMATION YOU PROVIDE</Text>
-      <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Name and profile information</Text></View>
+      <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Name, profile, and authentication credentials</Text></View>
       <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Email address</Text></View>
-      <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Reviews, ratings, comments, and feedback</Text></View>
+      <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Saved recipes, custom ingredients, and dietary preferences</Text></View>
       <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Information submitted through forms, inquiries, or support requests</Text></View>
       
       <Text style={[styles.listHeader, { color: colors.textSecondary, marginTop: 20 }]}>AUTOMATICALLY COLLECTED INFORMATION</Text>
       <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Device information (device type, OS, browser type)</Text></View>
       <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>IP address</Text></View>
-      <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>General usage information and activity within the Platform</Text></View>
-      <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Diagnostic and performance information</Text></View>
+      <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>General usage information and culinary AI interactions</Text></View>
+      <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Diagnostic and app performance information</Text></View>
       <View style={styles.listItem}><View style={[styles.bullet, { backgroundColor: colors.primary }]} /><Text style={[styles.listText, { color: colors.textSecondary }]}>Analytics and crash reports</Text></View>
     </View>
   );
@@ -116,7 +124,7 @@ export default function PrivacyScreen() {
                 <View style={[styles.sidebarCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
                   <Text style={[styles.tocTitle, { color: colors.textMuted }]}>TABLE OF CONTENTS</Text>
                   <View style={styles.tocList}>
-                    {POLICY_SECTIONS.map((sec) => {
+                    {filteredSections.map((sec) => {
                       const isActive = activeSection === sec.id;
                       return (
                         <TouchableOpacity 
@@ -143,6 +151,9 @@ export default function PrivacyScreen() {
                         </TouchableOpacity>
                       );
                     })}
+                    {filteredSections.length === 0 && (
+                      <Text style={[styles.tocItemText, { color: colors.textMuted, padding: 12 }]}>No matching topics</Text>
+                    )}
                   </View>
                 </View>
               </View>
@@ -151,7 +162,7 @@ export default function PrivacyScreen() {
             {/* Main Content Area */}
             <View style={styles.contentCol}>
               <Animated.View entering={FadeInDown.duration(400)}>
-                {POLICY_SECTIONS.map((sec) => (
+                {filteredSections.map((sec) => (
                   <View 
                     key={sec.id} 
                     style={[styles.contentCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
@@ -172,6 +183,15 @@ export default function PrivacyScreen() {
                     </View>
                   </View>
                 ))}
+                
+                {filteredSections.length === 0 && (
+                  <View style={{ alignItems: 'center', padding: 40 }}>
+                    <Ionicons name="search-outline" size={48} color={colors.border} />
+                    <Text style={{ color: colors.textSecondary, fontSize: 16, marginTop: 16, fontWeight: '600' }}>
+                      No results found for "{searchQuery}"
+                    </Text>
+                  </View>
+                )}
               </Animated.View>
             </View>
 
