@@ -225,41 +225,41 @@ export default function AboutScreen({ route }) {
 
               {/* Section 3: Developer Info (Matches Tarakape /about Maker card) */}
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
-              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, overflow: 'hidden', paddingBottom: 0 }]}>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, position: 'relative', overflow: 'hidden', paddingBottom: 20 }]}>
                 
-                <View style={{ flexDirection: 'row', alignItems: 'flex-end', position: 'relative' }}>
+                <View style={{ paddingRight: 140 }}>
                   {/* Left Column */}
-                  <View style={{ flex: 1, paddingRight: 10, paddingBottom: 16 }}>
-                    <View style={styles.developerHeaderRow}>
-                      <Image 
-                        source={{ uri: 'https://avatars.githubusercontent.com/u/225991575?v=4' }} 
-                        style={styles.developerAvatarImg} 
-                      />
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.developerName, { color: colors.text }]}>Louis Neo Lok</Text>
-                        <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>Full Stack AI Engineer</Text>
-                      </View>
+                  <View style={styles.developerHeaderRow}>
+                    <Image 
+                      source={{ uri: 'https://avatars.githubusercontent.com/u/225991575?v=4' }} 
+                      style={styles.developerAvatarImg} 
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.developerName, { color: colors.text }]}>Louis Neo Lok</Text>
+                      <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>Full Stack AI Engineer</Text>
                     </View>
-
-                    <Text style={[styles.developerBio, { color: colors.textSecondary, marginBottom: 0, lineHeight: 22 }]}>
-                      Hi, I'm <Text style={{ color: colors.text, fontWeight: '700' }}>Louis Neo Lok!</Text> I'm a senior IT student and developer specializing in <Text style={{ color: colors.text, fontWeight: '700' }}>LLMs, Agentic Tools,</Text> and clean web/mobile apps. Passionate about community leadership and tech education. When I'm offline, I'm either watching the latest MCU release or climbing ranks in Wild Rift!
-                    </Text>
                   </View>
 
-                  {/* Right Column Image anchored to bottom divider */}
-                  <Image 
-                    source={require('../../assets/pantheon.png')}
-                    style={{
-                      width: 170,
-                      height: 200,
-                      marginBottom: -2,
-                    }}
-                    resizeMode="contain"
-                  />
+                  <Text style={[styles.developerBio, { color: colors.textSecondary, marginBottom: 0, lineHeight: 22 }]}>
+                    Hi, I'm <Text style={{ color: colors.text, fontWeight: '700' }}>Louis Neo Lok!</Text> I'm a senior IT student and developer specializing in <Text style={{ color: colors.text, fontWeight: '700' }}>LLMs, Agentic Tools,</Text> and clean web/mobile apps. Passionate about community leadership and tech education. When I'm offline, I'm either watching the latest MCU release or climbing ranks in Wild Rift!
+                  </Text>
                 </View>
 
+                {/* Right Column Image absolutely positioned sticking to divider line below */}
+                <Image 
+                  source={require('../../assets/pantheon.png')}
+                  style={{
+                    position: 'absolute',
+                    right: -10,
+                    bottom: 80, // Sits directly on top of the divider line (which is ~80px from card bottom)
+                    width: 175,
+                    height: 190,
+                  }}
+                  resizeMode="contain"
+                />
+
                 {/* Divider Line */}
-                <View style={{ height: 1, backgroundColor: colors.borderLight, marginTop: 0, marginBottom: 20 }} />
+                <View style={{ height: 1, backgroundColor: colors.borderLight, marginTop: 16, marginBottom: 20 }} />
 
                 {/* Support Project Button */}
                 <TouchableOpacity 
