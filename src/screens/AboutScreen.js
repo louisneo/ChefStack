@@ -228,13 +228,13 @@ export default function AboutScreen({ route }) {
               <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, overflow: 'visible' }]}>
                 
                 <Image 
-                  source={require('../../assets/panth.png')}
+                  source={require('../../assets/pantheon.png')}
                   style={{
                     position: 'absolute',
-                    top: -50,
-                    right: -25,
-                    width: 140,
-                    height: 140,
+                    top: -70,
+                    right: -35,
+                    width: 190,
+                    height: 190,
                     zIndex: 10,
                   }}
                   resizeMode="contain"
