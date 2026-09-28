@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -35,6 +35,18 @@ export default function PrivacyScreen() {
   const [activeSection, setActiveSection] = useState('intro');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const scrollViewRef = useRef(null);
+  const sectionLayouts = useRef({});
+
+  const handleScrollToSection = (id) => {
+    setActiveSection(id);
+    const yOffset = sectionLayouts.current[id];
+    if (yOffset !== undefined && scrollViewRef.current) {
+      // Add roughly 100px to account for the top header height
+      scrollViewRef.current.scrollTo({ y: yOffset + 100, animated: true });
+    }
+  };
+
   const handleBack = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
@@ -63,7 +75,7 @@ export default function PrivacyScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       
-      <ScrollView contentContainerStyle={styles.scrollContainer} stickyHeaderIndices={[]}>
+      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContainer} stickyHeaderIndices={[]}>
         <View style={styles.innerWrapper}>
           
           {/* Top Header matching screenshot */}
@@ -109,7 +121,7 @@ export default function PrivacyScreen() {
                       return (
                         <TouchableOpacity 
                           key={sec.id}
-                          onPress={() => setActiveSection(sec.id)}
+                          onPress={() => handleScrollToSection(sec.id)}
                           style={[
                             styles.tocItem, 
                             isActive && { backgroundColor: isDark ? colors.borderLight : '#F3E8DA', borderColor: isDark ? colors.border : '#E8DAC8' }
@@ -140,7 +152,13 @@ export default function PrivacyScreen() {
             <View style={styles.contentCol}>
               <Animated.View entering={FadeInDown.duration(400)}>
                 {POLICY_SECTIONS.map((sec) => (
-                  <View key={sec.id} style={[styles.contentCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                  <View 
+                    key={sec.id} 
+                    style={[styles.contentCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
+                    onLayout={(event) => {
+                      sectionLayouts.current[sec.id] = event.nativeEvent.layout.y;
+                    }}
+                  >
                     <View style={[styles.cardHeader, { borderBottomColor: colors.borderLight }]}>
                       <View style={[styles.cardIconBox, { backgroundColor: isDark ? colors.background : '#F3E8DA', borderColor: colors.borderLight }]}>
                         <Ionicons name={sec.icon} size={16} color={colors.text} />
