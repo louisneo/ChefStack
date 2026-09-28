@@ -7,18 +7,25 @@ import {
   ScrollView,
   Platform,
   Image,
-  Linking
+  Linking,
+  Switch
 } from 'react-native';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { useRecipes } from '../context/RecipeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-export default function AboutScreen() {
+export default function AboutScreen({ route }) {
   const navigation = useNavigation();
+  const { colors, isDark, toggleTheme } = useTheme();
+  const { user } = useAuth();
+  const { openAddRecipe } = useRecipes();
 
-  // Navigation tabs: 'app' | 'docs'
-  const [mainTab, setMainTab] = useState('app');
+  // Navigation sub-views: 'main' | 'mobile' | 'documentation' | 'changelog' | 'privacy'
+  const initialView = route?.params?.view || 'main';
+  const [currentView, setCurrentView] = useState(initialView);
   
   // Docs sub-tabs: 'overview' | 'features' | 'architecture'
   const [docTab, setDocTab] = useState('overview');
@@ -26,388 +33,573 @@ export default function AboutScreen() {
   // Mobile App sub-tabs: 'android' | 'ios'
   const [appPlatform, setAppPlatform] = useState('android');
 
+  // Changelog sub-tabs: 'mobile' | 'website'
+  const [changelogTab, setChangelogTab] = useState('mobile');
+
+  // Accordion open states for FAQ
+  const [expandedFaq, setExpandedFaq] = useState(null);
+  const [expandedThanks, setExpandedThanks] = useState(false);
+
   const handleBack = () => {
-    if (navigation.canGoBack()) {
+    if (currentView !== 'main') {
+      setCurrentView('main');
+    } else if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
-      navigation.navigate('MainTabs', { screen: 'Profile' });
+      navigation.navigate('MainTabs', { screen: 'Home' });
     }
   };
 
   const handleDownloadAPK = () => {
-    Linking.openURL('https://chefstack.vercel.app/download/chefstack.apk').catch(() => {
-      alert('APK download will be available upon official release.');
-    });
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      try {
+        const link = document.createElement('a');
+        link.href = '/download/chefstack.apk';
+        link.setAttribute('download', 'chefstack.apk');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (e) {
+        window.open('/download/chefstack.apk', '_blank');
+      }
+    } else {
+      Linking.openURL('https://chef-stack.vercel.app/download/chefstack.apk').catch(() => {
+        alert('Downloading ChefStack APK v1.3.0...');
+      });
+    }
+  };
+
+  const toggleFaqItem = (index) => {
+    setExpandedFaq(expandedFaq === index ? null : index);
   };
 
   return (
-    <View style={styles.container}>
-      {/* Top Header */}
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Top Header Bar */}
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
         <TouchableOpacity onPress={handleBack} style={styles.headerBackBtn} accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
-          <Text style={styles.headerBackText}>
-            {mainTab === 'app' ? 'Mobile Application' : 'Technical Docs'}
+          <Text style={[styles.headerBackText, { color: colors.text }]}>
+            {currentView === 'main' ? 'About' : 
+             currentView === 'mobile' ? 'Mobile Application' :
+             currentView === 'documentation' ? 'Technical Docs' :
+             currentView === 'changelog' ? 'Changelog' : 'Privacy Policy'}
           </Text>
         </TouchableOpacity>
 
-        {/* Main Tab Switcher in Header */}
-        <View style={styles.mainTabPillContainer}>
+        {currentView !== 'main' && (
           <TouchableOpacity 
-            style={[styles.mainTabPill, mainTab === 'app' && styles.mainTabPillActive]}
-            onPress={() => setMainTab('app')}
+            style={[styles.backToAboutPill, { backgroundColor: colors.primary + '15' }]} 
+            onPress={() => setCurrentView('main')}
           >
-            <Text style={[styles.mainTabPillText, mainTab === 'app' && styles.mainTabPillTextActive]}>Mobile App</Text>
+            <Ionicons name="chevron-back" size={16} color={colors.primary} />
+            <Text style={[styles.backToAboutText, { color: colors.primary }]}>Back to About</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.mainTabPill, mainTab === 'docs' && styles.mainTabPillActive]}
-            onPress={() => setMainTab('docs')}
-          >
-            <Text style={[styles.mainTabPillText, mainTab === 'docs' && styles.mainTabPillTextActive]}>Technical Docs</Text>
-          </TouchableOpacity>
-        </View>
+        )}
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.maxWidthContainer}>
 
           {/* ========================================================================= */}
-          {/* TAB 1: MOBILE APPLICATION DOWNLOAD PAGE (Screenshots 1 & 2)              */}
+          {/* VIEW 1: MAIN ABOUT LANDING PAGE (Matches Tarakape /about screenshots)     */}
           {/* ========================================================================= */}
-          {mainTab === 'app' && (
+          {currentView === 'main' && (
             <Animated.View entering={FadeInDown.duration(400)}>
-              {/* Header Hero Card */}
-              <View style={styles.cardHeaderHero}>
-                <View style={styles.iconCircleBg}>
-                  <Ionicons name="phone-portrait-outline" size={32} color={colors.primary} />
+              
+              {/* Section 1: Main Brand Hero & Link Cards */}
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <View style={styles.brandHeaderRow}>
+                  <View style={[styles.brandLogoBg, { backgroundColor: colors.primary + '15' }]}>
+                    <Image 
+                      source={require('../../assets/chefstack_logo.png')} 
+                      style={{ width: 36, height: 36, borderRadius: 10 }} 
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.brandTitleText, { color: colors.text }]}>Ano, ChefStack?</Text>
+                    <Text style={[styles.brandTaglineText, { color: colors.primary }]}>DISCOVER • COOK • ENJOY</Text>
+                  </View>
                 </View>
-                <View style={styles.heroTextWrapper}>
-                  <Text style={styles.heroTitle}>Get ChefStack on your phone</Text>
-                  <Text style={styles.heroVersionBadge}>CURRENT VERSION: V1.3.0</Text>
-                  <Text style={styles.heroDescription}>
-                    Discover, filter, and manage your curated culinary creations directly from your mobile device.
+
+                <Text style={[styles.brandDescriptionText, { color: colors.textSecondary }]}>
+                  ChefStack is a modern recipe finder and manager platform designed to help home cooks discover premium, aesthetic, and delicious culinary creations. Find your perfect recipe, navigate cooking steps seamlessly, and save for offline use.
+                </Text>
+
+                <View style={[styles.statusNoticeBox, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                  <Ionicons name="location-outline" size={18} color={colors.primary} style={{ marginRight: 8 }} />
+                  <Text style={[styles.statusNoticeText, { color: colors.textSecondary }]}>
+                    <Text style={{ fontWeight: '700', color: colors.text }}>Currently serving global home cooks. </Text>
+                    We're continuously expanding our recipe collection.
                   </Text>
                 </View>
-              </View>
 
-              {/* Segmented Platform Toggle (Android | iOS) */}
-              <View style={styles.segmentedContainer}>
-                <TouchableOpacity 
-                  style={[styles.segmentedSegment, appPlatform === 'android' && styles.segmentedSegmentActive]}
-                  onPress={() => setAppPlatform('android')}
-                >
-                  <Text style={[styles.segmentedText, appPlatform === 'android' && styles.segmentedTextActive]}>Android</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.segmentedSegment, appPlatform === 'ios' && styles.segmentedSegmentActive]}
-                  onPress={() => setAppPlatform('ios')}
-                >
-                  <Text style={[styles.segmentedText, appPlatform === 'ios' && styles.segmentedTextActive]}>iOS (iPhone)</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* ANDROID PLATFORM CONTENT */}
-              {appPlatform === 'android' && (
-                <View style={styles.contentSectionCard}>
-                  <View style={styles.sectionHeaderRow}>
-                    <Text style={styles.sectionTitleText}>Android App (Direct APK)</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: '#D1FAE5' }]}>
-                      <Text style={[styles.statusBadgeText, { color: '#065F46' }]}>READY TO INSTALL</Text>
+                {/* 4 Main Link Cards */}
+                <View style={styles.linkCardsContainer}>
+                  <TouchableOpacity 
+                    style={[styles.linkNavCard, { backgroundColor: colors.background, borderColor: colors.borderLight }]}
+                    onPress={() => setCurrentView('mobile')}
+                  >
+                    <View style={styles.linkNavLeft}>
+                      <Ionicons name="phone-portrait-outline" size={20} color={colors.primary} />
+                      <Text style={[styles.linkNavTitle, { color: colors.text }]}>Get ChefStack Mobile App</Text>
                     </View>
-                  </View>
-
-                  <Text style={styles.bodyText}>
-                    Since the Google Play Store release is in progress, you can download and install the Android APK directly on your device.
-                  </Text>
-
-                  {/* Installation Steps Box */}
-                  <View style={styles.stepsCard}>
-                    <Text style={styles.stepsTitle}>INSTALLATION STEPS:</Text>
-                    
-                    <View style={styles.stepItemRow}>
-                      <View style={styles.stepNumberBadge}><Text style={styles.stepNumberText}>1</Text></View>
-                      <Text style={styles.stepDetailText}>
-                        Click the <Text style={{ fontWeight: 'bold' }}>Download Android APK</Text> button below to download the package file.
-                      </Text>
-                    </View>
-
-                    <View style={styles.stepItemRow}>
-                      <View style={styles.stepNumberBadge}><Text style={styles.stepNumberText}>2</Text></View>
-                      <Text style={styles.stepDetailText}>
-                        Open the downloaded file. If prompted with a security alert, select <Text style={{ fontWeight: 'bold' }}>Settings</Text>.
-                      </Text>
-                    </View>
-
-                    <View style={styles.stepItemRow}>
-                      <View style={styles.stepNumberBadge}><Text style={styles.stepNumberText}>3</Text></View>
-                      <Text style={styles.stepDetailText}>
-                        Toggle <Text style={{ fontWeight: 'bold' }}>"Allow from this source"</Text> (Unknown Sources) to grant installation permission, then return and tap <Text style={{ fontWeight: 'bold' }}>Install</Text>.
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Download APK Button */}
-                  <TouchableOpacity style={styles.primaryActionButton} onPress={handleDownloadAPK} activeOpacity={0.85}>
-                    <Ionicons name="download-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                    <Text style={styles.primaryActionButtonText}>Download Android APK</Text>
+                    <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
                   </TouchableOpacity>
 
-                  {/* Alternative Option Card */}
-                  <View style={styles.alternativeCard}>
-                    <Text style={styles.alternativeTitle}>ALTERNATIVE OPTION</Text>
-                    <Text style={styles.alternativeSubtitle}>If you don't want to download the APK file, then:</Text>
-                    <Text style={styles.alternativeBodyText}>Add it to your home screen if you want to use it like an app:</Text>
-                    <Text style={styles.alternativeBullet}>• <Text style={{ fontWeight: 'bold' }}>Android:</Text> Open in Chrome, tap the three-dot menu (top right), then tap "Add to Home Screen".</Text>
-                  </View>
-                </View>
-              )}
-
-              {/* IOS PLATFORM CONTENT */}
-              {appPlatform === 'ios' && (
-                <View style={styles.contentSectionCard}>
-                  <View style={styles.sectionHeaderRow}>
-                    <Text style={styles.sectionTitleText}>iOS (Apple iPhone)</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: '#FEF3C7' }]}>
-                      <Text style={[styles.statusBadgeText, { color: '#92400E' }]}>READY TO PUBLISH</Text>
+                  <TouchableOpacity 
+                    style={[styles.linkNavCard, { backgroundColor: colors.background, borderColor: colors.borderLight }]}
+                    onPress={() => setCurrentView('documentation')}
+                  >
+                    <View style={styles.linkNavLeft}>
+                      <Ionicons name="code-slash-outline" size={20} color={colors.primary} />
+                      <Text style={[styles.linkNavTitle, { color: colors.text }]}>Technical Documentation</Text>
                     </View>
+                    <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={[styles.linkNavCard, { backgroundColor: colors.background, borderColor: colors.borderLight }]}
+                    onPress={() => setCurrentView('changelog')}
+                  >
+                    <View style={styles.linkNavLeft}>
+                      <Ionicons name="git-branch-outline" size={20} color={colors.primary} />
+                      <Text style={[styles.linkNavTitle, { color: colors.text }]}>Version 1.3.0 (Changelog)</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={[styles.linkNavCard, { backgroundColor: colors.background, borderColor: colors.borderLight }]}
+                    onPress={() => setCurrentView('privacy')}
+                  >
+                    <View style={styles.linkNavLeft}>
+                      <Ionicons name="shield-checkmark-outline" size={20} color={colors.primary} />
+                      <Text style={[styles.linkNavTitle, { color: colors.text }]}>Privacy Policy</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Section 2: Quick Preferences & App Settings (Moved here as requested) */}
+              <Text style={[styles.sectionHeading, { color: colors.text }]}>Settings & Preferences</Text>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                
+                {/* Dark Mode Switch Toggle */}
+                <View style={styles.settingRowItem}>
+                  <View style={styles.settingLeftGroup}>
+                    <Ionicons name={isDark ? "moon" : "sunny-outline"} size={22} color={colors.primary} />
+                    <Text style={[styles.settingItemLabel, { color: colors.text }]}>Dark Mode</Text>
                   </View>
+                  <Switch
+                    value={isDark}
+                    onValueChange={toggleTheme}
+                    trackColor={{ false: '#767577', true: colors.primary }}
+                    thumbColor={Platform.OS === 'ios' ? '#fff' : isDark ? colors.surface : '#f4f3f4'}
+                  />
+                </View>
 
-                  <Text style={styles.bodyText}>
-                    Since the Apple App Store package is currently in review, you can add ChefStack to your home screen to use it as a Progressive Web App (PWA).
-                  </Text>
-
-                  <View style={styles.alternativeCard}>
-                    <Text style={styles.alternativeTitle}>Add it to your home screen if you want to use it like an app:</Text>
-                    <Text style={styles.alternativeBullet}>• <Text style={{ fontWeight: 'bold' }}>iPhone:</Text> Open in Safari, tap the Share button, then tap "Add to Home Screen".</Text>
+                <TouchableOpacity 
+                  style={[styles.settingRowItem, { borderTopWidth: 1, borderTopColor: colors.borderLight }]} 
+                  onPress={() => navigation.navigate('Notifications')}
+                >
+                  <View style={styles.settingLeftGroup}>
+                    <Ionicons name="notifications-outline" size={22} color={colors.textSecondary} />
+                    <Text style={[styles.settingItemLabel, { color: colors.text }]}>Notifications</Text>
                   </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
 
-                  <View style={styles.warningAlertCard}>
-                    <Ionicons name="information-circle-outline" size={22} color={colors.textSecondary} style={{ marginRight: 10 }} />
-                    <Text style={styles.warningAlertText}>
-                      Due to Apple's security requirements, native iOS apps can only be distributed through the official App Store. Stay tuned for the official release.
-                    </Text>
+                <TouchableOpacity 
+                  style={[styles.settingRowItem, { borderTopWidth: 1, borderTopColor: colors.borderLight }]} 
+                  onPress={() => setCurrentView('privacy')}
+                >
+                  <View style={styles.settingLeftGroup}>
+                    <Ionicons name="shield-outline" size={22} color={colors.textSecondary} />
+                    <Text style={[styles.settingItemLabel, { color: colors.text }]}>Privacy Settings</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+
+              {/* Section 3: Developer Info (Matches Tarakape /about Maker card) */}
+              <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <View style={styles.developerHeaderRow}>
+                  <View style={[styles.developerAvatar, { backgroundColor: colors.primary }]}>
+                    <Text style={styles.developerAvatarText}>L</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.developerName, { color: colors.text }]}>Louis Neo Lok</Text>
+                    <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>Student Software Engineer | Aspiring Cloud Engineer</Text>
                   </View>
                 </View>
-              )}
+
+                <Text style={[styles.developerBio, { color: colors.textSecondary }]}>
+                  Hi, I'm Louis! I'm a Computer Science student and a builder deeply obsessed with LLMs, Agentic Tools, and Artificial Intelligence. I'm passionate about building clean, helpful web and mobile apps. Outside of tech, I love exploring culinary creations!
+                </Text>
+
+                {/* Support Project Button */}
+                <TouchableOpacity 
+                  style={[styles.supportBtn, { backgroundColor: colors.background, borderColor: colors.borderLight }]}
+                  onPress={() => Linking.openURL('https://www.appbuildersph.com/apps/chefstack')}
+                >
+                  <Ionicons name="heart" size={18} color="#E53E3E" style={{ marginRight: 8 }} />
+                  <Text style={[styles.supportBtnText, { color: colors.text }]}>Support the project</Text>
+                </TouchableOpacity>
+
+                {/* Social Links Grid */}
+                <View style={styles.socialGrid}>
+                  {[
+                    { label: 'Github', icon: 'logo-github', url: 'https://github.com/louisneo' },
+                    { label: 'LinkedIn', icon: 'logo-linkedin', url: 'https://linkedin.com' },
+                    { label: 'Facebook', icon: 'logo-facebook', url: 'https://facebook.com' },
+                    { label: 'Instagram', icon: 'logo-instagram', url: 'https://instagram.com' }
+                  ].map(s => (
+                    <TouchableOpacity 
+                      key={s.label}
+                      style={[styles.socialPill, { backgroundColor: colors.background, borderColor: colors.borderLight }]}
+                      onPress={() => Linking.openURL(s.url).catch(() => {})}
+                    >
+                      <Ionicons name={s.icon} size={18} color={colors.primary} style={{ marginBottom: 4 }} />
+                      <Text style={[styles.socialPillText, { color: colors.text }]}>{s.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Section 4: Report & Feedback (Matches Tarakape /about feedback box) */}
+              <Text style={[styles.sectionHeading, { color: colors.text }]}>Report & Feedback</Text>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, padding: 0 }]}>
+                <TouchableOpacity 
+                  style={[styles.feedbackRow, { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}
+                  onPress={() => openAddRecipe()}
+                >
+                  <View style={styles.feedbackLeft}>
+                    <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
+                    <Text style={[styles.feedbackLabel, { color: colors.text }]}>Suggest a Recipe</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.feedbackRow, { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}
+                  onPress={() => Linking.openURL('mailto:support@chefstack.app?subject=Bug Report')}
+                >
+                  <View style={styles.feedbackLeft}>
+                    <Ionicons name="bug-outline" size={20} color={colors.primary} />
+                    <Text style={[styles.feedbackLabel, { color: colors.text }]}>Report a Bug</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={styles.feedbackRow}
+                  onPress={() => Linking.openURL('mailto:support@chefstack.app?subject=App Feedback')}
+                >
+                  <View style={styles.feedbackLeft}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.primary} />
+                    <Text style={[styles.feedbackLabel, { color: colors.text }]}>Give Feedback</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+
+              {/* Section 5: Frequently Asked Questions (FAQ Accordion) */}
+              <Text style={[styles.sectionHeading, { color: colors.text }]}>Frequently Asked Questions (FAQ)</Text>
+              <View style={{ gap: 10 }}>
+                {[
+                  {
+                    q: 'How does ChefStack offline mode work?',
+                    a: 'ChefStack automatically caches your saved recipes locally using AsyncStorage and Service Workers. When you go offline, the app switches to offline mode instantly.'
+                  },
+                  {
+                    q: 'Is ChefStack free to use?',
+                    a: 'Yes! ChefStack is 100% free for home cooks and food enthusiasts. You can create, edit, and search AI recipes without subscription fees.'
+                  },
+                  {
+                    q: 'Can I use ChefStack as a Guest without signing in?',
+                    a: 'Yes, you can continue as a Guest! Note that guest data is session-based and cleared upon sign out.'
+                  },
+                  {
+                    q: 'How does the AI Chef recipe search work?',
+                    a: 'Our AI Chef feature is powered by Google Gemini AI models to turn natural language prompts (e.g. "quick chicken meryenda in 20 mins") into tailored recipes.'
+                  }
+                ].map((faq, idx) => (
+                  <View key={idx} style={[styles.faqCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                    <TouchableOpacity 
+                      style={styles.faqHeaderBtn} 
+                      onPress={() => toggleFaqItem(idx)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={[styles.faqQuestionText, { color: colors.text }]}>{faq.q}</Text>
+                      <Ionicons name={expandedFaq === idx ? "chevron-up" : "chevron-down"} size={18} color={colors.textMuted} />
+                    </TouchableOpacity>
+
+                    {expandedFaq === idx && (
+                      <Text style={[styles.faqAnswerText, { color: colors.textSecondary }]}>{faq.a}</Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+
             </Animated.View>
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 2: TECHNICAL DOCS PAGE (Screenshots 3, 4 & 5)                          */}
+          {/* VIEW 2: MOBILE APPLICATION PAGE (https://www.tarakape.cc/mobile)            */}
           {/* ========================================================================= */}
-          {mainTab === 'docs' && (
+          {currentView === 'mobile' && (
             <Animated.View entering={FadeInDown.duration(400)}>
-              {/* Docs Top Hero Banner */}
-              <View style={styles.docsHeroBanner}>
-                <Text style={styles.docsPreTitle}>TECHNICAL DOCS</Text>
-                <Text style={styles.docsTitle}>ChefStack Recipe Manager</Text>
-                <Text style={styles.docsSubtitle}>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <View style={styles.heroHeaderRow}>
+                  <View style={[styles.brandLogoBg, { backgroundColor: colors.primary + '15' }]}>
+                    <Ionicons name="phone-portrait-outline" size={32} color={colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.heroTitleText, { color: colors.text }]}>Get ChefStack on your phone</Text>
+                    <Text style={[styles.heroVersionBadgeText, { color: colors.textSecondary }]}>CURRENT VERSION: V1.3.0</Text>
+                  </View>
+                </View>
+                <Text style={[styles.brandDescriptionText, { color: colors.textSecondary }]}>
+                  Discover, filter, and manage your curated culinary creations directly from your mobile device.
+                </Text>
+
+                {/* Segmented Platform Toggle (Android | iOS) */}
+                <View style={[styles.segmentedContainer, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                  <TouchableOpacity 
+                    style={[styles.segmentedSegment, appPlatform === 'android' && { backgroundColor: colors.surface }]}
+                    onPress={() => setAppPlatform('android')}
+                  >
+                    <Text style={[styles.segmentedText, { color: colors.textSecondary }, appPlatform === 'android' && { color: colors.text, fontWeight: '700' }]}>Android</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.segmentedSegment, appPlatform === 'ios' && { backgroundColor: colors.surface }]}
+                    onPress={() => setAppPlatform('ios')}
+                  >
+                    <Text style={[styles.segmentedText, { color: colors.textSecondary }, appPlatform === 'ios' && { color: colors.text, fontWeight: '700' }]}>iOS (iPhone)</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {appPlatform === 'android' ? (
+                  <View>
+                    <View style={styles.sectionHeaderRow}>
+                      <Text style={[styles.subSectionTitle, { color: colors.text }]}>Android App (Direct APK)</Text>
+                      <View style={[styles.statusBadgePill, { backgroundColor: '#D1FAE5' }]}>
+                        <Text style={[styles.statusBadgeText, { color: '#065F46' }]}>READY TO INSTALL</Text>
+                      </View>
+                    </View>
+
+                    <Text style={[styles.bodyNoticeText, { color: colors.textSecondary }]}>
+                      Since Google Play release is in progress, you can download and install the Android APK directly on your device.
+                    </Text>
+
+                    <View style={[styles.stepsBox, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                      <Text style={[styles.stepsBoxTitle, { color: colors.textSecondary }]}>INSTALLATION STEPS:</Text>
+                      <Text style={[styles.stepItemText, { color: colors.text }]}>1. Click the <Text style={{ fontWeight: 'bold' }}>Download Android APK</Text> button below.</Text>
+                      <Text style={[styles.stepItemText, { color: colors.text }]}>2. Open the downloaded file. Select <Text style={{ fontWeight: 'bold' }}>Settings</Text> if security alert shows.</Text>
+                      <Text style={[styles.stepItemText, { color: colors.text }]}>3. Toggle <Text style={{ fontWeight: 'bold' }}>"Allow from this source"</Text>, then tap <Text style={{ fontWeight: 'bold' }}>Install</Text>.</Text>
+                    </View>
+
+                    <TouchableOpacity style={[styles.primaryDownloadBtn, { backgroundColor: colors.primary }]} onPress={handleDownloadAPK}>
+                      <Ionicons name="download-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                      <Text style={styles.primaryDownloadBtnText}>Download Android APK</Text>
+                    </TouchableOpacity>
+
+                    <View style={[styles.alternativeBox, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                      <Text style={[styles.alternativeBoxTitle, { color: colors.textSecondary }]}>ALTERNATIVE OPTION</Text>
+                      <Text style={[styles.alternativeBoxText, { color: colors.text }]}>
+                        • <Text style={{ fontWeight: 'bold' }}>Android:</Text> Open in Chrome, tap three dots (top right), then tap "Add to Home Screen".
+                      </Text>
+                    </View>
+                  </View>
+                ) : (
+                  <View>
+                    <View style={styles.sectionHeaderRow}>
+                      <Text style={[styles.subSectionTitle, { color: colors.text }]}>iOS (Apple iPhone)</Text>
+                      <View style={[styles.statusBadgePill, { backgroundColor: '#FEF3C7' }]}>
+                        <Text style={[styles.statusBadgeText, { color: '#92400E' }]}>READY TO PUBLISH</Text>
+                      </View>
+                    </View>
+                    <View style={[styles.alternativeBox, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                      <Text style={[styles.alternativeBoxText, { color: colors.text }]}>
+                        • <Text style={{ fontWeight: 'bold' }}>iPhone:</Text> Open in Safari, tap Share button, then tap "Add to Home Screen".
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            </Animated.View>
+          )}
+
+          {/* ========================================================================= */}
+          {/* VIEW 3: TECHNICAL DOCS PAGE (https://www.tarakape.cc/documentation)       */}
+          {/* ========================================================================= */}
+          {currentView === 'documentation' && (
+            <Animated.View entering={FadeInDown.duration(400)}>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <Text style={[styles.preTitleLabel, { color: colors.primary }]}>TECHNICAL DOCS</Text>
+                <Text style={[styles.docsHeaderTitle, { color: colors.text }]}>ChefStack Architecture & System Specs</Text>
+                <Text style={[styles.brandDescriptionText, { color: colors.textSecondary }]}>
                   System overview, architecture layers, and technical specifications of the culinary companion app.
                 </Text>
-              </View>
 
-              {/* Sub-tab Navigation (OVERVIEW | FEATURES | ARCHITECTURE) */}
-              <View style={styles.segmentedContainer}>
-                <TouchableOpacity 
-                  style={[styles.segmentedSegment, docTab === 'overview' && styles.segmentedSegmentActive]}
-                  onPress={() => setDocTab('overview')}
-                >
-                  <Text style={[styles.segmentedText, docTab === 'overview' && styles.segmentedTextActive]}>OVERVIEW</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.segmentedSegment, docTab === 'features' && styles.segmentedSegmentActive]}
-                  onPress={() => setDocTab('features')}
-                >
-                  <Text style={[styles.segmentedText, docTab === 'features' && styles.segmentedTextActive]}>FEATURES</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.segmentedSegment, docTab === 'architecture' && styles.segmentedSegmentActive]}
-                  onPress={() => setDocTab('architecture')}
-                >
-                  <Text style={[styles.segmentedText, docTab === 'architecture' && styles.segmentedTextActive]}>ARCHITECTURE</Text>
-                </TouchableOpacity>
-              </View>
+                {/* Sub-tabs OVERVIEW | FEATURES | ARCHITECTURE */}
+                <View style={[styles.segmentedContainer, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                  {['overview', 'features', 'architecture'].map(t => (
+                    <TouchableOpacity 
+                      key={t}
+                      style={[styles.segmentedSegment, docTab === t && { backgroundColor: colors.surface }]}
+                      onPress={() => setDocTab(t)}
+                    >
+                      <Text style={[styles.segmentedText, { color: colors.textSecondary }, docTab === t && { color: colors.text, fontWeight: '700' }]}>
+                        {t.toUpperCase()}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
 
-              {/* SUB-TAB 1: OVERVIEW */}
-              {docTab === 'overview' && (
-                <View style={{ gap: 20 }}>
-                  <View style={styles.contentSectionCard}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                      <Ionicons name="cube-outline" size={24} color={colors.primary} />
-                      <Text style={styles.sectionTitleText}>Platform Summary</Text>
-                    </View>
-                    <Text style={styles.bodyText}>
-                      ChefStack is a location-aware web and mobile system that streamlines recipe management, ingredient tracking, automated parsing, and AI-powered cooking suggestions to match users with their favorite culinary creations.
+                {docTab === 'overview' && (
+                  <View style={{ gap: 16 }}>
+                    <Text style={[styles.subSectionTitle, { color: colors.text }]}>Platform Summary</Text>
+                    <Text style={[styles.bodyNoticeText, { color: colors.textSecondary }]}>
+                      ChefStack is a location-aware web and mobile system that streamlines recipe management, ingredient tracking, automated parsing, and AI-powered cooking suggestions.
                     </Text>
-                  </View>
 
-                  <Text style={styles.groupHeadingText}>TECHNOLOGY STACK</Text>
-                  <View style={styles.techStackGrid}>
-                    {[
-                      { icon: 'phone-portrait', label: 'MOBILE CLIENT', title: 'React Native & Expo', desc: 'Cross-platform mobile app utilizing file-based navigation, reanimated, and local state management.' },
-                      { icon: 'globe', label: 'WEB CLIENT', title: 'React & Expo Web', desc: 'Responsive companion web app optimized for desktop browsers and tablet experience.' },
-                      { icon: 'server', label: 'DATABASE & AUTH', title: 'Supabase (PostgreSQL)', desc: 'PostgreSQL database with Row Level Security (RLS) policies and real-time database subscriptions.' },
-                      { icon: 'cloudy', label: 'EDGE ROUTING', title: 'Cloudflare / Vercel CDN', desc: 'Global CDN caching of heavy database assets and low-latency API response routing.' },
-                      { icon: 'code-working', label: 'SERVERLESS COMPUTE', title: 'Node.js API Routes', desc: 'Serverless API endpoints used to handle secure proxy queries and background tasks.' },
-                      { icon: 'sparkles', label: 'AI GENERATOR', title: 'Google Gemini AI', desc: 'Conversational search engine using LLM models to generate recipes and match ingredients.' },
-                      { icon: 'scan', label: 'OCR PARSER', title: 'OCR Text Recognition', desc: 'Computer vision pipeline used to extract structured ingredient lists and instructions from photos.' },
-                      { icon: 'folder', label: 'OBJECT STORAGE', title: 'Cloud Storage Buckets', desc: 'Secure cloud buckets used for user recipe uploads and food photography.' },
-                    ].map((item, idx) => (
-                      <View key={idx} style={styles.techStackCard}>
-                        <View style={styles.techHeaderRow}>
-                          <Ionicons name={item.icon} size={22} color={colors.primary} />
-                          <Text style={styles.techLabelTag}>{item.label}</Text>
+                    <Text style={[styles.subSectionTitle, { color: colors.text, marginTop: 12 }]}>TECHNOLOGY STACK</Text>
+                    <View style={styles.techGrid}>
+                      {[
+                        { title: 'React Native & Expo', tag: 'MOBILE CLIENT', desc: 'Cross-platform app utilizing navigation, reanimated, and local state management.' },
+                        { title: 'React & Expo Web', tag: 'WEB CLIENT', desc: 'Responsive companion web app optimized for desktop and tablet browsers.' },
+                        { title: 'Supabase (PostgreSQL)', tag: 'DATABASE & AUTH', desc: 'PostgreSQL database with Row Level Security (RLS) policies and realtime sync.' },
+                        { title: 'Cloudflare / Vercel CDN', tag: 'EDGE ROUTING', desc: 'Global CDN caching of heavy database assets and low-latency API routing.' },
+                      ].map((item, i) => (
+                        <View key={i} style={[styles.techCardItem, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                          <Text style={[styles.techCardTag, { color: colors.primary }]}>{item.tag}</Text>
+                          <Text style={[styles.techCardTitle, { color: colors.text }]}>{item.title}</Text>
+                          <Text style={[styles.techCardDesc, { color: colors.textSecondary }]}>{item.desc}</Text>
                         </View>
-                        <Text style={styles.techTitleText}>{item.title}</Text>
-                        <Text style={styles.techDescText}>{item.desc}</Text>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {docTab === 'features' && (
+                  <View style={{ gap: 16 }}>
+                    {[
+                      { title: '"Ask Chef" AI Recipe Recommendations', badge: 'SEMANTIC MATCHING', desc: 'Translates natural language prompts into parameterized searches.' },
+                      { title: 'Menu & Photo Text Extraction', badge: 'OCR PARSING', desc: 'OCR pipeline extracting raw food, drink, and step instructions from photos.' },
+                      { title: 'Offline-First Synchronization', badge: 'REALTIME SYNC', desc: 'Queries local AsyncStorage before fallback to Supabase WebSocket subscriptions.' }
+                    ].map((f, i) => (
+                      <View key={i} style={[styles.techCardItem, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                        <Text style={[styles.techCardTag, { color: colors.primary }]}>{f.badge}</Text>
+                        <Text style={[styles.techCardTitle, { color: colors.text }]}>{f.title}</Text>
+                        <Text style={[styles.techCardDesc, { color: colors.textSecondary }]}>{f.desc}</Text>
                       </View>
                     ))}
                   </View>
-                </View>
-              )}
+                )}
 
-              {/* SUB-TAB 2: FEATURES */}
-              {docTab === 'features' && (
-                <View style={{ gap: 20 }}>
-                  <Text style={styles.groupHeadingText}>KEY FEATURES (SORTED BY COMPLEXITY)</Text>
-
-                  {[
-                    {
-                      badge: 'SEMANTIC CONTEXT MATCHING',
-                      title: '"Ask Chef" AI Recipe Recommendations',
-                      subtitle: 'Processes natural language inputs and queries recipe databases using custom prompt injection protection.',
-                      bullets: [
-                        'Translates unstructured user prompts into parameterized searches.',
-                        'Implements rate-limiting guards inside serverless middleware.',
-                        'Performs context-aware similarity filtering to match cooking preferences.'
-                      ]
-                    },
-                    {
-                      badge: 'OCR INGREDIENT PARSING',
-                      title: 'Menu & Photo Text Extraction',
-                      subtitle: 'OCR pipeline extracting raw food, drink, and step instructions from photos, indexable via full-text search.',
-                      bullets: [
-                        'Indexes structured recipe content into queryable relational columns.',
-                        'Supports semantic substring matching and tokenized text lookups.',
-                        'Returns corresponding culinary entities sorted by relevance.'
-                      ]
-                    },
-                    {
-                      badge: 'SMART CATEGORY ENGINE',
-                      title: 'Real-Time Filtering & Instant Autocomplete',
-                      subtitle: 'Instant filtering system for Ulam, Meryenda, Drinks, and custom tags with zero latency.',
-                      bullets: [
-                        'Provides dynamic autocomplete dropdown suggestions based on saved recipes.',
-                        'Sorts by newest, oldest, and alphabetical ordering instantly.',
-                        'Persists user favorites seamlessly across offline and online modes.'
-                      ]
-                    },
-                    {
-                      badge: 'OFFLINE-FIRST SYNCHRONIZATION',
-                      title: 'Local Caching & Realtime Sync',
-                      subtitle: 'Queries local AsyncStorage before fallback to Supabase WebSocket subscriptions.',
-                      bullets: [
-                        'Generates local UUIDs for offline creation.',
-                        'Subscribes to realtime Postgres changes for live updates.',
-                        'Minimizes network compute footprint by avoiding redundant fetch loops.'
-                      ]
-                    }
-                  ].map((feat, idx) => (
-                    <View key={idx} style={styles.featureDetailCard}>
-                      <View style={styles.featureBadgePill}>
-                        <Ionicons name="sparkles" size={14} color={colors.primary} style={{ marginRight: 6 }} />
-                        <Text style={styles.featureBadgeText}>{feat.badge}</Text>
+                {docTab === 'architecture' && (
+                  <View style={{ gap: 16 }}>
+                    {[
+                      { num: '1', layer: 'Client Layer', desc: 'Executes UI layout threads, handles local state persistence (AsyncStorage), and coordinates realtime recipe updates.' },
+                      { num: '2', layer: 'Edge & Routing Layer', desc: 'Handles global routing, SSL certificate termination, and CDN caching.' },
+                      { num: '3', layer: 'Compute & Integration', desc: 'Handles serverless routing pipelines and runs background extraction scripts.' },
+                      { num: '4', layer: 'Database & Services', desc: 'Provides persistent storage, relational schemas, user authorization pools, and cognitive text models.' }
+                    ].map((l, i) => (
+                      <View key={i} style={[styles.techCardItem, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                        <Text style={[styles.techCardTag, { color: colors.primary }]}>LAYER {l.num}</Text>
+                        <Text style={[styles.techCardTitle, { color: colors.text }]}>{l.layer}</Text>
+                        <Text style={[styles.techCardDesc, { color: colors.textSecondary }]}>{l.desc}</Text>
                       </View>
-                      <Text style={styles.featureCardTitle}>{feat.title}</Text>
-                      <Text style={styles.featureCardSubtitle}>{feat.subtitle}</Text>
-                      <View style={{ gap: 6, marginTop: 10 }}>
-                        {feat.bullets.map((b, bIdx) => (
-                          <Text key={bIdx} style={styles.featureBulletItem}>• {b}</Text>
-                        ))}
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              )}
-
-              {/* SUB-TAB 3: ARCHITECTURE */}
-              {docTab === 'architecture' && (
-                <View style={{ gap: 20 }}>
-                  <Text style={styles.groupHeadingText}>DATA FLOW & LAYERS</Text>
-
-                  {[
-                    {
-                      num: '1',
-                      layer: 'Client Layer',
-                      desc: 'Executes UI layout threads, handles local state persistence (AsyncStorage), and coordinates realtime recipe updates.',
-                      tags: ['React Native (Expo)', 'Expo Web', 'Context API', 'AsyncStorage']
-                    },
-                    {
-                      num: '2',
-                      layer: 'Edge & Routing Layer',
-                      desc: 'Handles global routing, SSL certificate termination, CDN caching of read-heavy database payloads, and middleware rate-limiting checks.',
-                      tags: ['Cloudflare Edge CDN', 'Edge Middleware', 'Cached Response Instance']
-                    },
-                    {
-                      num: '3',
-                      layer: 'Compute & Integration',
-                      desc: 'Handles serverless routing pipelines, executes API proxies, and runs background extraction scripts for recipe generation.',
-                      tags: ['Serverless API', 'AI Proxy Node', 'OCR Parser Engine']
-                    },
-                    {
-                      num: '4',
-                      layer: 'Database & Services',
-                      desc: 'Provides persistent storage, relational schemas, user authorization pools, and cognitive text models.',
-                      tags: ['Supabase PostgreSQL', 'Storage Buckets', 'Gemini AI Engine']
-                    },
-                    {
-                      num: '5',
-                      layer: 'Integration Specifications',
-                      desc: 'API requests route transparently through the Edge CDN before execution. Real-time sync uses dynamic WebSocket channels to keep response times under 100ms.',
-                      tags: ['WebSocket Realtime', 'Row Level Security', '100ms Target Latency']
-                    }
-                  ].map((layer, idx) => (
-                    <View key={idx} style={styles.architectureLayerCard}>
-                      <View style={styles.layerHeaderRow}>
-                        <View style={styles.layerNumCircle}>
-                          <Text style={styles.layerNumText}>{layer.num}</Text>
-                        </View>
-                        <Text style={styles.layerTitleText}>{layer.layer}</Text>
-                      </View>
-                      <Text style={styles.layerDescText}>{layer.desc}</Text>
-                      <View style={styles.tagRowContainer}>
-                        {layer.tags.map((t, tIdx) => (
-                          <View key={tIdx} style={styles.tagBadge}>
-                            <Text style={styles.tagBadgeText}>{t}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              )}
+                    ))}
+                  </View>
+                )}
+              </View>
             </Animated.View>
           )}
 
-          {/* Footer Information */}
-          <View style={styles.footerSection}>
-            <Text style={styles.supportText}>For support or inquiries, email us at support@chefstack.app</Text>
+          {/* ========================================================================= */}
+          {/* VIEW 4: CHANGELOG PAGE (https://www.tarakape.cc/changelog)               */}
+          {/* ========================================================================= */}
+          {currentView === 'changelog' && (
+            <Animated.View entering={FadeInDown.duration(400)}>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <Text style={[styles.preTitleLabel, { color: colors.primary }]}>CHANGELOG</Text>
+                <Text style={[styles.docsHeaderTitle, { color: colors.text }]}>Version History & Release Notes</Text>
 
-            <View style={styles.legalLinksRow}>
-              <TouchableOpacity onPress={() => navigation.navigate('Terms')}>
-                <Text style={styles.legalLinkText}>Terms of Service</Text>
-              </TouchableOpacity>
-              <Text style={styles.legalDot}>•</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Privacy')}>
-                <Text style={styles.legalLinkText}>Privacy Policy</Text>
-              </TouchableOpacity>
-              <Text style={styles.legalDot}>•</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('CookiePolicy')}>
-                <Text style={styles.legalLinkText}>Cookie Policy</Text>
-              </TouchableOpacity>
-            </View>
+                {/* Mobile / Website Toggle Switch */}
+                <View style={[styles.segmentedContainer, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                  <TouchableOpacity 
+                    style={[styles.segmentedSegment, changelogTab === 'mobile' && { backgroundColor: colors.surface }]}
+                    onPress={() => setChangelogTab('mobile')}
+                  >
+                    <Text style={[styles.segmentedText, { color: colors.textSecondary }, changelogTab === 'mobile' && { color: colors.text, fontWeight: '700' }]}>Mobile App</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.segmentedSegment, changelogTab === 'website' && { backgroundColor: colors.surface }]}
+                    onPress={() => setChangelogTab('website')}
+                  >
+                    <Text style={[styles.segmentedText, { color: colors.textSecondary }, changelogTab === 'website' && { color: colors.text, fontWeight: '700' }]}>Website</Text>
+                  </TouchableOpacity>
+                </View>
 
-            <Text style={styles.copyrightText}>© 2026 ChefStack. All rights reserved.</Text>
+                {/* Version 1.3.0 Card */}
+                <View style={[styles.versionBoxCard, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                  <View style={styles.versionHeaderRow}>
+                    <Text style={[styles.versionTitleText, { color: colors.text }]}>Version 1.3.0</Text>
+                    <Text style={[styles.versionDateText, { color: colors.textSecondary }]}>SEPTEMBER 2026</Text>
+                  </View>
+                  
+                  <Text style={[styles.changeCategoryTag, { color: '#10B981' }]}>ADDED</Text>
+                  <Text style={[styles.changeBulletText, { color: colors.text }]}>• Floating bottom navigation pill bar for responsive PC and mobile navigation.</Text>
+                  <Text style={[styles.changeBulletText, { color: colors.text }]}>• Comprehensive About landing page with integrated settings, FAQ, and developer info.</Text>
+                  <Text style={[styles.changeBulletText, { color: colors.text }]}>• Direct APK download asset and PWA installation steps.</Text>
+                  <Text style={[styles.changeBulletText, { color: colors.text }]}>• Interactive recipe filter panel with max cooking time range slider.</Text>
+
+                  <Text style={[styles.changeCategoryTag, { color: '#3B82F6', marginTop: 10 }]}>IMPROVED</Text>
+                  <Text style={[styles.changeBulletText, { color: colors.text }]}>• Isolated Guest Mode: guest sessions start clean with zero default recipes.</Text>
+                  <Text style={[styles.changeBulletText, { color: colors.text }]}>• Resolved recipe deletion errors in offline/guest modes.</Text>
+                </View>
+
+                {/* Version 1.0.0 Card (AppBuilders PH Release) */}
+                <View style={[styles.versionBoxCard, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+                  <View style={styles.versionHeaderRow}>
+                    <Text style={[styles.versionTitleText, { color: colors.text }]}>Version 1.0.0</Text>
+                    <Text style={[styles.versionDateText, { color: colors.textSecondary }]}>JUNE 8, 2026</Text>
+                  </View>
+                  <Text style={[styles.changeCategoryTag, { color: '#10B981' }]}>ADDED</Text>
+                  <Text style={[styles.changeBulletText, { color: colors.text }]}>• Initial public release on AppBuilders PH (https://www.appbuildersph.com/apps/chefstack).</Text>
+                  <Text style={[styles.changeBulletText, { color: colors.text }]}>• Smart AI recipe generation powered by Google Gemini Flash.</Text>
+                  <Text style={[styles.changeBulletText, { color: colors.text }]}>• Full offline caching with Service Workers and AsyncStorage.</Text>
+                </View>
+
+              </View>
+            </Animated.View>
+          )}
+
+          {/* ========================================================================= */}
+          {/* VIEW 5: PRIVACY POLICY PAGE (https://www.tarakape.cc/privacy)             */}
+          {/* ========================================================================= */}
+          {currentView === 'privacy' && (
+            <Animated.View entering={FadeInDown.duration(400)}>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <Text style={[styles.preTitleLabel, { color: colors.primary }]}>PRIVACY POLICY</Text>
+                <Text style={[styles.docsHeaderTitle, { color: colors.text }]}>Data Privacy & Local Storage Guarantee</Text>
+                <Text style={[styles.brandDescriptionText, { color: colors.textSecondary }]}>
+                  At ChefStack, we respect your privacy. All your guest data and offline recipes remain stored safely on your local device. We do not sell or track your personal information.
+                </Text>
+              </View>
+            </Animated.View>
+          )}
+
+          {/* Footer Info */}
+          <View style={[styles.footerContainer, { borderTopColor: colors.borderLight }]}>
+            <Text style={[styles.footerSupportText, { color: colors.textSecondary }]}>
+              For support or feedback, reach out at <Text style={{ fontWeight: '700', color: colors.primary }}>support@chefstack.app</Text>
+            </Text>
           </View>
 
         </View>
@@ -419,17 +611,14 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.surface,
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
   },
   headerBackBtn: {
     flexDirection: 'row',
@@ -438,32 +627,19 @@ const styles = StyleSheet.create({
   },
   headerBackText: {
     fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
+    fontWeight: '800',
   },
-  mainTabPillContainer: {
+  backToAboutPill: {
     flexDirection: 'row',
-    backgroundColor: colors.background,
-    borderRadius: 20,
-    padding: 3,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  mainTabPill: {
-    paddingHorizontal: 14,
+    alignItems: 'center',
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    gap: 4,
   },
-  mainTabPillActive: {
-    backgroundColor: colors.primary,
-  },
-  mainTabPillText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  mainTabPillTextActive: {
-    color: '#FFFFFF',
+  backToAboutText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   scrollContent: {
     paddingVertical: 24,
@@ -473,427 +649,375 @@ const styles = StyleSheet.create({
   },
   maxWidthContainer: {
     width: '100%',
-    maxWidth: 840,
+    maxWidth: 720,
   },
 
-  /* Hero Cards */
-  cardHeaderHero: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: colors.surface,
+  /* Card Sections */
+  cardSection: {
     borderRadius: 20,
     padding: 24,
     borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: 20,
-    gap: 16,
-  },
-  iconCircleBg: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: colors.primary + '15',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  heroTextWrapper: {
-    flex: 1,
-  },
-  heroTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  heroVersionBadge: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.textSecondary,
-    letterSpacing: 0.5,
-    marginBottom: 8,
-  },
-  heroDescription: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-
-  /* Segmented Toggles */
-  segmentedContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
     marginBottom: 20,
   },
-  segmentedSegment: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
-  },
-  segmentedSegmentActive: {
-    backgroundColor: colors.background,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  segmentedText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  segmentedTextActive: {
-    color: colors.text,
-    fontWeight: '700',
-  },
-
-  /* Sections */
-  contentSectionCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: 20,
-  },
-  sectionHeaderRow: {
+  brandHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 12,
     marginBottom: 12,
   },
-  sectionTitleText: {
-    fontSize: 18,
+  brandLogoBg: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandTitleText: {
+    fontSize: 22,
     fontWeight: '800',
-    color: colors.text,
   },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusBadgeText: {
+  brandTaglineText: {
     fontSize: 11,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
-  bodyText: {
+  brandDescriptionText: {
     fontSize: 14,
-    color: colors.textSecondary,
     lineHeight: 22,
     marginBottom: 16,
   },
-
-  /* Steps Box */
-  stepsCard: {
-    backgroundColor: colors.background,
-    borderRadius: 16,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: 20,
-    gap: 12,
-  },
-  stepsTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: colors.textSecondary,
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  stepItemRow: {
+  statusNoticeBox: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  stepNumberBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
     alignItems: 'center',
-    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 20,
   },
-  stepNumberText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  stepDetailText: {
+  statusNoticeText: {
     flex: 1,
     fontSize: 13,
-    color: colors.text,
     lineHeight: 18,
   },
 
-  primaryActionButton: {
+  /* Link Navigation Cards */
+  linkCardsContainer: {
+    gap: 10,
+  },
+  linkNavCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  linkNavLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  linkNavTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
+  /* Section Headings */
+  sectionHeading: {
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 12,
+    marginTop: 8,
+  },
+
+  /* Settings Rows */
+  settingRowItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+  },
+  settingLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  settingItemLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+
+  /* Developer Info */
+  developerHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  developerAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  developerAvatarText: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  developerName: {
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  developerTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  developerBio: {
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  supportBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 14,
+  },
+  supportBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  socialGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  socialPill: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  socialPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  /* Report & Feedback */
+  feedbackRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+  },
+  feedbackLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  feedbackLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
+  /* FAQ Accordion */
+  faqCard: {
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+  },
+  faqHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  faqQuestionText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '700',
+    paddingRight: 10,
+  },
+  faqAnswerText: {
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+
+  /* Sub-view Styling */
+  preTitleLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  docsHeaderTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
+  heroHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  heroTitleText: {
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  heroVersionBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  segmentedContainer: {
+    flexDirection: 'row',
+    borderRadius: 14,
+    padding: 4,
+    borderWidth: 1,
+    marginVertical: 16,
+  },
+  segmentedSegment: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  segmentedText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  subSectionTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  statusBadgePill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  statusBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  bodyNoticeText: {
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: 12,
+  },
+  stepsBox: {
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    marginBottom: 16,
+    gap: 8,
+  },
+  stepsBoxTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  stepItemText: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  primaryDownloadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 14,
     borderRadius: 14,
-    marginBottom: 20,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    marginBottom: 16,
   },
-  primaryActionButtonText: {
+  primaryDownloadBtnText: {
     color: '#FFFFFF',
     fontWeight: '700',
     fontSize: 15,
   },
-
-  alternativeCard: {
-    backgroundColor: colors.background,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: 12,
-  },
-  alternativeTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: colors.textSecondary,
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  alternativeSubtitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  alternativeBodyText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginBottom: 6,
-  },
-  alternativeBullet: {
-    fontSize: 13,
-    color: colors.text,
-    lineHeight: 18,
-  },
-
-  warningAlertCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.background,
+  alternativeBox: {
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: colors.borderLight,
   },
-  warningAlertText: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 18,
-  },
-
-  /* Technical Docs Components */
-  docsHeroBanner: {
-    marginBottom: 20,
-  },
-  docsPreTitle: {
-    fontSize: 12,
+  alternativeBoxTitle: {
+    fontSize: 11,
     fontWeight: '800',
-    color: colors.primary,
-    letterSpacing: 1,
     marginBottom: 4,
   },
-  docsTitle: {
-    fontSize: 26,
+  alternativeBoxText: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  techGrid: {
+    gap: 10,
+  },
+  techCardItem: {
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+  },
+  techCardTag: {
+    fontSize: 10,
     fontWeight: '800',
-    color: colors.text,
-    marginBottom: 6,
+    marginBottom: 4,
   },
-  docsSubtitle: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 20,
+  techCardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 2,
   },
-
-  groupHeadingText: {
+  techCardDesc: {
     fontSize: 12,
-    fontWeight: '800',
-    color: colors.textSecondary,
-    letterSpacing: 1,
-    marginBottom: 12,
-    marginTop: 8,
+    lineHeight: 17,
   },
-  techStackGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  techStackCard: {
-    width: Platform.OS === 'web' ? '48.5%' : '100%',
-    backgroundColor: colors.surface,
-    borderRadius: 16,
+  versionBoxCard: {
+    borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: colors.borderLight,
+    marginBottom: 12,
   },
-  techHeaderRow: {
+  versionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 8,
   },
-  techLabelTag: {
+  versionTitleText: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  versionDateText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  changeCategoryTag: {
     fontSize: 10,
     fontWeight: '800',
-    color: colors.primary,
-    letterSpacing: 0.5,
-  },
-  techTitleText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.text,
     marginBottom: 4,
   },
-  techDescText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    lineHeight: 17,
-  },
-
-  featureDetailCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 18,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  featureBadgePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: colors.primary + '15',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  featureBadgeText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: colors.primary,
-    letterSpacing: 0.5,
-  },
-  featureCardTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  featureCardSubtitle: {
+  changeBulletText: {
     fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 18,
-  },
-  featureBulletItem: {
-    fontSize: 13,
-    color: colors.text,
-    lineHeight: 18,
-  },
-
-  architectureLayerCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 18,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  layerHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 8,
-  },
-  layerNumCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.primary + '20',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  layerNumText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: colors.primary,
-  },
-  layerTitleText: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  layerDescText: {
-    fontSize: 13,
-    color: colors.textSecondary,
     lineHeight: 19,
-    marginBottom: 12,
   },
-  tagRowContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  tagBadge: {
-    backgroundColor: colors.background,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  tagBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-
-  /* Footer */
-  footerSection: {
+  footerContainer: {
     alignItems: 'center',
-    marginTop: 32,
-    paddingTop: 20,
+    marginTop: 24,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: colors.borderLight,
-    gap: 12,
   },
-  supportText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  legalLinksRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  legalLinkText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  legalDot: {
-    color: colors.textMuted,
-  },
-  copyrightText: {
+  footerSupportText: {
     fontSize: 12,
-    color: colors.textMuted,
+    textAlign: 'center',
   }
 });
