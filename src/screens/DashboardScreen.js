@@ -283,7 +283,7 @@ export default function DashboardScreen({ navigation, route }) {
                     </View>
 
                     {/* Interactive Cooking Time Slider Track */}
-                    <View style={styles.sliderTrackContainer}>
+                    <View style={[styles.sliderTrackContainer, { marginHorizontal: 9 }]}>
                       <View style={[styles.sliderTrackBg, { backgroundColor: colors.borderLight }]} />
                       <View style={[
                         styles.sliderTrackFill, 
@@ -296,7 +296,8 @@ export default function DashboardScreen({ navigation, route }) {
                         styles.sliderThumbDot, 
                         { 
                           backgroundColor: colors.primary,
-                          left: maxCookingTime === 0 ? '96%' : `${Math.max(2, Math.min(94, (maxCookingTime / 60) * 100))}%`
+                          left: maxCookingTime === 0 ? '100%' : `${Math.max(0, Math.min(100, (maxCookingTime / 60) * 100))}%`,
+                          marginLeft: -9,
                         }
                       ]} />
                     </View>

@@ -13,13 +13,13 @@ export const themeColors = {
   light: {
     ...shared,
     background: '#F8FAFC', // Slate-50 background
-    surface: '#FFFFFF',
+    surface: 'antiquewhite',
     text: '#0F172A', // Slate-900 heading
     textSecondary: '#475569', // Slate-600
     textMuted: '#94A3B8', // Slate-400
     border: '#E2E8F0', // Slate-200
     borderLight: '#F1F5F9', // Slate-100
-    card: '#FFFFFF',
+    card: 'antiquewhite',
   },
   dark: {
     ...shared,

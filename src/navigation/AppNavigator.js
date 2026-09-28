@@ -35,7 +35,7 @@ function AddPlaceholder() { return null; }
 
 // Floating Bottom Navigation Bar Component (Matches screenshot design)
 function FloatingTabBar({ state, descriptors, navigation }) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
 
@@ -47,6 +47,11 @@ function FloatingTabBar({ state, descriptors, navigation }) {
           backgroundColor: colors.surface, 
           borderColor: colors.borderLight,
           width: isDesktop ? 500 : '90%',
+          shadowColor: isDark ? '#ffffff' : '#000000',
+          shadowOpacity: isDark ? 0.1 : 0.08,
+          shadowOffset: { width: 0, height: 4 },
+          shadowRadius: 12,
+          elevation: 10,
         }
       ]}>
         {state.routes.map((route, index) => {
