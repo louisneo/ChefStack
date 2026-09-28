@@ -7,36 +7,44 @@ export default function PageHeader({ title, subtitle, icon, onBack, rightCompone
   const { colors } = useTheme();
   
   return (
-    <View style={[styles.header, !noBorder && { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}>
-      <View style={styles.headerLeft}>
-        {onBack && (
-          <TouchableOpacity onPress={onBack} style={[styles.backBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
-            <Ionicons name="arrow-back" size={20} color={colors.text} />
-          </TouchableOpacity>
-        )}
-        <View style={styles.headerTitleGroup}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{title}</Text>
-          {subtitle && (
-            <View style={styles.dateGroup}>
-              <Ionicons name={icon || "information-circle-outline"} size={14} color={colors.textMuted} />
-              <Text style={[styles.dateText, { color: colors.textMuted }]}>{subtitle}</Text>
-            </View>
+    <View style={[styles.headerContainer, !noBorder && { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}>
+      <View style={styles.innerWrapper}>
+        <View style={styles.headerLeft}>
+          {onBack && (
+            <TouchableOpacity onPress={onBack} style={[styles.backBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+              <Ionicons name="arrow-back" size={20} color={colors.text} />
+            </TouchableOpacity>
           )}
+          <View style={styles.headerTitleGroup}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{title}</Text>
+            {subtitle && (
+              <View style={styles.dateGroup}>
+                <Ionicons name={icon || "information-circle-outline"} size={14} color={colors.textMuted} />
+                <Text style={[styles.dateText, { color: colors.textMuted }]}>{subtitle}</Text>
+              </View>
+            )}
+          </View>
         </View>
+        {rightComponent}
       </View>
-      {rightComponent}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
+  headerContainer: {
+    width: '100%',
+    zIndex: 10,
+  },
+  innerWrapper: {
+    width: '100%',
+    maxWidth: 1100,
+    alignSelf: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    zIndex: 10,
   },
   headerLeft: {
     flexDirection: 'row',
