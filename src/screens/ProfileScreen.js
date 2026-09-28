@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import PageHeader from '../components/PageHeader';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -48,15 +49,7 @@ export default function ProfileScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.webWrapper}>
         {/* Header */}
-        <View style={[styles.header, { backgroundColor: colors.background }]}>
-          <TouchableOpacity onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')} style={styles.headerBtn}>
-            <Ionicons name="arrow-back" size={28} color={colors.text} />
-          </TouchableOpacity>
-          <View style={styles.titleContainer}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
-          </View>
-          <View style={{ width: 44 }} />
-        </View>
+        <PageHeader title="Profile" subtitle="Manage your account" icon="person-outline" onBack={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')} />
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.formContainer}>

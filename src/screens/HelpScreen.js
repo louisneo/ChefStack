@@ -10,7 +10,9 @@ import {
   Platform
 } from 'react-native';
 import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import PageHeader from '../components/PageHeader';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -35,6 +37,7 @@ const FAQS = [
 ];
 
 export default function HelpScreen() {
+  const { colors, isDark } = useTheme();
   const navigation = useNavigation();
   const [openFaq, setOpenFaq] = useState(null);
 
@@ -44,21 +47,13 @@ export default function HelpScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={28} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.titleContainer}>
-          <Text style={styles.headerTitle}>Help & Support</Text>
-        </View>
-        <View style={{ width: 44 }} />
-      </View>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <PageHeader title="Help & Support" subtitle="App Version 1.3.0" icon="help-buoy-outline" onBack={handleBack} />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { backgroundColor: colors.background }]}>
         <View style={styles.formContainer}>
-          <Animated.View entering={FadeInDown.duration(400)} style={styles.section}>
-            <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+          <Animated.View entering={FadeInDown.duration(400)} style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Frequently Asked Questions</Text>
             <View style={styles.faqList}>
               {FAQS.map((faq, i) => (
                 <View key={i} style={styles.faqItemContainer}>
@@ -85,8 +80,8 @@ export default function HelpScreen() {
             </View>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.section}>
-            <Text style={styles.sectionTitle}>Video Tutorials</Text>
+          <Animated.View entering={FadeInDown.delay(100).duration(400)} style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Video Tutorials</Text>
             <View style={styles.videoList}>
               {['Getting Started', 'Managing Recipes'].map((title, index) => (
                 <TouchableOpacity key={index} style={styles.videoItem}>

@@ -9,11 +9,14 @@ import {
   Platform
 } from 'react-native';
 import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import PageHeader from '../components/PageHeader';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export default function NotificationsScreen() {
+  const { colors, isDark } = useTheme();
   const navigation = useNavigation();
   const [pushNotifs, setPushNotifs] = useState(true);
   const [emailNotifs, setEmailNotifs] = useState(false);
@@ -28,16 +31,8 @@ export default function NotificationsScreen() {
   ];
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={28} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.titleContainer}>
-          <Text style={styles.headerTitle}>Notifications</Text>
-        </View>
-        <View style={{ width: 44 }} />
-      </View>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <PageHeader title="Notifications" subtitle="Manage your alerts" icon="notifications-outline" onBack={handleBack} />
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.formContainer}>

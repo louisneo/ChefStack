@@ -15,6 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useRecipes } from '../context/RecipeContext';
 import { Ionicons } from '@expo/vector-icons';
+import PageHeader from '../components/PageHeader';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -77,27 +78,20 @@ export default function AboutScreen({ route }) {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Top Header Bar */}
-      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
-        <TouchableOpacity onPress={handleBack} style={styles.headerBackBtn} accessibilityLabel="Go back">
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-          <Text style={[styles.headerBackText, { color: colors.text }]}>
-            {currentView === 'main' ? 'About' : 
-             currentView === 'mobile' ? 'Mobile Application' :
-             currentView === 'documentation' ? 'Technical Docs' :
-             currentView === 'changelog' ? 'Changelog' : 'Privacy Policy'}
-          </Text>
-        </TouchableOpacity>
-
-        {currentView !== 'main' && (
-          <TouchableOpacity 
-            style={[styles.backToAboutPill, { backgroundColor: colors.primary + '15' }]} 
-            onPress={() => setCurrentView('main')}
-          >
-            <Ionicons name="chevron-back" size={16} color={colors.primary} />
-            <Text style={[styles.backToAboutText, { color: colors.primary }]}>Back to About</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      <PageHeader 
+        title={currentView === 'main' ? 'About ChefStack' : currentView === 'mobile' ? 'Mobile App' : currentView === 'documentation' ? 'Technical Docs' : currentView === 'changelog' ? 'Changelog' : 'Privacy Policy'}
+        subtitle="Version 1.3.0"
+        icon="information-circle-outline"
+        onBack={handleBack}
+        rightComponent={
+          currentView !== 'main' ? (
+            <TouchableOpacity style={[styles.backToAboutPill, { backgroundColor: colors.primary + '15' }]} onPress={() => setCurrentView('main')}>
+              <Ionicons name="chevron-back" size={16} color={colors.primary} />
+              <Text style={[styles.backToAboutText, { color: colors.primary }]}>Back</Text>
+            </TouchableOpacity>
+          ) : null
+        }
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.maxWidthContainer}>
