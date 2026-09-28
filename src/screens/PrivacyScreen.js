@@ -8,15 +8,80 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuth } from '../context/AuthContext';
 
+const POLICY_SECTIONS = [
+  {
+    id: 'intro',
+    icon: 'information-circle',
+    title: 'Introduction',
+    content: 'Welcome to ChefStack ("the Platform", "we", "our", or "us"). We are committed to protecting your privacy and handling your information responsibly. This Privacy Policy explains what information we collect, how we use it, and the choices available to you when using our website and mobile application.\n\nBy accessing or using ChefStack, you agree to the practices described in this Privacy Policy.'
+  },
+  {
+    id: 'collect',
+    icon: 'book',
+    title: 'Information We Collect',
+    content: 'Information You Provide:\n• Name and profile information\n• Email address\n• Recipes, ingredients, and feedback\n• Information submitted through forms\n\nAutomatically Collected Information:\n• Device information (device type, OS, browser type)\n• IP address\n• General usage information and activity within the Platform\n• Analytics and crash reports'
+  },
+  {
+    id: 'use',
+    icon: 'shield-checkmark',
+    title: 'How We Use Information',
+    content: 'We use collected information to:\n• Provide and maintain the Platform and its features\n• Personalize recommendations and AI searches\n• Improve user experience and platform performance\n• Monitor security, reliability, and system health\n• Respond to inquiries and provide support'
+  },
+  {
+    id: 'share',
+    icon: 'share-social',
+    title: 'Information Sharing and Disclosure',
+    content: 'We do NOT sell your personal information.\n\nWe may share information in the following situations:\n• With service providers that help operate the Platform (hosting, analytics, auth, and AI processing)\n• When required by law, legal process, or official government requests\n• To protect the rights, property, safety, and security of our users and the Platform'
+  },
+  {
+    id: 'third',
+    icon: 'document-text',
+    title: 'Third-Party Services',
+    content: 'ChefStack uses third-party services and technologies to deliver features and improve experience (such as Supabase for authentication and Google Gemini for AI). These services process data according to their own privacy policies. We encourage users to review the privacy practices of these third-party providers.'
+  },
+  {
+    id: 'ugc',
+    icon: 'person-add',
+    title: 'User-Generated Content',
+    content: 'The Platform allows you to submit user-generated content, including recipes, notes, and photos.\n\nImportant Warning: Any content you submit may be visible to other users if shared publicly. Please avoid sharing sensitive or confidential information in public fields.'
+  },
+  {
+    id: 'retention',
+    icon: 'sync',
+    title: 'Data Retention',
+    content: 'We retain information only for as long as necessary to provide the services, resolve disputes, enforce agreements, and maintain security. Once no longer needed, data is deleted, anonymized, or aggregated.'
+  },
+  {
+    id: 'security',
+    icon: 'lock-closed',
+    title: 'Data Security',
+    content: 'We implement administrative, technical, and organizational safeguards designed to protect your information from unauthorized access, loss, or alteration.\n\n* While we strive to protect your data, no method of transmission over the internet can be guaranteed 100% secure.'
+  },
+  {
+    id: 'children',
+    icon: 'scale',
+    title: "Children's Privacy",
+    content: 'ChefStack is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If discovered, we will take steps to remove such records immediately.'
+  },
+  {
+    id: 'contact',
+    icon: 'mail',
+    title: 'Contact Us',
+    content: 'If you have questions, concerns, or requests regarding this Privacy Policy, please contact the developer:\n\nLouis Neo Lok\nFull Stack AI Engineer, ChefStack'
+  }
+];
+
 export default function PrivacyScreen() {
   const navigation = useNavigation();
   const { signOut, user } = useAuth();
+  const { colors } = useTheme();
+  
   const [profileVisible, setProfileVisible] = useState(true);
   const [activityStatus, setActivityStatus] = useState(true);
   const [dataCollection, setDataCollection] = useState(false);
@@ -47,8 +112,8 @@ export default function PrivacyScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
         <TouchableOpacity 
           onPress={handleBack} 
           style={styles.headerBtn}
@@ -58,7 +123,7 @@ export default function PrivacyScreen() {
           <Ionicons name="arrow-back" size={28} color={colors.text} />
         </TouchableOpacity>
         <View style={styles.titleContainer}>
-          <Text style={styles.headerTitle}>Privacy Policy & Settings</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Privacy Policy</Text>
         </View>
         <View style={{ width: 44 }} />
       </View>
@@ -66,59 +131,60 @@ export default function PrivacyScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.formContainer}>
           <Animated.View entering={FadeInDown.duration(400)}>
-            <Text style={styles.lastUpdated}>Last Updated: September 7, 2026</Text>
-
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Privacy Controls</Text>
-              {SETTINGS.map(({ label, desc, val, set }) => (
-                <View key={label} style={styles.settingItem}>
-                  <View style={styles.settingTextContainer}>
-                    <Text style={styles.settingLabel}>{label}</Text>
-                    <Text style={styles.settingDesc}>{desc}</Text>
-                  </View>
-                  <Switch
-                    trackColor={{ false: colors.border, true: colors.primaryActive }}
-                    thumbColor={val ? colors.primary : colors.surface}
-                    ios_backgroundColor={colors.borderLight}
-                    onValueChange={() => set(!val)}
-                    value={val}
-                    accessibilityLabel={label}
-                  />
+            
+            {/* Settings block can remain at top or we can just focus on privacy policy. Let's keep it under a settings title */}
+            <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+              <View style={[styles.sectionHeader, { borderBottomColor: colors.borderLight }]}>
+                <View style={[styles.iconWrapper, { backgroundColor: colors.primaryLight, borderColor: colors.primaryLight }]}>
+                  <Ionicons name="settings" size={16} color={colors.primary} />
                 </View>
-              ))}
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Privacy Controls</Text>
+              </View>
+              <View style={styles.sectionBody}>
+                {SETTINGS.map(({ label, desc, val, set }, index) => (
+                  <View key={label} style={[styles.settingItem, index === SETTINGS.length - 1 && { borderBottomWidth: 0 }, { borderBottomColor: colors.borderLight }]}>
+                    <View style={styles.settingTextContainer}>
+                      <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
+                      <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>{desc}</Text>
+                    </View>
+                    <Switch
+                      trackColor={{ false: colors.border, true: colors.primaryActive }}
+                      thumbColor={val ? colors.primary : colors.card}
+                      ios_backgroundColor={colors.borderLight}
+                      onValueChange={() => set(!val)}
+                      value={val}
+                    />
+                  </View>
+                ))}
+              </View>
             </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>1. Personal Data Collection</Text>
-              <Text style={styles.paragraph}>
-                ChefStack collects your email address and account credentials strictly for user authentication via Supabase. We do not sell your personal information to third parties.
-              </Text>
-            </View>
+            <Text style={[styles.lastUpdated, { color: colors.textMuted }]}>Effective Date: September 28, 2026</Text>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>2. AI Processing & Gemini API</Text>
-              <Text style={styles.paragraph}>
-                Recipe generation inputs are processed securely by Google Gemini API endpoints. Prompts sent to the AI model do not include personal account identifiers.
-              </Text>
-            </View>
-
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>3. User Rights & Data Erasure</Text>
-              <Text style={styles.paragraph}>
-                Under GDPR, CCPA, and applicable data protection regulations (including PH RA 10173), you have the right to inspect, export, or request immediate deletion of all personal data held by ChefStack.
-              </Text>
-            </View>
+            {POLICY_SECTIONS.map((sec) => (
+              <View key={sec.id} style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+                <View style={[styles.sectionHeader, { borderBottomColor: colors.borderLight }]}>
+                  <View style={[styles.iconWrapper, { backgroundColor: colors.primaryLight, borderColor: colors.primaryLight }]}>
+                    <Ionicons name={sec.icon} size={16} color={colors.primary} />
+                  </View>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>{sec.title}</Text>
+                </View>
+                <View style={styles.sectionBody}>
+                  <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
+                    {sec.content}
+                  </Text>
+                </View>
+              </View>
+            ))}
 
             <View style={styles.dangerZone}>
               <TouchableOpacity 
-                style={styles.deleteButton}
+                style={[styles.deleteButton, { backgroundColor: colors.errorBackground, borderColor: colors.error }]}
                 onPress={handleDeleteAccount}
-                accessibilityLabel="Delete Account and Data"
-                accessibilityRole="button"
               >
-                <Text style={styles.deleteButtonText}>Request Account Deletion</Text>
+                <Text style={[styles.deleteButtonText, { color: colors.error }]}>Request Account Deletion</Text>
               </TouchableOpacity>
-              <Text style={styles.deleteDesc}>Permanently removes your account data from cloud & local storage</Text>
+              <Text style={[styles.deleteDesc, { color: colors.textSecondary }]}>Permanently removes your account data from cloud & local storage</Text>
             </View>
           </Animated.View>
         </View>
@@ -130,17 +196,14 @@ export default function PrivacyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.surface,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
     height: 60,
   },
   headerBtn: {
@@ -159,63 +222,78 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
+    fontWeight: '800',
   },
   content: {
     padding: 24,
     alignItems: 'center',
+    paddingBottom: 60,
   },
   formContainer: {
     width: '100%',
     maxWidth: 750,
   },
   lastUpdated: {
-    fontSize: 13,
-    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: '700',
     marginBottom: 20,
+    marginLeft: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   section: {
-    backgroundColor: colors.surface,
     borderRadius: 16,
-    padding: 20,
-    borderWidth: 1.5,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
     marginBottom: 20,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  iconWrapper: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 14,
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  sectionBody: {
+    padding: 16,
   },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
   },
   settingTextContainer: {
     flex: 1,
     marginRight: 16,
   },
   settingLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 2,
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 4,
   },
   settingDesc: {
     fontSize: 13,
-    color: colors.textSecondary,
     lineHeight: 18,
   },
   paragraph: {
     fontSize: 14,
-    color: colors.textSecondary,
     lineHeight: 22,
+    fontWeight: '500',
   },
   dangerZone: {
     marginTop: 20,
@@ -223,21 +301,18 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     width: '100%',
-    backgroundColor: colors.errorBackground,
     borderWidth: 1.5,
-    borderColor: '#EF4444',
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   deleteButtonText: {
-    color: colors.error || '#EF4444',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
   },
   deleteDesc: {
-    color: colors.textSecondary,
     fontSize: 13,
+    fontWeight: '500',
   }
 });
