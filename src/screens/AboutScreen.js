@@ -232,12 +232,12 @@ export default function AboutScreen({ route }) {
                   <View style={{ flex: 1, paddingRight: 180 }}>
                     <View style={styles.developerHeaderRow}>
                       <Image 
-                        source={{ uri: 'https://avatars.githubusercontent.com/u/225991575?v=4' }} 
+                        source={require('../../assets/profile.png')} 
                         style={styles.developerAvatarImg} 
                       />
                       <View style={{ flex: 1 }}>
                         <Text style={[styles.developerName, { color: colors.text }]}>Louis Neo Lok</Text>
-                        <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>Full Stack AI Engineer</Text>
+                        <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>Student Full-Stack Developer | Aspiring Software Engineer</Text>
                       </View>
                     </View>
 
