@@ -23,7 +23,7 @@ const POLICY_SECTIONS = [
   { id: 'retention', icon: 'sync-outline', title: 'Data Retention', content: 'We retain information only for as long as necessary to provide our recipe and AI services, resolve disputes, enforce agreements, and maintain security. Once no longer needed, data is deleted, anonymized, or aggregated. Local guest data is cleared if the app is uninstalled.' },
   { id: 'security', icon: 'lock-closed-outline', title: 'Data Security', content: 'We implement administrative, technical, and organizational safeguards designed to protect your information from unauthorized access, loss, or alteration. Authentication is securely handled via industry-standard protocols.\n\n* While we strive to protect your data, no method of transmission over the internet can be guaranteed 100% secure.' },
   { id: 'children', icon: 'scale-outline', title: "Children's Privacy", content: 'ChefStack is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If discovered, we will take steps to remove such records immediately.' },
-  { id: 'contact', icon: 'mail-outline', title: 'Contact Us', content: 'If you have questions, concerns, or data deletion requests regarding this Privacy Policy, please contact the developer:\n\nLouis Neo Lok\nFull-Stack Developer | Aspiring Software Engineer\nsupport@chefstack.app' }
+  { id: 'contact', icon: 'mail-outline', title: 'Contact Us', content: 'If you have questions, concerns, or data deletion requests regarding this Privacy Policy, please contact the developer:\n\nLouis Neo Lok\nFull-Stack Developer | Aspiring Software Engineer\nlouisneolok@gmail.com' }
 ];
 
 export default function PrivacyScreen() {

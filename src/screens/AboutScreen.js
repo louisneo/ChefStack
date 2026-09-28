@@ -311,7 +311,7 @@ export default function AboutScreen({ route }) {
 
                 <TouchableOpacity 
                   style={[styles.feedbackRow, { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}
-                  onPress={() => Linking.openURL('mailto:support@chefstack.app?subject=Bug Report')}
+                  onPress={() => Linking.openURL('mailto:louisneolok@gmail.com?subject=Bug Report')}
                 >
                   <View style={styles.feedbackLeft}>
                     <Ionicons name="bug-outline" size={20} color={colors.primary} />
@@ -322,7 +322,7 @@ export default function AboutScreen({ route }) {
 
                 <TouchableOpacity 
                   style={styles.feedbackRow}
-                  onPress={() => Linking.openURL('mailto:support@chefstack.app?subject=App Feedback')}
+                  onPress={() => Linking.openURL('mailto:louisneolok@gmail.com?subject=App Feedback')}
                 >
                   <View style={styles.feedbackLeft}>
                     <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.primary} />
@@ -621,10 +621,9 @@ export default function AboutScreen({ route }) {
             </Animated.View>
           )}
 
-          {/* Footer Info */}
           <View style={[styles.footerContainer, { borderTopColor: colors.borderLight }]}>
             <Text style={[styles.footerSupportText, { color: colors.textSecondary }]}>
-              For support or feedback, reach out at <Text style={{ fontWeight: '700', color: colors.primary }}>support@chefstack.app</Text>
+              For support or feedback, reach out at <Text style={{ fontWeight: '700', color: colors.primary }}>louisneolok@gmail.com</Text>
             </Text>
           </View>
 
