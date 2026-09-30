@@ -119,6 +119,21 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    
+    const handleBeforeUnload = (e) => {
+      if (user && (user.is_anonymous || user.is_offline_guest)) {
+        e.preventDefault();
+        e.returnValue = 'Guest session will be lost. Are you sure you want to refresh?';
+        return e.returnValue;
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [user]);
+
   const signIn = async (email, password) => {
     try {
       const signInPromise = supabase.auth.signInWithPassword({ email, password });
