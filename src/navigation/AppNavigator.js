@@ -167,34 +167,6 @@ function ResponsiveMainNavigator(props) {
   return <BottomTabNavigator {...props} />;
 }
 
-const linking = {
-  prefixes: ['chefstack://', 'https://chefstack.vercel.app', 'http://localhost:8081', 'http://localhost:19006'],
-  config: {
-    screens: {
-      MainTabs: {
-        path: '',
-        initialRouteName: 'Home',
-        screens: {
-          Home: '',
-          Favorites: 'favorites',
-          AddRecipe: 'add',
-          AISearch: 'ai',
-          About: 'about',
-          Profile: 'profile'
-        }
-      },
-      Notifications: 'notifications',
-      Privacy: 'privacy',
-      Terms: 'terms',
-      CookiePolicy: 'cookies',
-      Help: 'help',
-      About: 'about',
-      Login: 'login',
-      Signup: 'signup'
-    }
-  }
-};
-
 export default function AppNavigator() {
   const { user, loading } = useAuth();
   const { colors } = useTheme();
@@ -203,9 +175,42 @@ export default function AppNavigator() {
     return <SplashScreen />;
   }
 
+  const linkingConfig = {
+    prefixes: ['chefstack://', 'https://chefstack.vercel.app', 'http://localhost:8081', 'http://localhost:19006'],
+    config: {
+      screens: user ? {
+        MainTabs: {
+          path: '',
+          initialRouteName: 'Home',
+          screens: {
+            Home: '',
+            Favorites: 'favorites',
+            AddRecipe: 'add',
+            AISearch: 'ai',
+            About: 'about',
+            Profile: 'profile'
+          }
+        },
+        Notifications: 'notifications',
+        Privacy: 'privacy',
+        Terms: 'terms',
+        CookiePolicy: 'cookies',
+        Help: 'help',
+      } : {
+        Login: '',
+        Signup: 'signup',
+        About: 'about',
+        Privacy: 'privacy',
+        Terms: 'terms',
+        CookiePolicy: 'cookies',
+        Help: 'help',
+      }
+    }
+  };
+
   return (
     <NavigationContainer 
-      linking={linking}
+      linking={linkingConfig}
       fallback={
         <View style={{ flex: 1, backgroundColor: colors.background }} />
       }
