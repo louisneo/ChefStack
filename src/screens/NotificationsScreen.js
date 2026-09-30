@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -8,6 +8,7 @@ import {
   ScrollView,
   Platform
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../theme/colors';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +24,34 @@ export default function NotificationsScreen() {
   const [recipeTips, setRecipeTips] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(false);
 
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const saved = await AsyncStorage.getItem('@notif_settings');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setPushNotifs(parsed.pushNotifs ?? true);
+          setEmailNotifs(parsed.emailNotifs ?? false);
+          setRecipeTips(parsed.recipeTips ?? true);
+          setWeeklyDigest(parsed.weeklyDigest ?? false);
+        }
+      } catch (e) {
+        console.log('Failed to load settings', e);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const updateSetting = async (key, value, setter) => {
+    setter(value);
+    try {
+      const current = { pushNotifs, emailNotifs, recipeTips, weeklyDigest, [key]: value };
+      await AsyncStorage.setItem('@notif_settings', JSON.stringify(current));
+    } catch (e) {
+      console.log('Failed to save settings', e);
+    }
+  };
+
   const handleBack = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
@@ -32,10 +61,10 @@ export default function NotificationsScreen() {
   };
 
   const SETTINGS = [
-    { label: 'Push Notifications', desc: 'Get notified about new recipes and updates', val: pushNotifs, set: setPushNotifs },
-    { label: 'Email Notifications', desc: 'Receive email updates about your account', val: emailNotifs, set: setEmailNotifs },
-    { label: 'Recipe Tips', desc: 'Daily cooking tips and tricks', val: recipeTips, set: setRecipeTips },
-    { label: 'Weekly Digest', desc: 'Weekly summary of popular recipes', val: weeklyDigest, set: setWeeklyDigest },
+    { label: 'Push Notifications', key: 'pushNotifs', desc: 'Get notified about new recipes and updates', val: pushNotifs, set: setPushNotifs },
+    { label: 'Email Notifications', key: 'emailNotifs', desc: 'Receive email updates about your account', val: emailNotifs, set: setEmailNotifs },
+    { label: 'Recipe Tips', key: 'recipeTips', desc: 'Daily cooking tips and tricks', val: recipeTips, set: setRecipeTips },
+    { label: 'Weekly Digest', key: 'weeklyDigest', desc: 'Weekly summary of popular recipes', val: weeklyDigest, set: setWeeklyDigest },
   ];
 
   return (
@@ -45,7 +74,7 @@ export default function NotificationsScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.formContainer}>
           <Animated.View entering={FadeInDown.duration(400)}>
-            {SETTINGS.map(({ label, desc, val, set }, index) => (
+            {SETTINGS.map(({ label, key, desc, val, set }, index) => (
               <View key={label} style={styles.settingItem}>
                 <View style={styles.settingTextContainer}>
                   <Text style={styles.settingLabel}>{label}</Text>
@@ -55,7 +84,7 @@ export default function NotificationsScreen() {
                   trackColor={{ false: colors.border, true: colors.primaryActive }}
                   thumbColor={val ? colors.primary : colors.surface}
                   ios_backgroundColor={colors.borderLight}
-                  onValueChange={() => set(!val)}
+                  onValueChange={() => updateSetting(key, !val, set)}
                   value={val}
                 />
               </View>
