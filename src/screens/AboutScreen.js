@@ -198,7 +198,7 @@ export default function AboutScreen({ route }) {
 
                 <TouchableOpacity 
                   style={[styles.settingRowItem, { borderTopWidth: 1, borderTopColor: colors.borderLight }]} 
-                  onPress={() => navigation.navigate('Notifications')}
+                  onPress={() => user ? navigation.navigate('Notifications') : navigation.navigate('Login')}
                 >
                   <View style={styles.settingLeftGroup}>
                     <Ionicons name="notifications-outline" size={22} color={colors.textSecondary} />
