@@ -48,7 +48,7 @@ export default function HelpScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <PageHeader title="Help & Support" subtitle="App Version 1.3.0" icon="help-buoy-outline" onBack={handleBack} maxWidth={800} />
+      <PageHeader title="Help & Support" subtitle="App Version 1.2.0" icon="help-buoy-outline" onBack={handleBack} maxWidth={800} />
 
       <ScrollView contentContainerStyle={[styles.content, { backgroundColor: colors.background }]}>
         <View style={styles.formContainer}>

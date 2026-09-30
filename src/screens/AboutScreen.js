@@ -66,7 +66,7 @@ export default function AboutScreen({ route }) {
       }
     } else {
       Linking.openURL('https://chef-stack.vercel.app/download/chefstack.apk').catch(() => {
-        alert('Downloading ChefStack APK v1.3.0...');
+        alert('Downloading ChefStack APK v1.2.0...');
       });
     }
   };
@@ -80,7 +80,7 @@ export default function AboutScreen({ route }) {
       {/* Top Header Bar */}
       <PageHeader 
         title={currentView === 'main' ? 'About ChefStack' : currentView === 'mobile' ? 'Mobile App' : currentView === 'documentation' ? 'Technical Docs' : currentView === 'changelog' ? 'Changelog' : 'Privacy Policy'}
-        subtitle="Version 1.3.0"
+        subtitle="Version 1.2.0"
         icon="information-circle-outline"
         onBack={handleBack}
         maxWidth={720}
@@ -152,7 +152,7 @@ export default function AboutScreen({ route }) {
                   >
                     <View style={styles.linkNavLeft}>
                       <Ionicons name="git-branch-outline" size={20} color={colors.primary} />
-                      <Text style={[styles.linkNavTitle, { color: colors.text }]}>Version 1.3.0 (Changelog)</Text>
+                      <Text style={[styles.linkNavTitle, { color: colors.text }]}>Version 1.2.0 (Changelog)</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
                   </TouchableOpacity>
@@ -381,7 +381,7 @@ export default function AboutScreen({ route }) {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.heroTitleText, { color: colors.text }]}>Get ChefStack on your phone</Text>
-                    <Text style={[styles.heroVersionBadgeText, { color: colors.textSecondary }]}>CURRENT VERSION: V1.3.0</Text>
+                    <Text style={[styles.heroVersionBadgeText, { color: colors.textSecondary }]}>CURRENT VERSION: V1.2.0</Text>
                   </View>
                 </View>
                 <Text style={[styles.brandDescriptionText, { color: colors.textSecondary }]}>
@@ -568,10 +568,10 @@ export default function AboutScreen({ route }) {
                   </TouchableOpacity>
                 </View>
 
-                {/* Version 1.3.0 Card */}
+                {/* Version 1.2.0 Card */}
                 <View style={[styles.versionBoxCard, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
                   <View style={styles.versionHeaderRow}>
-                    <Text style={[styles.versionTitleText, { color: colors.text }]}>Version 1.3.0</Text>
+                    <Text style={[styles.versionTitleText, { color: colors.text }]}>Version 1.2.0</Text>
                     <Text style={[styles.versionDateText, { color: colors.textSecondary }]}>SEPTEMBER 2026</Text>
                   </View>
                   

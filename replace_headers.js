@@ -5,10 +5,10 @@ const screensDir = path.join(__dirname, 'src', 'screens');
 
 const screens = [
   { file: 'TermsScreen.js', title: 'Terms of Service', subtitle: 'Last Updated: September 7, 2026', icon: 'document-text-outline' },
-  { file: 'HelpScreen.js', title: 'Help & Support', subtitle: 'App Version 1.3.0', icon: 'help-buoy-outline' },
+  { file: 'HelpScreen.js', title: 'Help & Support', subtitle: 'App Version 1.2.0', icon: 'help-buoy-outline' },
   { file: 'CookiePolicyScreen.js', title: 'Cookie Policy', subtitle: 'Last Updated: September 1, 2026', icon: 'cookie-outline' },
   { file: 'NotificationsScreen.js', title: 'Notifications', subtitle: 'Manage your alerts', icon: 'notifications-outline' },
-  { file: 'AboutScreen.js', title: 'About ChefStack', subtitle: 'Version 1.3.0', icon: 'information-circle-outline' },
+  { file: 'AboutScreen.js', title: 'About ChefStack', subtitle: 'Version 1.2.0', icon: 'information-circle-outline' },
   { file: 'ProfileScreen.js', title: 'Profile', subtitle: 'Manage your account', icon: 'person-outline' },
 ];
 
@@ -66,7 +66,7 @@ screens.forEach(({ file, title, subtitle, icon }) => {
   
   if (file === 'AboutScreen.js') {
     content = content.replace(/\{\/\* Top Header Bar \*\/\}[\s\S]*?<\/View>\n/, 
-      `{/* Top Header Bar */}\n      <PageHeader \n        title={currentView === 'main' ? 'About ChefStack' : currentView === 'mobile' ? 'Mobile App' : currentView === 'documentation' ? 'Technical Docs' : currentView === 'changelog' ? 'Changelog' : 'Privacy Policy'}\n        subtitle="Version 1.3.0"\n        icon="information-circle-outline"\n        onBack={handleBack}\n        rightComponent={\n          currentView !== 'main' ? (\n            <TouchableOpacity style={[styles.backToAboutPill, { backgroundColor: colors.primary + '15' }]} onPress={() => setCurrentView('main')}>\n              <Ionicons name="chevron-back" size={16} color={colors.primary} />\n              <Text style={[styles.backToAboutText, { color: colors.primary }]}>Back</Text>\n            </TouchableOpacity>\n          ) : null\n        }\n      />\n`
+      `{/* Top Header Bar */}\n      <PageHeader \n        title={currentView === 'main' ? 'About ChefStack' : currentView === 'mobile' ? 'Mobile App' : currentView === 'documentation' ? 'Technical Docs' : currentView === 'changelog' ? 'Changelog' : 'Privacy Policy'}\n        subtitle="Version 1.2.0"\n        icon="information-circle-outline"\n        onBack={handleBack}\n        rightComponent={\n          currentView !== 'main' ? (\n            <TouchableOpacity style={[styles.backToAboutPill, { backgroundColor: colors.primary + '15' }]} onPress={() => setCurrentView('main')}>\n              <Ionicons name="chevron-back" size={16} color={colors.primary} />\n              <Text style={[styles.backToAboutText, { color: colors.primary }]}>Back</Text>\n            </TouchableOpacity>\n          ) : null\n        }\n      />\n`
     );
   }
 
