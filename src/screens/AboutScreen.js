@@ -227,8 +227,8 @@ export default function AboutScreen({ route }) {
                 <View 
                   style={{ 
                     position: 'absolute', 
-                    right: Platform.OS === 'web' ? -45 : -20, 
-                    top: Platform.OS === 'web' ? -30 : -10, 
+                    right: Platform.OS === 'web' ? -85 : -20, 
+                    top: Platform.OS === 'web' ? -28 : -10, 
                     zIndex: 10, 
                     pointerEvents: 'none' 
                   }}
@@ -237,8 +237,8 @@ export default function AboutScreen({ route }) {
                     source={require('../../assets/pantheon.png')}
                     style={[
                       {
-                        width: Platform.OS === 'web' ? 240 : 170,
-                        height: Platform.OS === 'web' ? 240 : 170,
+                        width: Platform.OS === 'web' ? 290 : 170,
+                        height: Platform.OS === 'web' ? 290 : 170,
                       },
                       Platform.OS === 'web' && { filter: 'drop-shadow(-5px 8px 10px rgba(0, 0, 0, 0.25))' }
                     ]}
@@ -246,7 +246,7 @@ export default function AboutScreen({ route }) {
                   />
                 </View>
 
-                <View style={{ paddingRight: Platform.OS === 'web' ? 160 : 100, minHeight: Platform.OS === 'web' ? 140 : 120 }}>
+                <View style={{ paddingRight: Platform.OS === 'web' ? 180 : 100, minHeight: Platform.OS === 'web' ? 140 : 120 }}>
                   <View style={[styles.developerHeaderRow, { zIndex: 1 }]}>
                     <Image 
                       source={require('../../assets/profile.png')} 
