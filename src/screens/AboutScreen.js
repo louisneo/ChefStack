@@ -207,16 +207,6 @@ export default function AboutScreen({ route }) {
                   <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
                 </TouchableOpacity>
 
-                <TouchableOpacity 
-                  style={[styles.settingRowItem, { borderTopWidth: 1, borderTopColor: colors.borderLight }]} 
-                  onPress={() => navigation.navigate('Privacy')}
-                >
-                  <View style={styles.settingLeftGroup}>
-                    <Ionicons name="shield-outline" size={22} color={colors.textSecondary} />
-                    <Text style={[styles.settingItemLabel, { color: colors.text }]}>Privacy Settings</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-                </TouchableOpacity>
               </View>
 
               {/* Section 3: Developer Info (Matches Tarakape /about Maker card) */}
@@ -227,8 +217,8 @@ export default function AboutScreen({ route }) {
                 <View 
                   style={{ 
                     position: 'absolute', 
-                    right: Platform.OS === 'web' ? -85 : -20, 
-                    top: Platform.OS === 'web' ? -28 : -10, 
+                    right: Platform.OS === 'web' ? -75 : -20, 
+                    top: Platform.OS === 'web' ? -5 : -10, 
                     zIndex: 10, 
                     pointerEvents: 'none' 
                   }}
@@ -237,8 +227,8 @@ export default function AboutScreen({ route }) {
                     source={require('../../assets/pantheon.png')}
                     style={[
                       {
-                        width: Platform.OS === 'web' ? 290 : 170,
-                        height: Platform.OS === 'web' ? 290 : 170,
+                        width: Platform.OS === 'web' ? 260 : 170,
+                        height: Platform.OS === 'web' ? 260 : 170,
                       },
                       Platform.OS === 'web' && { filter: 'drop-shadow(-5px 8px 10px rgba(0, 0, 0, 0.25))' }
                     ]}
