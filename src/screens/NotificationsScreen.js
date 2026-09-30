@@ -23,6 +23,14 @@ export default function NotificationsScreen() {
   const [recipeTips, setRecipeTips] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(false);
 
+  const handleBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('MainTabs', { screen: 'Home' });
+    }
+  };
+
   const SETTINGS = [
     { label: 'Push Notifications', desc: 'Get notified about new recipes and updates', val: pushNotifs, set: setPushNotifs },
     { label: 'Email Notifications', desc: 'Receive email updates about your account', val: emailNotifs, set: setEmailNotifs },
