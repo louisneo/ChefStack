@@ -84,14 +84,6 @@ export default function AboutScreen({ route }) {
         icon="information-circle-outline"
         onBack={handleBack}
         maxWidth={720}
-        rightComponent={
-          currentView !== 'main' ? (
-            <TouchableOpacity style={[styles.backToAboutPill, { backgroundColor: colors.primary + '15' }]} onPress={() => setCurrentView('main')}>
-              <Ionicons name="chevron-back" size={16} color={colors.primary} />
-              <Text style={[styles.backToAboutText, { color: colors.primary }]}>Back</Text>
-            </TouchableOpacity>
-          ) : null
-        }
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -113,7 +105,7 @@ export default function AboutScreen({ route }) {
                     />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.brandTitleText, { color: colors.text }]}>Ano, ChefStack?</Text>
+                    <Text style={[styles.brandTitleText, { color: colors.text }]}>ChefStack?</Text>
                     <Text style={[styles.brandTaglineText, { color: colors.primary }]}>DISCOVER • COOK • ENJOY</Text>
                   </View>
                 </View>
