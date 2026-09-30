@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import { Platform } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -28,10 +29,27 @@ export function AuthProvider({ children }) {
         ]);
         
         if (mounted) {
+          let resolvedUser = null;
           if (authResponse?.data?.session?.user) {
-            setUser(authResponse.data.session.user);
+            resolvedUser = authResponse.data.session.user;
           } else if (cachedOfflineUser) {
-            setUser(JSON.parse(cachedOfflineUser));
+            resolvedUser = JSON.parse(cachedOfflineUser);
+          }
+
+          if (resolvedUser) {
+            if (resolvedUser.is_anonymous || resolvedUser.is_offline_guest) {
+              if (typeof window !== 'undefined' && window.alert) {
+                window.alert('Guest session ended. Everything has been lost because you were just a guest.');
+              } else if (Platform.OS !== 'web') {
+                alert('Guest session ended. Everything has been lost because you were just a guest.');
+              }
+              // Clear the session
+              supabase.auth.signOut().catch(() => {});
+              AsyncStorage.removeItem(OFFLINE_USER_KEY).catch(() => {});
+              setUser(null);
+            } else {
+              setUser(resolvedUser);
+            }
           } else {
             setUser(null);
           }
@@ -40,7 +58,18 @@ export function AuthProvider({ children }) {
         console.log('Auth init offline fallback:', err);
         const cachedOfflineUser = await AsyncStorage.getItem(OFFLINE_USER_KEY).catch(() => null);
         if (mounted && cachedOfflineUser) {
-          setUser(JSON.parse(cachedOfflineUser));
+          const parsed = JSON.parse(cachedOfflineUser);
+          if (parsed.is_anonymous || parsed.is_offline_guest) {
+            if (typeof window !== 'undefined' && window.alert) {
+              window.alert('Guest session ended. Everything has been lost because you were just a guest.');
+            } else if (Platform.OS !== 'web') {
+              alert('Guest session ended. Everything has been lost because you were just a guest.');
+            }
+            AsyncStorage.removeItem(OFFLINE_USER_KEY).catch(() => {});
+            setUser(null);
+          } else {
+            setUser(parsed);
+          }
         }
       } finally {
         const elapsed = Date.now() - startTime;
