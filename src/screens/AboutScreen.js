@@ -48,7 +48,7 @@ export default function AboutScreen({ route }) {
     } else if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
-      navigation.navigate('MainTabs', { screen: 'Home' });
+      navigation.navigate(user ? 'MainTabs' : 'Login', user ? { screen: 'Home' } : undefined);
     }
   };
 
@@ -221,7 +221,7 @@ export default function AboutScreen({ route }) {
 
               {/* Section 3: Developer Info (Matches Tarakape /about Maker card) */}
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
-              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, position: 'relative', overflow: 'visible', paddingBottom: 20 }]}>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, position: 'relative', overflow: 'hidden', paddingBottom: 20 }]}>
                 
                 <View style={{ flexDirection: 'column' }}>
                   {/* Bio Column */}
@@ -243,14 +243,12 @@ export default function AboutScreen({ route }) {
                   </View>
 
                   {/* Right Column Image below text */}
-                  <View style={{ alignItems: 'flex-end', marginTop: 10, marginRight: -20, marginBottom: -10 }}>
+                  <View style={{ alignItems: 'flex-end', marginTop: 12, marginRight: -8, marginBottom: -12 }}>
                     <Image 
                       source={require('../../assets/pantheon.png')}
                       style={{
-                        width: 180,
-                        height: 180,
-                        // RN Web drop-shadow for transparent PNGs
-                        filter: 'drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.4))'
+                        width: 170,
+                        height: 170,
                       }}
                       resizeMode="contain"
                     />

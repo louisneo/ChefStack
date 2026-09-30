@@ -168,7 +168,7 @@ function ResponsiveMainNavigator(props) {
 }
 
 const linking = {
-  prefixes: ['chefstack://', 'https://chefstack.vercel.app'],
+  prefixes: ['chefstack://', 'https://chefstack.vercel.app', 'http://localhost:8081', 'http://localhost:19006'],
   config: {
     screens: {
       MainTabs: {
@@ -179,6 +179,7 @@ const linking = {
           Favorites: 'favorites',
           AddRecipe: 'add',
           AISearch: 'ai',
+          About: 'about',
           Profile: 'profile'
         }
       },
@@ -203,7 +204,12 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer 
+      linking={linking}
+      fallback={
+        <View style={{ flex: 1, backgroundColor: colors.background }} />
+      }
+    >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <>
@@ -226,9 +232,11 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />
-            <Stack.Screen name="Terms" component={TermsScreen} />
+            <Stack.Screen name="About" component={AboutScreen} />
             <Stack.Screen name="Privacy" component={PrivacyScreen} />
+            <Stack.Screen name="Terms" component={TermsScreen} />
             <Stack.Screen name="CookiePolicy" component={CookiePolicyScreen} />
+            <Stack.Screen name="Help" component={HelpScreen} />
           </>
         )}
       </Stack.Navigator>
