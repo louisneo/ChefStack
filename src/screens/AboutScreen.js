@@ -293,7 +293,14 @@ export default function AboutScreen({ route }) {
 
                 <TouchableOpacity 
                   style={[styles.feedbackRow, { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}
-                  onPress={() => Linking.openURL('mailto:louisneolok@gmail.com?subject=Bug Report')}
+                  onPress={() => {
+                    const url = 'mailto:louisneolok@gmail.com?subject=Bug Report';
+                    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                      window.location.href = url;
+                    } else {
+                      Linking.openURL(url).catch(() => alert('Please set up an email client on your device.'));
+                    }
+                  }}
                 >
                   <View style={styles.feedbackLeft}>
                     <Ionicons name="bug-outline" size={20} color={colors.primary} />
@@ -304,7 +311,14 @@ export default function AboutScreen({ route }) {
 
                 <TouchableOpacity 
                   style={styles.feedbackRow}
-                  onPress={() => Linking.openURL('mailto:louisneolok@gmail.com?subject=App Feedback')}
+                  onPress={() => {
+                    const url = 'mailto:louisneolok@gmail.com?subject=App Feedback';
+                    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                      window.location.href = url;
+                    } else {
+                      Linking.openURL(url).catch(() => alert('Please set up an email client on your device.'));
+                    }
+                  }}
                 >
                   <View style={styles.feedbackLeft}>
                     <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.primary} />
