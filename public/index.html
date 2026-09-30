@@ -40,6 +40,25 @@
         height: 100%;
         flex: 1;
       }
+      /* Custom Modern Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(150, 150, 150, 0.4);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(150, 150, 150, 0.7);
+      }
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(150, 150, 150, 0.4) transparent;
+      }
     </style>
   </head>
 
