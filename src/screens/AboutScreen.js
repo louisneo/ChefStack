@@ -220,43 +220,51 @@ export default function AboutScreen({ route }) {
               </View>
 
               {/* Section 3: Developer Info (Matches Tarakape /about Maker card) */}
-              <Text style={[styles.sectionHeading, { color: colors.text }]}>Developer</Text>
-              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, position: 'relative', overflow: 'hidden', paddingBottom: 20 }]}>
+              <Text style={[styles.sectionHeading, { color: colors.text, zIndex: 20 }]}>Developer</Text>
+              <View style={[styles.cardSection, { backgroundColor: colors.surface, borderColor: colors.borderLight, position: 'relative', overflow: 'visible', paddingBottom: 20, zIndex: 10 }]}>
                 
-                <View style={{ flexDirection: 'column' }}>
-                  {/* Bio Column */}
-                  <View style={{ flex: 1 }}>
-                    <View style={styles.developerHeaderRow}>
-                      <Image 
-                        source={require('../../assets/profile.png')} 
-                        style={styles.developerAvatarImg} 
-                      />
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.developerName, { color: colors.text }]}>Louis Neo Lok</Text>
-                        <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>Student Full-Stack Developer | Aspiring Software Engineer</Text>
-                      </View>
-                    </View>
+                {/* Floating Pantheon Image */}
+                <View 
+                  style={{ 
+                    position: 'absolute', 
+                    right: Platform.OS === 'web' ? -35 : -15, 
+                    top: Platform.OS === 'web' ? -65 : -40, 
+                    zIndex: 10, 
+                    pointerEvents: 'none' 
+                  }}
+                >
+                  <Image 
+                    source={require('../../assets/pantheon.png')}
+                    style={[
+                      {
+                        width: Platform.OS === 'web' ? 240 : 180,
+                        height: Platform.OS === 'web' ? 240 : 180,
+                      },
+                      Platform.OS === 'web' && { filter: 'drop-shadow(0px 12px 16px rgba(0, 0, 0, 0.45))' }
+                    ]}
+                    resizeMode="contain"
+                  />
+                </View>
 
-                    <Text style={[styles.developerBio, { color: colors.textSecondary, marginBottom: 0, lineHeight: 22 }]}>
-                      Hi, I'm <Text style={{ color: colors.text, fontWeight: '700' }}>Louis Neo Lok!</Text> I'm a senior IT student and developer specializing in <Text style={{ color: colors.text, fontWeight: '700' }}>LLMs, Agentic Tools,</Text> and clean web/mobile apps. Passionate about community leadership and tech education. When I'm offline, I'm either watching the latest MCU release or climbing ranks in Wild Rift!
-                    </Text>
-                  </View>
-
-                  {/* Right Column Image below text */}
-                  <View style={{ alignItems: 'flex-end', marginTop: 12, marginRight: -8, marginBottom: -12 }}>
+                <View style={{ paddingRight: Platform.OS === 'web' ? 180 : 100, minHeight: 120 }}>
+                  <View style={[styles.developerHeaderRow, { zIndex: 1 }]}>
                     <Image 
-                      source={require('../../assets/pantheon.png')}
-                      style={{
-                        width: 170,
-                        height: 170,
-                      }}
-                      resizeMode="contain"
+                      source={require('../../assets/profile.png')} 
+                      style={styles.developerAvatarImg} 
                     />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.developerName, { color: colors.text }]}>Louis Neo Lok</Text>
+                      <Text style={[styles.developerTitle, { color: colors.textSecondary }]}>Student Full-Stack Developer | Aspiring Software Engineer</Text>
+                    </View>
                   </View>
+
+                  <Text style={[styles.developerBio, { color: colors.textSecondary, marginBottom: 0, lineHeight: 22, zIndex: 1 }]}>
+                    Hi, I'm <Text style={{ color: colors.text, fontWeight: '700' }}>Louis Neo Lok!</Text> I'm a senior IT student and developer specializing in <Text style={{ color: colors.text, fontWeight: '700' }}>LLMs, Agentic Tools,</Text> and clean web/mobile apps. Passionate about community leadership and tech education. When I'm offline, I'm either watching the latest MCU release or climbing ranks in Wild Rift!
+                  </Text>
                 </View>
 
                 {/* Divider Line */}
-                <View style={{ height: 1, backgroundColor: colors.borderLight, marginTop: 12, marginBottom: 20 }} />
+                <View style={{ height: 1, backgroundColor: colors.borderLight, marginTop: 24, marginBottom: 20 }} />
 
                 {/* Support Project Button */}
                 <TouchableOpacity 
